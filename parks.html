@@ -351,8 +351,8 @@
     <section class="fade-up fade-up-1">
       <div class="toolbar">
         <input id="searchInput" class="search" type="search" placeholder="Search festivals, places, and traditions">
-        <div style="font-family:var(--font-data);font-size:9px;letter-spacing:0.08em;color:var(--text-muted);margin:6px 0 2px;">Search matches festival name, city, region, and local name. It does not search lineups.</div>
-        <div id="filterScopeLabel" style="font-family:var(--font-data);font-size:9px;letter-spacing:0.08em;color:var(--text-muted);margin:0 0 6px;"></div>
+        <div style="font-size:13px;color:var(--text-secondary);margin:6px 0 2px;">Search matches festival name, city, region, and local name. It does not search lineups.</div>
+        <div id="filterScopeLabel" style="font-size:13px;color:var(--text-secondary);margin:0 0 6px;"></div>
         <button class="chip active" data-filter="all">All</button>
         <button class="chip" data-filter="attended">Attended</button>
         <button class="chip" data-filter="route">On route</button>
@@ -555,7 +555,7 @@
         ${park.booking.airportCode ? `<a href="${app.buildFlightLink(park)}" target="_blank" rel="noopener" class="btn btn-ghost" style="color:var(--cream); border-color:rgba(255,255,255,0.12); margin:3px 4px 3px 0; display:inline-flex;">Flights (${escapeHtml(park.booking.airportCode)})</a>` : ""}
         ${park.booking.lodgingQuery ? `<a href="${app.buildStayLink(park, { startDate: app.getActiveTrip().startDate })}" target="_blank" rel="noopener" class="btn btn-ghost" style="color:var(--cream); border-color:rgba(255,255,255,0.12); margin:3px 4px 3px 0; display:inline-flex;">Stays</a>` : ""}
         ${park.booking.groundQuery ? `<a href="${app.buildGroundLink(park)}" target="_blank" rel="noopener" class="btn btn-ghost" style="color:var(--cream); border-color:rgba(255,255,255,0.12); margin:3px 4px 3px 0; display:inline-flex;">Ground</a>` : ""}
-        ${!app.getActiveTrip().startDate ? `<div style="font-family:var(--font-data);font-size:9px;color:rgba(248,243,232,0.5);margin-top:6px;">Add dates on the route board to enable date-prefilled booking links.</div>` : ""}
+        ${!app.getActiveTrip().startDate ? `<div style="font-size:13px;color:rgba(248,243,232,0.6);margin-top:6px;">Add dates on the route board to enable date-prefilled booking links.</div>` : ""}
       </div>
       ` : ""}
 

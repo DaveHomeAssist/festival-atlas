@@ -585,7 +585,7 @@
       return '<div class="route-stop-card"><div class="stop-header"><span class="tier-stamp tier-' + utils.safeToken(park.tier, "B") + '">' + utils.escapeHtml(park.tier) + '</span><span class="stop-name">' + utils.escapeHtml(park.name) + '</span></div><div class="stop-description">' + utils.escapeHtml(park.city) + '</div></div>';
     }).join("");
     if (sharedHtml) {
-      stopsEl.innerHTML = '<div class="section-label">Shared route (' + shared.parkIds.length + ' stops)</div>' + sharedHtml + '<div style="padding:14px;display:flex;align-items:center;gap:12px;"><span style="font-family:var(--font-data);font-size:10px;color:var(--text-muted);">This is a read-only shared view.</span><button class="btn btn-export" id="btn-import-shared">Import to my route</button></div>';
+      stopsEl.innerHTML = '<div class="section-label">Shared route (' + shared.parkIds.length + ' stops)</div>' + sharedHtml + '<div style="padding:14px;display:flex;align-items:center;gap:12px;"><span style="font-size:13px;color:var(--text-secondary);">This is a read-only shared view.</span><button class="btn btn-export" id="btn-import-shared">Import to my route</button></div>';
     }
     if (shareBtn) shareBtn.style.display = "none";
     var importBtn = document.getElementById("btn-import-shared");
@@ -627,7 +627,7 @@
   sample.legs.forEach(function (leg) {
     sampleHtml += '<div style="font-size:13px;padding:4px 0;">' + utils.escapeHtml(leg.from) + ' → ' + utils.escapeHtml(leg.to) + ' · ' + leg.miles + ' mi · ~' + leg.hours + ' hr</div>';
   });
-  sampleHtml += '<div style="font-size:12px;color:var(--text-muted);margin-top:10px;">' + utils.escapeHtml(sample.bufferNote) + '</div>';
+  sampleHtml += '<div style="font-size:13px;color:var(--text-secondary);margin-top:10px;">' + utils.escapeHtml(sample.bufferNote) + '</div>';
   sampleHtml += '<div style="font-family:var(--font-data);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin:12px 0 6px;">Why this route</div>';
   sampleHtml += '<div style="font-size:13px;color:var(--text-secondary);">' + utils.escapeHtml(sample.whyThisRoute) + '</div>';
   sampleHtml += '</div>';
