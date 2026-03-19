@@ -105,7 +105,28 @@
     "hard-summer":      { searchMeta: { localName: "HARD Summer", region: "Southern California" }, booking: { airportCode: "LAX", lodgingQuery: "Inglewood hotels SoFi", groundQuery: "LAX to Hollywood Park" } },
     "bass-canyon":      { searchMeta: { localName: "Bass Canyon", region: "Pacific Northwest" }, booking: { airportCode: "SEA", lodgingQuery: "George WA camping", groundQuery: "Gorge shuttle Seattle" } },
     "bumbershoot":      { searchMeta: { localName: "Bumbershoot", region: "Pacific Northwest" }, booking: { airportCode: "SEA", lodgingQuery: "Seattle Center hotels", groundQuery: "Seattle Link light rail" } },
-    "telluride-bluegrass-festival": { searchMeta: { localName: "Telluride Bluegrass", region: "Rocky Mountain" }, booking: { airportCode: "MTJ", lodgingQuery: "Telluride CO lodging", groundQuery: "Telluride shuttle" } }
+    "telluride-bluegrass-festival": { searchMeta: { localName: "Telluride Bluegrass", region: "Rocky Mountain" }, booking: { airportCode: "MTJ", lodgingQuery: "Telluride CO lodging", groundQuery: "Telluride shuttle" } },
+    "newport-jazz-festival": { searchMeta: { localName: "Newport Jazz", region: "New England" }, booking: { airportCode: "PVD", lodgingQuery: "Newport RI hotels", groundQuery: "Newport ferry Fort Adams" } },
+    "sea-hear-now": { searchMeta: { localName: "Sea Hear Now", region: "Northeast" }, booking: { airportCode: "EWR", lodgingQuery: "Asbury Park NJ hotels", groundQuery: "NJ Transit Asbury Park" } },
+    "elements-music-arts-festival": { searchMeta: { localName: "Elements", region: "Northeast" }, booking: { airportCode: "ABE", lodgingQuery: "Long Pond PA lodging Poconos", groundQuery: "Poconos shuttle" } },
+    "iii-points": { searchMeta: { localName: "III Points", region: "South Florida" }, booking: { airportCode: "MIA", lodgingQuery: "Miami Wynwood hotels", groundQuery: "Miami rideshare Wynwood" } },
+    "essence-festival-of-culture": { searchMeta: { localName: "Essence Fest", region: "Gulf South" }, booking: { airportCode: "MSY", lodgingQuery: "New Orleans Downtown hotels", groundQuery: "New Orleans Superdome transit" } },
+    "railbird-festival": { searchMeta: { localName: "Railbird", region: "Southeast" }, booking: { airportCode: "LEX", lodgingQuery: "Lexington KY hotels", groundQuery: "Lexington rideshare Keeneland" } },
+    "hinterland-music-festival": { searchMeta: { localName: "Hinterland", region: "Midwest" }, booking: { airportCode: "DSM", lodgingQuery: "Saint Charles IA lodging", groundQuery: "Des Moines to Saint Charles IA" } },
+    "summer-camp-music-festival": { searchMeta: { localName: "Summer Camp", region: "Midwest" }, booking: { airportCode: "PIA", lodgingQuery: "Chillicothe IL camping", groundQuery: "Three Sisters Park directions" } },
+    "seismic-dance-event": { searchMeta: { localName: "Seismic", region: "Texas" }, booking: { airportCode: "AUS", lodgingQuery: "Austin hotels airport", groundQuery: "Austin Bergstrom rideshare" } },
+    "ubbi-dubbi-festival": { searchMeta: { localName: "Ubbi Dubbi", region: "Texas" }, booking: { airportCode: "DFW", lodgingQuery: "Fort Worth TX hotels", groundQuery: "DFW to Fort Worth" } },
+    "m3f-music-festival": { searchMeta: { localName: "M3F", region: "Southwest" }, booking: { airportCode: "PHX", lodgingQuery: "Phoenix Midtown hotels", groundQuery: "Phoenix light rail" } },
+    "goldrush-festival": { searchMeta: { localName: "Goldrush", region: "Southwest" }, booking: { airportCode: "PHX", lodgingQuery: "Chandler AZ hotels", groundQuery: "Phoenix to Rawhide" } },
+    "crssd-festival": { searchMeta: { localName: "CRSSD", region: "Southern California" }, booking: { airportCode: "SAN", lodgingQuery: "San Diego Downtown hotels", groundQuery: "San Diego trolley Waterfront" } },
+    "capitol-hill-block-party": { searchMeta: { localName: "CHBP", region: "Pacific Northwest" }, booking: { airportCode: "SEA", lodgingQuery: "Seattle Capitol Hill hotels", groundQuery: "Seattle Link light rail Capitol Hill" } },
+    "lightning-in-a-bottle": { searchMeta: { localName: "LIB", region: "Southern California" }, booking: { airportCode: "BFL", lodgingQuery: "Buena Vista Lake CA camping", groundQuery: "Bakersfield to Buena Vista Lake" } },
+    "ohana-festival": { searchMeta: { localName: "Ohana", region: "Southern California" }, booking: { airportCode: "SNA", lodgingQuery: "Dana Point CA hotels", groundQuery: "Dana Point shuttle Doheny" } },
+    "pickathon": { searchMeta: { localName: "Pickathon", region: "Pacific Northwest" }, booking: { airportCode: "PDX", lodgingQuery: "Happy Valley OR lodging", groundQuery: "Portland to Pendarvis Farm" } },
+    "beyond-wonderland-at-the-gorge": { searchMeta: { localName: "Beyond Wonderland", region: "Pacific Northwest" }, booking: { airportCode: "SEA", lodgingQuery: "George WA camping Gorge", groundQuery: "Gorge Amphitheatre shuttle" } },
+    "group-therapy-700": { searchMeta: { localName: "ABGT 700", region: "Pacific Northwest" }, booking: { airportCode: "SEA", lodgingQuery: "George WA camping Gorge", groundQuery: "Gorge Amphitheatre shuttle Seattle" } },
+    "treefort-music-fest": { searchMeta: { localName: "Treefort", region: "Mountain West" }, booking: { airportCode: "BOI", lodgingQuery: "Boise Downtown hotels", groundQuery: "Boise downtown walking" } },
+    "kilby-block-party": { searchMeta: { localName: "Kilby Block Party", region: "Mountain West" }, booking: { airportCode: "SLC", lodgingQuery: "Salt Lake City hotels", groundQuery: "SLC UTA transit Fairpark" } }
   };
 
   SEEDED_PARKS.forEach(function enrichPark(park) {
