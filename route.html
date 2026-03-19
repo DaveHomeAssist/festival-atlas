@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Festival Atlas · Route</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#101826">
+<link rel="stylesheet" href="shared.css">
+<style>
+.route-page {
+  padding: 34px 0 64px;
+}
+
+.route-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 22px;
+  margin-bottom: 26px;
+}
+
+.route-hero-card,
+.route-side-card,
+.route-map-card,
+.route-stop-card,
+.route-leg-card {
+  border-radius: 24px;
+  border: 1px solid var(--border-light);
+  background: rgba(255,255,255,0.76);
+}
+
+.route-hero-card {
+  padding: 28px;
+}
+
+.route-hero-card h1 {
+  font-family: var(--font-display);
+  font-size: clamp(34px, 5vw, 56px);
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+  max-width: 8ch;
+}
+
+.route-hero-card p {
+  font-size: 15px;
+  color: var(--text-secondary);
+  max-width: 620px;
+  margin-top: 12px;
+}
+
+.route-metrics {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.metric {
+  min-width: 130px;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(16,24,38,0.04);
+}
+
+.metric-value {
+  font-family: var(--font-display);
+  font-size: 28px;
+  line-height: 1;
+}
+
+.metric-label {
+  font-family: var(--font-data);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+.route-side-card {
+  padding: 22px;
+  background: rgba(16,24,38,0.96);
+  color: var(--cream);
+}
+
+.route-side-card .section-label {
+  color: rgba(248,243,232,0.6);
+}
+
+.route-side-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 14px 0;
+}
+
+.route-side-grid label {
+  display: block;
+}
+
+.route-side-grid span,
+.trip-notes-label {
+  display: block;
+  font-family: var(--font-data);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(248,243,232,0.62);
+  margin-bottom: 6px;
+}
+
+.route-side-grid input,
+.trip-notes {
+  width: 100%;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.06);
+  color: var(--cream);
+  padding: 12px;
+  font-family: var(--font-body);
+}
+
+.trip-notes {
+  min-height: 140px;
+  resize: vertical;
+}
+
+.route-map-card,
+.route-stop-card,
+.route-leg-card {
+  padding: 20px;
+}
+
+.route-map-card {
+  margin-bottom: 22px;
+}
+
+.route-map {
+  width: 100%;
+  border-radius: 18px;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(16,24,38,0.96), rgba(29,42,64,0.94));
+}
+
+.route-grid,
+.route-legs {
+  display: grid;
+  gap: 14px;
+}
+
+.route-stop-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: start;
+}
+
+.stop-brand {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.stop-logo {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.stop-name {
+  font-family: var(--font-display);
+  font-size: 24px;
+  line-height: 1;
+}
+
+.stop-meta,
+.stop-sub,
+.leg-meta {
+  font-family: var(--font-data);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+}
+
+.stop-description {
+  font-size: 14px;
+  color: var(--text-primary);
+  margin-top: 10px;
+}
+
+.stop-session-list {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.stop-session-list .btn {
+  padding: 8px 10px;
+}
+
+.stop-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.route-leg-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  gap: 16px;
+}
+
+.leg-title {
+  font-family: var(--font-display);
+  font-size: 26px;
+  line-height: 1;
+  margin-bottom: 10px;
+}
+
+.leg-note {
+  width: 100%;
+  min-height: 110px;
+  border-radius: 16px;
+  border: 1px solid var(--border-light);
+  background: rgba(255,255,255,0.78);
+  padding: 12px;
+  font-family: var(--font-body);
+  resize: vertical;
+}
+
+.leg-panel {
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(16,24,38,0.04);
+}
+
+.empty {
+  padding: 24px;
+  border-radius: 24px;
+  border: 1px dashed var(--border-mid);
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 980px) {
+  .route-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .route-stop-card,
+  .route-leg-card {
+    grid-template-columns: 1fr;
+  }
+
+  .stop-actions {
+    justify-content: flex-start;
+  }
+}
+</style>
+</head>
+<body>
+<nav class="site-nav">
+  <a href="index.html" class="nav-brand">
+    <span class="nav-brand-name">Festival Atlas</span>
+    <span class="nav-brand-mark">Music planner</span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html" class="nav-link">Home</a>
+    <a href="parks.html" class="nav-link">Festivals</a>
+    <a href="route.html" class="nav-link active">Route</a>
+    <a href="scorekeeper.html" class="nav-link nav-cta">Setkeeper</a>
+  </div>
+</nav>
+
+<main class="page-wrap route-page">
+  <section class="route-hero">
+    <div class="route-hero-card fade-up">
+      <div class="section-label">Route board</div>
+      <h1 id="routeTitle">Next festival run</h1>
+      <p>Lock the order, choose the sessions, and keep the travel call in one place.</p>
+      <div class="route-metrics">
+        <div class="metric">
+          <div class="metric-value" id="metricStops">0</div>
+          <div class="metric-label">Stops</div>
+        </div>
+        <div class="metric">
+          <div class="metric-value" id="metricMiles">0</div>
+          <div class="metric-label">Miles</div>
+        </div>
+        <div class="metric">
+          <div class="metric-value" id="metricSessions">0</div>
+          <div class="metric-label">Sessions chosen</div>
+        </div>
+      </div>
+      <div style="margin-top:14px; display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="btn btn-export" id="btn-share-trip">Share trip</button>
+      </div>
+    </div>
+
+    <aside class="route-side-card fade-up fade-up-1">
+      <div class="section-label">Trip notes</div>
+      <div class="trip-notes-label">Window</div>
+      <div class="route-side-grid">
+        <label>
+          <span>Start</span>
+          <input id="tripStartDate" type="date">
+        </label>
+        <label>
+          <span>End</span>
+          <input id="tripEndDate" type="date">
+        </label>
+      </div>
+      <label>
+        <span class="trip-notes-label">Scratchpad</span>
+        <textarea id="tripNotes" class="trip-notes" placeholder="Keep lodging, budget, crew, and travel tradeoffs here."></textarea>
+      </label>
+    </aside>
+  </section>
+
+  <section class="route-map-card fade-up fade-up-2">
+    <div class="section-label">Route map</div>
+    <svg class="route-map" id="routeMap" viewBox="0 0 860 260" aria-label="Route map"></svg>
+  </section>
+
+  <section class="fade-up fade-up-3">
+    <div class="section-label">Stops</div>
+    <div class="route-grid" id="routeGrid"></div>
+  </section>
+
+  <section class="fade-up fade-up-4" style="margin-top:22px;">
+    <div class="section-label">Travel legs</div>
+    <div class="route-legs" id="routeLegs"></div>
+  </section>
+</main>
+
+<script src="storage.js"></script>
+<script src="utils.js"></script>
+<script src="data.js"></script>
+<script src="logos.js"></script>
+<script src="schedule.js"></script>
+<script src="device.js"></script>
+<script src="app.js"></script>
+<script>
+(function initRouteBoard() {
+  const app = window.BPQ.app;
+  const utils = window.BPQ.utils;
+  const logos = window.BPQ.logos;
+  const schedule = window.BPQ.schedule;
+  const trip = app.getActiveTrip();
+  const routeGrid = document.getElementById("routeGrid");
+  const routeLegs = document.getElementById("routeLegs");
+  const tripStart = document.getElementById("tripStartDate");
+  const tripEnd = document.getElementById("tripEndDate");
+  const tripNotes = document.getElementById("tripNotes");
+
+  function escapeHtml(value) {
+    return utils.escapeHtml(value);
+  }
+
+  function logo(name) {
+    return `<img class="stop-logo" src="${escapeHtml(logos.getTeamLogo(name))}" alt="${escapeHtml(name)} badge" loading="lazy">`;
+  }
+
+  function renderMap(stops) {
+    const map = document.getElementById("routeMap");
+    const width = 860;
+    const height = 260;
+    const points = stops.map((stop) => ({
+      stop,
+      point: utils.projectPoint(stop.park.coordinates, width, height, { left: 34, top: 24, horizontalInset: 70, verticalInset: 46 })
+    }));
+
+    const polyline = points.map((entry) => `${entry.point.x.toFixed(1)},${entry.point.y.toFixed(1)}`).join(" ");
+    map.innerHTML = `
+      <rect x="0" y="0" width="${width}" height="${height}" fill="rgba(255,255,255,0.02)"></rect>
+      <g opacity="0.24">
+        <line x1="40" y1="32" x2="40" y2="224" stroke="rgba(248,243,232,0.12)"></line>
+        <line x1="240" y1="32" x2="240" y2="224" stroke="rgba(248,243,232,0.12)"></line>
+        <line x1="440" y1="32" x2="440" y2="224" stroke="rgba(248,243,232,0.12)"></line>
+        <line x1="640" y1="32" x2="640" y2="224" stroke="rgba(248,243,232,0.12)"></line>
+        <line x1="30" y1="74" x2="830" y2="74" stroke="rgba(248,243,232,0.12)"></line>
+        <line x1="30" y1="138" x2="830" y2="138" stroke="rgba(248,243,232,0.12)"></line>
+        <line x1="30" y1="202" x2="830" y2="202" stroke="rgba(248,243,232,0.12)"></line>
+      </g>
+      ${points.length > 1 ? `<polyline points="${polyline}" fill="none" stroke="rgba(248,243,232,0.4)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></polyline>` : ""}
+      ${points.map((entry, index) => `
+        <circle cx="${entry.point.x.toFixed(1)}" cy="${entry.point.y.toFixed(1)}" r="${index === 0 ? "8" : "7"}" fill="${escapeHtml(entry.stop.park.color)}" stroke="#F8F3E8" stroke-width="2.2"></circle>
+        <text x="${(entry.point.x + 10).toFixed(1)}" y="${(entry.point.y - 10).toFixed(1)}" fill="rgba(248,243,232,0.86)" font-family="DM Mono, monospace" font-size="9">${escapeHtml(entry.stop.park.city)}</text>
+      `).join("")}
+    `;
+  }
+
+  function renderStops() {
+    const stops = app.getRouteStops();
+    const sessionsChosen = stops.filter((stop) => stop.gameId).length;
+    const totalMiles = app.getActiveTrip().legs.reduce((sum, leg) => sum + leg.distanceMiles, 0);
+
+    document.getElementById("routeTitle").textContent = app.getActiveTrip().title || "Next festival run";
+    document.getElementById("metricStops").textContent = String(stops.length);
+    document.getElementById("metricMiles").textContent = String(Math.round(totalMiles));
+    document.getElementById("metricSessions").textContent = String(sessionsChosen);
+
+    renderMap(stops);
+
+    if (!stops.length) {
+      routeGrid.innerHTML = `
+        <div class="empty">
+          <div style="font-family:var(--font-display); font-size:32px; line-height:1; margin-bottom:8px;">No route yet.</div>
+          <p style="margin-bottom:14px;">Add a festival from the explorer to start building the run.</p>
+          <a href="parks.html" class="btn btn-primary">Browse festivals</a>
+        </div>
+      `;
+      routeLegs.innerHTML = "";
+      return;
+    }
+
+    routeGrid.innerHTML = stops.map((stop, index) => {
+      const sessions = app.getUpcomingGamesByPark(stop.park.id, 3);
+      return `
+        <article class="route-stop-card card">
+          <div>
+            <div class="stop-brand">
+              ${logo(stop.park.team)}
+              <div>
+                <div class="stop-sub">Stop ${index + 1}</div>
+                <div class="stop-name">${escapeHtml(stop.park.name)}</div>
+                <div class="stop-meta">${escapeHtml(stop.park.team)} · ${escapeHtml(stop.park.city)} · ${escapeHtml(stop.park.roof)}</div>
+              </div>
+            </div>
+            <div class="stop-description">${escapeHtml(stop.park.note || stop.park.ticketApproach)}</div>
+            <div class="stop-session-list">
+              ${stop.game ? `
+                <button class="btn btn-export" data-calendar="${escapeHtml(stop.game.gameId)}">Calendar</button>
+                <a href="scorekeeper.html" class="btn btn-red" data-setkeeper-park="${escapeHtml(stop.park.id)}" data-setkeeper-game="${escapeHtml(stop.game.gameId)}">Open setkeeper</a>
+                <button class="btn btn-ghost" data-clear-session="${escapeHtml(stop.park.id)}">Clear session</button>
+              ` : sessions.map((session) => `
+                <button class="btn btn-export" data-pick-session="${escapeHtml(stop.park.id)}" data-game-id="${escapeHtml(session.gameId)}">${escapeHtml(schedule.formatGameLine(session))}</button>
+              `).join("") || `<span class="badge badge-unvisited">No sessions loaded</span>`}
+            </div>
+          </div>
+          <div class="stop-actions">
+            <button class="btn btn-danger-outline" data-remove-stop="${escapeHtml(stop.park.id)}">Remove</button>
+            <a href="https://www.google.com/maps/search/${encodeURIComponent(stop.park.city)}" class="btn btn-ghost" target="_blank" rel="noreferrer">Map</a>
+          </div>
+        </article>
+      `;
+    }).join("");
+
+    const legs = app.getActiveTrip().legs;
+    routeLegs.innerHTML = legs.length ? legs.map((leg) => {
+      const fromPark = app.getParkById(leg.fromParkId);
+      const toPark = app.getParkById(leg.toParkId);
+      const note = app.getLegScratchpad(leg.id);
+      return `
+        <article class="route-leg-card card">
+          <div>
+            <div class="section-label">Leg</div>
+            <div class="leg-title">${escapeHtml(fromPark ? fromPark.city : "")} to ${escapeHtml(toPark ? toPark.city : "")}</div>
+            <div class="leg-meta">${Math.round(leg.distanceMiles)} miles · ${escapeHtml(app.minutesToReadable(leg.travelMinutes))}</div>
+            <textarea class="leg-note" data-leg-note="${escapeHtml(leg.id)}" placeholder="Track lodging ideas, travel timing, budget risks, or crew changes.">${escapeHtml(note ? note.text : "")}</textarea>
+          </div>
+          <div class="leg-panel">
+            <div class="section-label">Signals</div>
+            <p style="font-size:14px; color:var(--text-secondary); margin-bottom:10px;">${escapeHtml(toPark ? toPark.transitNote : "")}</p>
+            <div style="display:flex; flex-wrap:wrap; gap:8px;">
+              <button class="btn btn-export" data-leg-status="${escapeHtml(leg.id)}" data-status="booked">Booked</button>
+              <button class="btn btn-ghost" data-leg-status="${escapeHtml(leg.id)}" data-status="active">Active</button>
+              <a class="btn btn-red" href="${escapeHtml(app.buildMapsUrl(toPark ? toPark.city : "", fromPark ? fromPark.city : ""))}" target="_blank" rel="noreferrer">Directions</a>
+            </div>
+          </div>
+        </article>
+      `;
+    }).join("") : `
+      <div class="empty">Add at least two stops to generate travel legs.</div>
+    `;
+  }
+
+  routeGrid.addEventListener("click", (event) => {
+    const remove = event.target.closest("[data-remove-stop]");
+    if (remove) {
+      app.removeRouteStop(remove.dataset.removeStop);
+      renderStops();
+      return;
+    }
+
+    const pickSession = event.target.closest("[data-pick-session]");
+    if (pickSession) {
+      app.setRouteStopGame(pickSession.dataset.pickSession, pickSession.dataset.gameId);
+      renderStops();
+      return;
+    }
+
+    const clearSession = event.target.closest("[data-clear-session]");
+    if (clearSession) {
+      app.setRouteStopGame(clearSession.dataset.clearSession, "");
+      renderStops();
+      return;
+    }
+
+    const calendar = event.target.closest("[data-calendar]");
+    if (calendar) {
+      const game = app.getGameById(calendar.dataset.calendar);
+      if (game) app.downloadGameICS(game);
+      return;
+    }
+
+    const setkeeper = event.target.closest("[data-setkeeper-park]");
+    if (setkeeper) {
+      app.setScorekeeperContext({
+        parkId: setkeeper.dataset.setkeeperPark,
+        gameId: setkeeper.dataset.setkeeperGame
+      });
+    }
+  });
+
+  routeLegs.addEventListener("click", (event) => {
+    const statusButton = event.target.closest("[data-leg-status]");
+    if (statusButton) {
+      app.setLegStatus(statusButton.dataset.legStatus, statusButton.dataset.status);
+    }
+  });
+
+  routeLegs.addEventListener("input", (event) => {
+    if (event.target.matches("[data-leg-note]")) {
+      app.saveLegScratchpad(event.target.dataset.legNote, event.target.value);
+    }
+  });
+
+  tripStart.value = trip.startDate || "";
+  tripEnd.value = trip.endDate || "";
+  tripNotes.value = (app.getTripScratchpad() && app.getTripScratchpad().text) || "";
+
+  tripStart.addEventListener("change", () => {
+    app.setTripWindow(tripStart.value, tripEnd.value);
+    renderStops();
+  });
+
+  tripEnd.addEventListener("change", () => {
+    app.setTripWindow(tripStart.value, tripEnd.value);
+    renderStops();
+  });
+
+  tripNotes.addEventListener("input", () => {
+    app.saveTripScratchpad(tripNotes.value);
+  });
+
+  renderStops();
+
+  /* ── Share trip ────────────────────────── */
+  var shareBtn = document.getElementById("btn-share-trip");
+  if (shareBtn) {
+    shareBtn.addEventListener("click", function () {
+      var trip = app.getActiveTrip();
+      if (!trip.parkIds.length) { alert("Add stops to the route before sharing."); return; }
+      var url = app.buildShareTripUrl(trip, { includeNotes: false });
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(function () {
+          shareBtn.textContent = "Link copied!";
+          setTimeout(function () { shareBtn.textContent = "Share trip"; }, 2000);
+        });
+      } else {
+        prompt("Copy this link:", url);
+      }
+    });
+  }
+
+  /* ── Shared URL detection (read-only) ── */
+  var shared = app.parseSharedTripState(window.location.search);
+  if (shared) {
+    document.getElementById("routeTitle").textContent = shared.title + " (shared, read-only)";
+    // Render shared stops without overwriting local state
+    var sharedHtml = shared.parkIds.map(function (parkId) {
+      var park = app.getParkById(parkId);
+      if (!park) return "";
+      return '<div class="route-stop-card"><div class="stop-header"><span class="tier-stamp tier-' + utils.safeToken(park.tier, "B") + '">' + utils.escapeHtml(park.tier) + '</span><span class="stop-name">' + utils.escapeHtml(park.name) + '</span></div><div class="stop-description">' + utils.escapeHtml(park.city) + '</div></div>';
+    }).join("");
+    if (sharedHtml) {
+      stopsEl.innerHTML = '<div class="section-label">Shared route (' + shared.parkIds.length + ' stops)</div>' + sharedHtml + '<div style="padding:14px;font-family:var(--font-data);font-size:10px;color:var(--text-muted);">This is a read-only shared view. To edit, save these stops to your own route.</div>';
+    }
+    if (shareBtn) shareBtn.style.display = "none";
+  }
+
+  /* ── Planner assumptions ───────────────── */
+  var assumptionsHtml = '<div style="margin-top:32px;padding:18px;border:1px solid var(--border-light);border-radius:var(--r-lg);background:var(--surface-card);">';
+  assumptionsHtml += '<div class="section-label">What this planner considers</div>';
+  assumptionsHtml += '<ul style="margin:8px 0 0 16px;font-size:13px;line-height:1.7;color:var(--text-secondary);">';
+  app.getPlannerAssumptionsSummary().forEach(function (line) {
+    assumptionsHtml += '<li>' + utils.escapeHtml(line) + '</li>';
+  });
+  assumptionsHtml += '</ul></div>';
+  stopsEl.insertAdjacentHTML("afterend", assumptionsHtml);
+
+  /* ── Sample itinerary ──────────────────── */
+  var sample = app.getSampleItinerary();
+  var sampleHtml = '<div style="margin-top:24px;padding:18px;border:1px solid rgba(200,146,10,0.22);border-radius:var(--r-lg);background:rgba(200,146,10,0.04);">';
+  sampleHtml += '<div class="section-label" style="color:var(--gold);">Sample itinerary (demo output)</div>';
+  sampleHtml += '<div style="font-family:var(--font-display);font-size:18px;font-weight:700;margin-bottom:6px;">' + utils.escapeHtml(sample.label) + '</div>';
+  sampleHtml += '<div style="font-size:13px;color:var(--text-secondary);margin-bottom:12px;">' + utils.escapeHtml(sample.description) + '</div>';
+  sampleHtml += '<div style="font-family:var(--font-data);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Stops</div>';
+  sample.stops.forEach(function (stop) {
+    var park = app.getParkById(stop.festivalId);
+    sampleHtml += '<div style="padding:8px 0;border-bottom:1px solid var(--border-light);font-size:13px;">';
+    sampleHtml += '<strong>' + utils.escapeHtml(park ? park.name : stop.festivalId) + '</strong> · ' + utils.escapeHtml(stop.city) + ' · ' + utils.escapeHtml(stop.dates);
+    sampleHtml += '<div style="font-size:12px;color:var(--text-muted);margin-top:2px;">' + utils.escapeHtml(stop.reason) + '</div></div>';
+  });
+  sampleHtml += '<div style="font-family:var(--font-data);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin:12px 0 6px;">Travel legs</div>';
+  sample.legs.forEach(function (leg) {
+    sampleHtml += '<div style="font-size:13px;padding:4px 0;">' + utils.escapeHtml(leg.from) + ' → ' + utils.escapeHtml(leg.to) + ' · ' + leg.miles + ' mi · ~' + leg.hours + ' hr</div>';
+  });
+  sampleHtml += '<div style="font-size:12px;color:var(--text-muted);margin-top:10px;">' + utils.escapeHtml(sample.bufferNote) + '</div>';
+  sampleHtml += '<div style="font-family:var(--font-data);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin:12px 0 6px;">Why this route</div>';
+  sampleHtml += '<div style="font-size:13px;color:var(--text-secondary);">' + utils.escapeHtml(sample.whyThisRoute) + '</div>';
+  sampleHtml += '</div>';
+  stopsEl.insertAdjacentHTML("afterend", sampleHtml);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Festival Atlas · Setkeeper</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#101826">
+<link rel="stylesheet" href="shared.css">
+<style>
+body {
+  min-height: 100vh;
+}
+
+.setkeeper {
+  padding: 34px 0 64px;
+}
+
+.journal-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 24px;
+}
+
+.journal-main,
+.journal-side,
+.session-card,
+.moment-card {
+  border-radius: 26px;
+  border: 1px solid var(--border-light);
+}
+
+.journal-main {
+  padding: 28px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.82), rgba(255,255,255,0.74));
+}
+
+.journal-top {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.journal-brand {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  min-width: 0;
+}
+
+.journal-logo {
+  width: 58px;
+  height: 58px;
+  border-radius: 20px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.journal-title {
+  font-family: var(--font-display);
+  font-size: clamp(34px, 5vw, 54px);
+  line-height: 0.96;
+  letter-spacing: -0.03em;
+}
+
+.journal-meta {
+  font-family: var(--font-data);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-top: 6px;
+}
+
+.headline-card {
+  padding: 22px;
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 16% 20%, rgba(241,92,65,0.22), transparent 22%),
+    radial-gradient(circle at 82% 18%, rgba(8,145,178,0.22), transparent 24%),
+    linear-gradient(145deg, rgba(16,24,38,0.98), rgba(29,42,64,0.94));
+  color: var(--cream);
+  margin-bottom: 18px;
+}
+
+.headline-kicker {
+  font-family: var(--font-data);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(248,243,232,0.68);
+  margin-bottom: 10px;
+}
+
+.headline-title {
+  font-family: var(--font-display);
+  font-size: 34px;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.headline-copy {
+  color: rgba(248,243,232,0.8);
+  max-width: 58ch;
+}
+
+.journal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.field.full {
+  grid-column: 1 / -1;
+}
+
+.field label {
+  font-family: var(--font-data);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.field input,
+.field textarea,
+.field select {
+  width: 100%;
+  border-radius: 16px;
+  border: 1px solid var(--border-light);
+  background: rgba(255,255,255,0.76);
+  padding: 12px 14px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.field textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.moment-strip,
+.session-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.moment-card,
+.session-card {
+  padding: 16px;
+  background: rgba(16,24,38,0.04);
+}
+
+.moment-title,
+.session-title {
+  font-family: var(--font-data);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.moment-copy {
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.session-line {
+  font-size: 14px;
+}
+
+.session-tag {
+  font-family: var(--font-data);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.session-actions,
+.journal-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.journal-side {
+  padding: 24px;
+  background: rgba(16,24,38,0.96);
+  color: var(--cream);
+  align-self: start;
+  position: sticky;
+  top: 80px;
+}
+
+.journal-side .section-label,
+.journal-side .session-tag {
+  color: rgba(248,243,232,0.6);
+}
+
+.status-chip {
+  display: inline-flex;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  font-family: var(--font-data);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.save-note {
+  font-family: var(--font-data);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(248,243,232,0.68);
+  margin-top: 12px;
+}
+
+@media (max-width: 980px) {
+  .journal-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .journal-side {
+    position: static;
+  }
+}
+
+@media (max-width: 640px) {
+  .journal-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+</head>
+<body>
+<nav class="site-nav">
+  <a href="index.html" class="nav-brand">
+    <span class="nav-brand-name">Festival Atlas</span>
+    <span class="nav-brand-mark">Music planner</span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html" class="nav-link">Home</a>
+    <a href="parks.html" class="nav-link">Festivals</a>
+    <a href="route.html" class="nav-link">Route</a>
+    <a href="scorekeeper.html" class="nav-link active nav-cta">Setkeeper</a>
+  </div>
+</nav>
+
+<main class="page-wrap setkeeper">
+  <section class="journal-shell">
+    <section class="journal-main fade-up">
+      <div class="journal-top">
+        <div class="journal-brand">
+          <img id="journalLogo" class="journal-logo" alt="">
+          <div>
+            <div class="journal-title" id="journalTitle">Setkeeper</div>
+            <div class="journal-meta" id="journalMeta">Pick a festival from the route or festivals page</div>
+          </div>
+        </div>
+        <div class="status-chip" id="visitStatus">Planning</div>
+      </div>
+
+      <div class="headline-card">
+        <div class="headline-kicker">Live journal</div>
+        <div class="headline-title" id="headlineTitle">Capture the sets worth remembering.</div>
+        <div class="headline-copy" id="headlineCopy">Use this page as the post set notebook for the route. Save the day, the standout act, the crowd feel, and the detail you do not want to lose.</div>
+      </div>
+
+      <div class="journal-grid">
+        <div class="field">
+          <label for="visitDate">Attended date</label>
+          <input id="visitDate" type="date">
+        </div>
+        <div class="field">
+          <label for="energy">Energy rating</label>
+          <select id="energy">
+            <option value="">Pick one</option>
+            <option value="Calm reset">Calm reset</option>
+            <option value="Strong lane">Strong lane</option>
+            <option value="Peak crowd">Peak crowd</option>
+            <option value="All timer">All timer</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="bestSet">Best set</label>
+          <input id="bestSet" type="text" placeholder="Artist, stage, or moment">
+        </div>
+        <div class="field">
+          <label for="standout">Standout memory</label>
+          <input id="standout" type="text" placeholder="What made this stop worth it">
+        </div>
+        <div class="field full">
+          <label for="sessionLine">Selected session</label>
+          <input id="sessionLine" type="text" placeholder="No session picked yet">
+        </div>
+        <div class="field">
+          <label for="foodNote">Food note</label>
+          <input id="foodNote" type="text" placeholder="Best vendor, drink, or late night move">
+        </div>
+        <div class="field">
+          <label for="travelNote">Travel note</label>
+          <input id="travelNote" type="text" placeholder="Train, shuttle, lot, exit call">
+        </div>
+        <div class="field full">
+          <label for="freeform">Journal note</label>
+          <textarea id="freeform" placeholder="Write the sound, the crowd, the weather, the miss, the surprise, or the exact thing future you should remember."></textarea>
+        </div>
+      </div>
+
+      <div class="journal-actions">
+        <button class="btn btn-success" id="markAttended">Mark attended</button>
+        <button class="btn btn-export" id="saveEntry">Save entry</button>
+        <button class="btn btn-red" id="calendarButton">Export selected session</button>
+        <button class="btn btn-ghost" id="clearEntry">Clear journal</button>
+      </div>
+
+      <div class="moment-strip">
+        <div class="moment-card">
+          <div class="moment-title">Current planner note</div>
+          <div class="moment-copy" id="plannerNote">No planner note saved for this festival yet.</div>
+        </div>
+        <div class="moment-card">
+          <div class="moment-title">Saved entry status</div>
+          <div class="moment-copy" id="entryStatus">No journal entry saved yet.</div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="journal-side fade-up fade-up-1">
+      <div class="section-label">Upcoming sessions</div>
+      <div id="sessionList" class="session-list"></div>
+      <div class="save-note" id="saveNote">Autosave ready</div>
+    </aside>
+  </section>
+</main>
+
+<script src="storage.js"></script>
+<script src="utils.js"></script>
+<script src="data.js"></script>
+<script src="logos.js"></script>
+<script src="schedule.js"></script>
+<script src="device.js"></script>
+<script src="app.js"></script>
+<script>
+(function initSetkeeper() {
+  const STORAGE_KEY = "festivalJournalEntries";
+  const app = window.BPQ.app;
+  const storage = window.BPQ.storage;
+  const utils = window.BPQ.utils;
+  const logos = window.BPQ.logos;
+  const schedule = window.BPQ.schedule;
+  let context = app.getScorekeeperContext();
+
+  const fields = {
+    visitDate: document.getElementById("visitDate"),
+    energy: document.getElementById("energy"),
+    bestSet: document.getElementById("bestSet"),
+    standout: document.getElementById("standout"),
+    sessionLine: document.getElementById("sessionLine"),
+    foodNote: document.getElementById("foodNote"),
+    travelNote: document.getElementById("travelNote"),
+    freeform: document.getElementById("freeform")
+  };
+
+  function escapeHtml(value) {
+    return utils.escapeHtml(value);
+  }
+
+  function getEntries() {
+    return storage.get(STORAGE_KEY) || {};
+  }
+
+  function saveEntries(entries) {
+    storage.set(STORAGE_KEY, entries);
+    storage.flush(STORAGE_KEY);
+    return entries;
+  }
+
+  function getEntry(parkId) {
+    return getEntries()[parkId] || null;
+  }
+
+  function buildPayload() {
+    return {
+      parkId: context ? context.parkId : "",
+      gameId: context ? context.gameId : "",
+      venue: context ? context.venue : "",
+      visitDate: fields.visitDate.value || "",
+      energy: fields.energy.value || "",
+      bestSet: fields.bestSet.value.trim(),
+      standout: fields.standout.value.trim(),
+      sessionLine: fields.sessionLine.value.trim(),
+      foodNote: fields.foodNote.value.trim(),
+      travelNote: fields.travelNote.value.trim(),
+      freeform: fields.freeform.value.trim(),
+      updatedAt: new Date().toISOString()
+    };
+  }
+
+  function saveCurrentEntry() {
+    if (!context || !context.parkId) return null;
+    const entries = getEntries();
+    entries[context.parkId] = buildPayload();
+    saveEntries(entries);
+    document.getElementById("entryStatus").textContent = `Saved ${new Date(entries[context.parkId].updatedAt).toLocaleString()}`;
+    document.getElementById("saveNote").textContent = "Saved locally";
+    return entries[context.parkId];
+  }
+
+  function loadEntry() {
+    if (!context || !context.parkId) return;
+    const park = app.getParkById(context.parkId);
+    const visitMeta = app.getVisitedMeta(context.parkId);
+    const entry = getEntry(context.parkId);
+    const plannerNote = app.getParkScratchpad(context.parkId);
+    const selectedGame = context.gameId ? app.getGameById(context.gameId) : null;
+    const sessions = app.getUpcomingGamesByPark(context.parkId, 4);
+
+    document.getElementById("journalTitle").textContent = park ? park.name : "Setkeeper";
+    document.getElementById("journalMeta").textContent = park ? `${park.team} · ${park.city} · ${park.roof}` : "Pick a festival from the planner";
+    document.getElementById("journalLogo").src = park ? logos.getTeamLogo(park.team) : logos.getTeamLogo("Festival Atlas");
+    document.getElementById("journalLogo").alt = park ? `${park.team} badge` : "Festival Atlas badge";
+    document.getElementById("visitStatus").textContent = visitMeta ? "Attended" : "Planning";
+    document.getElementById("headlineTitle").textContent = selectedGame ? selectedGame.awayTeam : (park ? park.name : "Capture the sets worth remembering.");
+    document.getElementById("headlineCopy").textContent = selectedGame
+      ? `${schedule.formatGameLine(selectedGame)}${selectedGame.s ? ` · ${selectedGame.s}` : ""}`
+      : (park ? park.note : "Use this page as the post set notebook for the route.");
+    document.getElementById("plannerNote").textContent = plannerNote && plannerNote.text ? plannerNote.text : (park ? park.ticketApproach : "No planner note saved for this festival yet.");
+
+    fields.visitDate.value = (entry && entry.visitDate) || (visitMeta && visitMeta.visitDate) || new Date().toISOString().slice(0, 10);
+    fields.energy.value = (entry && entry.energy) || "";
+    fields.bestSet.value = (entry && entry.bestSet) || (visitMeta && visitMeta.bestFeature) || "";
+    fields.standout.value = (entry && entry.standout) || "";
+    fields.sessionLine.value = (entry && entry.sessionLine) || (selectedGame ? schedule.formatGameLine(selectedGame) : (context.gameLabel || ""));
+    fields.foodNote.value = (entry && entry.foodNote) || "";
+    fields.travelNote.value = (entry && entry.travelNote) || (park ? park.transitNote : "");
+    fields.freeform.value = (entry && entry.freeform) || (visitMeta && visitMeta.notes) || "";
+    document.getElementById("entryStatus").textContent = entry ? `Saved ${new Date(entry.updatedAt).toLocaleString()}` : "No journal entry saved yet.";
+
+    document.getElementById("sessionList").innerHTML = sessions.length ? sessions.map((session) => `
+      <div class="session-card">
+        <div class="session-title">Session</div>
+        <div class="session-line">${escapeHtml(schedule.formatGameLine(session))}</div>
+        <div class="session-tag">${escapeHtml(session.s || "Featured slot")}</div>
+        <div class="session-actions">
+          <button class="btn btn-export" data-pick-session="${escapeHtml(session.gameId)}">Use this session</button>
+          <button class="btn btn-red" data-calendar-session="${escapeHtml(session.gameId)}">Calendar</button>
+        </div>
+      </div>
+    `).join("") : `<div class="session-card"><div class="session-line">No future sessions loaded.</div></div>`;
+  }
+
+  function markAttended() {
+    if (!context || !context.parkId) return;
+    const payload = buildPayload();
+    app.markVisited(context.parkId, {
+      visitDate: payload.visitDate || new Date().toISOString().slice(0, 10),
+      bestFeature: payload.bestSet || payload.standout || "Festival memory",
+      notes: payload.freeform || payload.sessionLine || ""
+    });
+    loadEntry();
+  }
+
+  function clearEntry() {
+    if (!context || !context.parkId) return;
+    const entries = getEntries();
+    delete entries[context.parkId];
+    saveEntries(entries);
+    fields.energy.value = "";
+    fields.bestSet.value = "";
+    fields.standout.value = "";
+    fields.foodNote.value = "";
+    fields.travelNote.value = context && context.parkId ? (app.getParkById(context.parkId).transitNote || "") : "";
+    fields.freeform.value = "";
+    document.getElementById("saveNote").textContent = "Entry cleared";
+    loadEntry();
+  }
+
+  document.getElementById("saveEntry").addEventListener("click", () => {
+    saveCurrentEntry();
+  });
+
+  document.getElementById("markAttended").addEventListener("click", () => {
+    saveCurrentEntry();
+    markAttended();
+  });
+
+  document.getElementById("clearEntry").addEventListener("click", () => {
+    clearEntry();
+  });
+
+  document.getElementById("calendarButton").addEventListener("click", () => {
+    if (!context || !context.gameId) return;
+    const game = app.getGameById(context.gameId);
+    if (game) app.downloadGameICS(game);
+  });
+
+  document.getElementById("sessionList").addEventListener("click", (event) => {
+    const pick = event.target.closest("[data-pick-session]");
+    if (pick && context && context.parkId) {
+      context = app.setScorekeeperContext({ parkId: context.parkId, gameId: pick.dataset.pickSession });
+      loadEntry();
+      return;
+    }
+
+    const calendar = event.target.closest("[data-calendar-session]");
+    if (calendar) {
+      const game = app.getGameById(calendar.dataset.calendarSession);
+      if (game) app.downloadGameICS(game);
+    }
+  });
+
+  Object.values(fields).forEach((field) => {
+    field.addEventListener("input", () => {
+      document.getElementById("saveNote").textContent = "Unsaved changes";
+      saveCurrentEntry();
+    });
+  });
+
+  window.render_game_to_text = function renderGameToText() {
+    return JSON.stringify({
+      mode: "setkeeper",
+      context: context,
+      fields: buildPayload(),
+      attended: Boolean(context && app.getVisitedMeta(context.parkId)),
+      plannerNote: context ? ((app.getParkScratchpad(context.parkId) || {}).text || "") : ""
+    });
+  };
+
+  window.advanceTime = function advanceTime() {
+    return window.render_game_to_text();
+  };
+
+  if (!context) {
+    const fallback = app.getRouteParks()[0] || app.getParks()[0];
+    if (fallback) {
+      context = app.setScorekeeperContext(fallback.id);
+    }
+  }
+
+  loadEntry();
+})();
+</script>
+</body>
+</html>

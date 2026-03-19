@@ -1,0 +1,44 @@
+FESTIVAL ATLAS
+
+Store Capsule
+
+A clean, local first music festival planner for building a route, saving session choices, and journaling what actually hit.
+
+Short Description
+
+Map a seeded festival circuit, lock the stops that matter, export the sessions worth keeping, and save the standout moments in one static tool.
+
+About This Project
+
+Festival Atlas is a lightweight planning board for people who want the trip logic and the memory log in the same place.
+
+The current build stays focused on one loop:
+
+1. browse the field
+2. choose the stops
+3. lock the sessions
+4. journal the set
+5. move to the next festival
+
+Why It Works
+
+- Static first
+- Local first
+- Fast to open
+- Easy to host
+- Easy to hand edit
+- Strong visual hierarchy
+- Useful route and journal flow without app bloat
+
+Current Features
+
+- Seeded festival explorer with search and filters
+- Route board with trip notes and travel legs
+- Session export to calendar
+- Setkeeper journal for best set, standout memory, food note, travel note, and freeform notes
+- Attended festival tracking
+- Generated monogram marks instead of stored logo assets
+
+One Line Pitch
+
+A fast, static festival route board that makes the next run feel organized, personal, and ready to act on.
