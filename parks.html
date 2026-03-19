@@ -571,6 +571,12 @@
         </div>
       </div>
 
+      <div class="detail-actions" style="margin:14px 0;">
+        <button class="btn ${onRoute ? "btn-danger-outline" : "btn-export"}" data-toggle-route="${escapeHtml(park.id)}" style="flex:1;">${onRoute ? "Remove from route" : "Add to route"}</button>
+        <button class="btn ${app.isShortlisted(park.id) ? "btn-export" : "btn-ghost"}" style="${app.isShortlisted(park.id) ? "" : "color:var(--cream); border-color:rgba(255,255,255,0.12);"}" data-toggle-shortlist="${escapeHtml(park.id)}">★ ${app.isShortlisted(park.id) ? "Saved" : "Save"}</button>
+        <button class="btn ${visitMeta ? "btn-danger-outline" : "btn-success"}" data-toggle-visit="${escapeHtml(park.id)}">${visitMeta ? "Undo attended" : "Mark attended"}</button>
+      </div>
+
       <div class="detail-hero" style="background:linear-gradient(160deg, ${escapeHtml(park.color)}22, rgba(255,255,255,0.04));">
         <strong>${escapeHtml(park.note || "No note saved yet.")}</strong>
         <div style="color:rgba(248,243,232,0.76);">${escapeHtml(visitMeta && visitMeta.notes ? visitMeta.notes : park.ticketApproach)}</div>
@@ -615,15 +621,7 @@
         <div class="signal-label">Moments to chase</div>
         <div class="event-pills">${park.specialEvents.map((item) => `<span class="event-pill">${escapeHtml(item)}</span>`).join("")}</div>
       </div>
-      <div class="signal">
-        <div class="signal-label">Route status</div>
-        <div>${onRoute ? "Already on the current route." : "Not on the route yet."}</div>
-      </div>
-
       <div class="detail-actions">
-        <button class="btn ${app.isShortlisted(park.id) ? "btn-export" : "btn-ghost"}" style="${app.isShortlisted(park.id) ? "" : "color:var(--cream); border-color:rgba(255,255,255,0.12);"}" data-toggle-shortlist="${escapeHtml(park.id)}">${app.isShortlisted(park.id) ? "★ Saved" : "☆ Save"}</button>
-        <button class="btn ${visitMeta ? "btn-danger-outline" : "btn-success"}" data-toggle-visit="${escapeHtml(park.id)}">${visitMeta ? "Undo attended" : "Mark attended"}</button>
-        <button class="btn ${onRoute ? "btn-danger-outline" : "btn-export"}" data-toggle-route="${escapeHtml(park.id)}">${onRoute ? "Remove route" : "Add route"}</button>
         <a href="scorekeeper.html" class="btn btn-red" data-open-setkeeper="${escapeHtml(park.id)}">Open setkeeper</a>
         <a href="route.html" class="btn btn-ghost" style="color:var(--cream); border-color:rgba(255,255,255,0.12);">Route board</a>
       </div>
