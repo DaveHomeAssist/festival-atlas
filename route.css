@@ -960,4 +960,56 @@
     flex-direction: column;
     align-items: stretch;
   }
+
+  .route-metrics {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .metric {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .metric-value {
+    font-size: 22px;
+  }
+
+  .metric-label {
+    font-size: 12px;
+  }
+
+  .route-hero-card h1 {
+    font-size: 26px;
+  }
+
+  .route-hero-card p {
+    font-size: 14px;
+  }
+
+  .stop-name {
+    font-size: 16px;
+  }
+
+  .stop-city,
+  .stop-description {
+    font-size: 13px;
+  }
+
+  .leg-distance,
+  .leg-time {
+    font-size: 13px;
+  }
+
+  .route-side-card {
+    padding: 16px;
+  }
+
+  .trip-label {
+    font-size: 12px;
+  }
+
+  .scratchpad-wrap textarea {
+    font-size: 14px;
+  }
 }

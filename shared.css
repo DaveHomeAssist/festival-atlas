@@ -430,4 +430,29 @@ body::after {
   .page-wrap {
     padding: 0 16px;
   }
+
+  .btn {
+    font-size: 12px;
+    padding: 12px 18px;
+    min-height: 44px;
+  }
+
+  .nav-link {
+    font-size: 11px;
+    padding: 10px 10px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .badge {
+    font-size: 11px;
+    padding: 4px 10px;
+  }
+
+  .chip {
+    font-size: 12px;
+    padding: 10px 14px;
+    min-height: 44px;
+  }
 }
