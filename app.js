@@ -706,6 +706,14 @@
   data.initializeData();
   registerServiceWorker();
 
+  /* ── Shortlist badge (auto-render on all pages) ── */
+  global.addEventListener("DOMContentLoaded", function () {
+    var badge = global.document.getElementById("shortlistBadge");
+    if (!badge) return;
+    var count = getShortlist().length;
+    badge.textContent = count > 0 ? String(count) : "";
+  });
+
   namespace.app = {
     LEG_STATUSES: LEG_STATUSES.slice(),
     getParks: getParks,

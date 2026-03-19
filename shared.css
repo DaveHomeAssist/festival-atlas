@@ -234,6 +234,24 @@ body::after {
 }
 .nav-link.nav-cta:hover { background: linear-gradient(135deg, var(--red-light), var(--red)); }
 
+.nav-shortlist-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 5px;
+  border-radius: 8px;
+  background: var(--gold);
+  color: var(--navy);
+  font-family: var(--font-data);
+  font-size: 9px;
+  font-weight: 500;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+.nav-shortlist-badge:empty { display: none; }
+
 .card {
   background: var(--surface-card);
   border: 1px solid var(--border-light);

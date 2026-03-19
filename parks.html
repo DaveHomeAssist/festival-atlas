@@ -334,7 +334,7 @@
   </a>
   <div class="nav-links">
     <a href="index.html" class="nav-link">Home</a>
-    <a href="parks.html" class="nav-link active">Festivals</a>
+    <a href="parks.html" class="nav-link active">Festivals<span class="nav-shortlist-badge" id="shortlistBadge"></span></a>
     <a href="route.html" class="nav-link">Route</a>
     <a href="scorekeeper.html" class="nav-link nav-cta">Setkeeper</a>
   </div>
@@ -358,6 +358,7 @@
         <button class="chip" data-filter="route">On route</button>
         <button class="chip" data-filter="camping">Camping</button>
         <button class="chip" data-filter="urban">Urban</button>
+        <button class="chip" data-filter="saved">Saved</button>
         <button class="chip" data-filter="elite">Tier S</button>
       </div>
       <div class="count" id="countLabel"></div>
@@ -431,6 +432,7 @@
 
       if (activeFilter === "attended") return app.isVisited(park.id);
       if (activeFilter === "route") return routeIds.includes(park.id);
+      if (activeFilter === "saved") return app.isShortlisted(park.id);
       if (activeFilter === "camping") return park.roof === "Camping";
       if (activeFilter === "urban") return park.roof === "Urban" || park.roof === "Waterfront";
       if (activeFilter === "elite") return park.tier === "S";

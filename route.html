@@ -270,7 +270,7 @@
   </a>
   <div class="nav-links">
     <a href="index.html" class="nav-link">Home</a>
-    <a href="parks.html" class="nav-link">Festivals</a>
+    <a href="parks.html" class="nav-link">Festivals<span class="nav-shortlist-badge" id="shortlistBadge"></span></a>
     <a href="route.html" class="nav-link active">Route</a>
     <a href="scorekeeper.html" class="nav-link nav-cta">Setkeeper</a>
   </div>
@@ -557,7 +557,13 @@
       var trip = app.getActiveTrip();
       if (!trip.parkIds.length) { alert("Add stops to the route before sharing."); return; }
       var url = app.buildShareTripUrl(trip, { includeNotes: false });
-      if (navigator.clipboard && navigator.clipboard.writeText) {
+
+      if (navigator.share) {
+        navigator.share({ title: trip.title || "Festival Atlas Trip", url: url }).then(function () {
+          shareBtn.textContent = "Shared!";
+          setTimeout(function () { shareBtn.textContent = "Share trip"; }, 2000);
+        }).catch(function () { /* user cancelled share sheet */ });
+      } else if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(url).then(function () {
           shareBtn.textContent = "Link copied!";
           setTimeout(function () { shareBtn.textContent = "Share trip"; }, 2000);
@@ -579,9 +585,19 @@
       return '<div class="route-stop-card"><div class="stop-header"><span class="tier-stamp tier-' + utils.safeToken(park.tier, "B") + '">' + utils.escapeHtml(park.tier) + '</span><span class="stop-name">' + utils.escapeHtml(park.name) + '</span></div><div class="stop-description">' + utils.escapeHtml(park.city) + '</div></div>';
     }).join("");
     if (sharedHtml) {
-      stopsEl.innerHTML = '<div class="section-label">Shared route (' + shared.parkIds.length + ' stops)</div>' + sharedHtml + '<div style="padding:14px;font-family:var(--font-data);font-size:10px;color:var(--text-muted);">This is a read-only shared view. To edit, save these stops to your own route.</div>';
+      stopsEl.innerHTML = '<div class="section-label">Shared route (' + shared.parkIds.length + ' stops)</div>' + sharedHtml + '<div style="padding:14px;display:flex;align-items:center;gap:12px;"><span style="font-family:var(--font-data);font-size:10px;color:var(--text-muted);">This is a read-only shared view.</span><button class="btn btn-export" id="btn-import-shared">Import to my route</button></div>';
     }
     if (shareBtn) shareBtn.style.display = "none";
+    var importBtn = document.getElementById("btn-import-shared");
+    if (importBtn) {
+      importBtn.addEventListener("click", function () {
+        shared.parkIds.forEach(function (parkId) { app.addRouteStop(parkId); });
+        if (shared.startDate || shared.endDate) app.setTripWindow(shared.startDate, shared.endDate);
+        importBtn.textContent = "Imported!";
+        importBtn.disabled = true;
+        setTimeout(function () { window.location.href = "route.html"; }, 800);
+      });
+    }
   }
 
   /* ── Planner assumptions ───────────────── */
