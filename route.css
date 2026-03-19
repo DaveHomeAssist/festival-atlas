@@ -497,14 +497,14 @@
   height: auto;
 }
 
-.route-map-base {
-  fill: rgba(245,237,216,0.03);
-  stroke: rgba(245,237,216,0.08);
-  stroke-width: 1.2;
+.atlas-map-land {
+  fill: rgba(245,237,216,0.05);
+  stroke: rgba(245,237,216,0.16);
+  stroke-width: 1.4;
 }
 
-.route-map-grid {
-  stroke: rgba(245,237,216,0.05);
+.atlas-map-region {
+  stroke: rgba(245,237,216,0.08);
   stroke-width: 1;
 }
 

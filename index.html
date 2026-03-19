@@ -351,6 +351,17 @@
   background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
 }
 
+.atlas-map-land {
+  fill: rgba(248,243,232,0.05);
+  stroke: rgba(248,243,232,0.16);
+  stroke-width: 1.4;
+}
+
+.atlas-map-region {
+  stroke: rgba(248,243,232,0.08);
+  stroke-width: 1;
+}
+
 .sidebar-stop-list {
   margin-top: 16px;
   display: flex;
@@ -622,22 +633,16 @@
     const map = document.getElementById("sidebarMap");
     const width = 300;
     const height = 210;
+    const projection = { left: 22, top: 18, horizontalInset: 46, verticalInset: 36 };
     const projected = stops.map((park) => ({
       park,
-      point: utils.projectPoint(park.coordinates, width, height, { left: 22, top: 18, horizontalInset: 46, verticalInset: 36 })
+      point: utils.projectPoint(park.coordinates, width, height, projection)
     }));
 
     const polyline = projected.map((entry) => `${entry.point.x.toFixed(1)},${entry.point.y.toFixed(1)}`).join(" ");
     map.innerHTML = `
       <rect x="0" y="0" width="${width}" height="${height}" fill="rgba(255,255,255,0.02)"></rect>
-      <g opacity="0.28">
-        <line x1="40" y1="20" x2="40" y2="184" stroke="rgba(248,243,232,0.16)"></line>
-        <line x1="140" y1="20" x2="140" y2="184" stroke="rgba(248,243,232,0.16)"></line>
-        <line x1="240" y1="20" x2="240" y2="184" stroke="rgba(248,243,232,0.16)"></line>
-        <line x1="20" y1="52" x2="280" y2="52" stroke="rgba(248,243,232,0.16)"></line>
-        <line x1="20" y1="112" x2="280" y2="112" stroke="rgba(248,243,232,0.16)"></line>
-        <line x1="20" y1="172" x2="280" y2="172" stroke="rgba(248,243,232,0.16)"></line>
-      </g>
+      ${utils.buildUsBasemap(width, height, projection)}
       ${projected.length > 1 ? `<polyline points="${polyline}" fill="none" stroke="rgba(248,243,232,0.34)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></polyline>` : ""}
       ${projected.map((entry) => `
         <circle cx="${entry.point.x.toFixed(1)}" cy="${entry.point.y.toFixed(1)}" r="6" fill="${safeColor(entry.park.color, "#F15C41")}" stroke="#F8F3E8" stroke-width="2"></circle>

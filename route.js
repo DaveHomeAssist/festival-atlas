@@ -23,6 +23,7 @@
   var safeColor = utils.safeColor;
   var safeToken = utils.safeToken;
   var projectPoint = utils.projectPoint;
+  var buildUsBasemap = utils.buildUsBasemap;
 
   function teamLogoImg(teamName) {
     var src = logos && logos.getTeamLogo ? logos.getTeamLogo(teamName) : "";
@@ -214,13 +215,14 @@
   function renderMapPanel(routeParks, activeTrip) {
     var width = 760;
     var height = 260;
+    var projection = { left: 48, top: 34, horizontalInset: 96, verticalInset: 68 };
     var usableParks = routeParks.filter(function filterPark(park) {
       return park && park.coordinates && typeof park.coordinates.lat === "number" && typeof park.coordinates.lng === "number";
     });
     var points = usableParks.map(function mapPark(park) {
       return {
         park: park,
-        point: projectPoint(park.coordinates, width, height, { left: 48, top: 34, horizontalInset: 96, verticalInset: 68 })
+        point: projectPoint(park.coordinates, width, height, projection)
       };
     });
     var linePoints = points.map(function mapPoint(entry) {
@@ -239,12 +241,7 @@
       '</div>',
       '<div class="route-map-frame">',
       '  <svg class="route-map-svg" viewBox="0 0 ' + width + ' ' + height + '" aria-label="Route map preview">',
-      '    <path class="route-map-base" d="M110 58 L188 42 L258 55 L332 36 L429 45 L518 74 L601 87 L646 140 L616 188 L530 214 L400 224 L296 210 L180 196 L118 162 L96 118 Z"></path>',
-      '    <path class="route-map-grid" d="M124 84 L628 84"></path>',
-      '    <path class="route-map-grid" d="M110 144 L640 144"></path>',
-      '    <path class="route-map-grid" d="M180 54 L150 210"></path>',
-      '    <path class="route-map-grid" d="M342 42 L318 220"></path>',
-      '    <path class="route-map-grid" d="M532 66 L516 214"></path>',
+      buildUsBasemap(width, height, projection),
       (linePoints ? '    <polyline class="' + (points.length > 1 ? 'route-map-line' : 'route-map-line-muted') + '" points="' + escapeHtml(linePoints) + '"></polyline>' : ''),
       points.map(function mapPoint(entry, index) {
         var point = entry.point;
