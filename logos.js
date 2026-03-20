@@ -62,8 +62,8 @@
     return buildSvg(name);
   }
 
-  global.BPQ = global.BPQ || {};
-  global.BPQ.logos = {
+  global.FA = global.FA || {};
+  global.FA.logos = {
     getTeamLogo: getTeamLogo
   };
 })(window);

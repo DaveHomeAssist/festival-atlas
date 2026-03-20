@@ -2,9 +2,9 @@ const CACHE_NAME = "festival-atlas-v1";
 const PRECACHE = [
   "./",
   "index.html",
-  "parks.html",
+  "festivals.html",
   "route.html",
-  "scorekeeper.html",
+  "setkeeper.html",
   "shared.css",
   "device.js",
   "storage.js",

@@ -121,8 +121,8 @@
     return [game.y, month + " " + day, game.t, game.o].filter(Boolean).join(" · ");
   }
 
-  global.BPQ = global.BPQ || {};
-  global.BPQ.schedule = {
+  global.FA = global.FA || {};
+  global.FA.schedule = {
     getGamesForPark: getGamesForPark,
     getUpcomingGames: getUpcomingGames,
     getGameById: getGameById,

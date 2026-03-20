@@ -89,7 +89,7 @@
     bindResizeRefresh();
   });
 
-  window.BPQ = window.BPQ || {};
-  window.BPQ.device = detectDevice;
-  window.BPQ.viewport = detectViewport;
+  window.FA = window.FA || {};
+  window.FA.device = detectDevice;
+  window.FA.viewport = detectViewport;
 })();

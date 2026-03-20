@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Festival Atlas · Setkeeper</title>
 <link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
 <meta name="theme-color" content="#101826">
 <link rel="stylesheet" href="shared.css">
 <style>
@@ -256,9 +258,9 @@ body {
   </a>
   <div class="nav-links">
     <a href="index.html" class="nav-link">Home</a>
-    <a href="parks.html" class="nav-link">Festivals<span class="nav-shortlist-badge" id="shortlistBadge"></span></a>
+    <a href="festivals.html" class="nav-link">Festivals<span class="nav-shortlist-badge" id="shortlistBadge"></span></a>
     <a href="route.html" class="nav-link">Route</a>
-    <a href="scorekeeper.html" class="nav-link active nav-cta">Setkeeper</a>
+    <a href="setkeeper.html" class="nav-link is-active nav-cta">Setkeeper</a>
   </div>
 </nav>
 
@@ -360,12 +362,12 @@ body {
 <script>
 (function initSetkeeper() {
   const STORAGE_KEY = "festivalJournalEntries";
-  const app = window.BPQ.app;
-  const storage = window.BPQ.storage;
-  const utils = window.BPQ.utils;
-  const logos = window.BPQ.logos;
-  const schedule = window.BPQ.schedule;
-  let context = app.getScorekeeperContext();
+  const app = window.FA.app;
+  const storage = window.FA.storage;
+  const utils = window.FA.utils;
+  const logos = window.FA.logos;
+  const schedule = window.FA.schedule;
+  let context = app.getSetkeeperContext();
 
   const fields = {
     visitDate: document.getElementById("visitDate"),
@@ -514,7 +516,7 @@ body {
   document.getElementById("sessionList").addEventListener("click", (event) => {
     const pick = event.target.closest("[data-pick-session]");
     if (pick && context && context.parkId) {
-      context = app.setScorekeeperContext({ parkId: context.parkId, gameId: pick.dataset.pickSession });
+      context = app.setSetkeeperContext({ parkId: context.parkId, gameId: pick.dataset.pickSession });
       loadEntry();
       return;
     }
@@ -550,7 +552,7 @@ body {
   if (!context) {
     const fallback = app.getRouteParks()[0] || app.getParks()[0];
     if (fallback) {
-      context = app.setScorekeeperContext(fallback.id);
+      context = app.setSetkeeperContext(fallback.id);
     }
   }
 

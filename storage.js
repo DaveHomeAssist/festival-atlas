@@ -13,7 +13,7 @@
 
   function canUseLocalStorage() {
     try {
-      var probeKey = "__bpq_storage_probe__";
+      var probeKey = "__fa_storage_probe__";
       global.localStorage.setItem(probeKey, "1");
       global.localStorage.removeItem(probeKey);
       return true;
@@ -144,10 +144,10 @@
     };
   }
 
-  global.BPQ = global.BPQ || {};
-  global.BPQ.createStorage = createStorage;
-  global.BPQ.storage = createStorage({
-    namespace: "bpq.prototype",
+  global.FA = global.FA || {};
+  global.FA.createStorage = createStorage;
+  global.FA.storage = createStorage({
+    namespace: "fa.prototype",
     debounceMs: DEFAULT_DEBOUNCE_MS
   });
 })(window);

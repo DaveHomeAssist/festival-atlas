@@ -168,8 +168,8 @@
     return fallback || "#0F1F38";
   }
 
-  global.BPQ = global.BPQ || {};
-  global.BPQ.utils = {
+  global.FA = global.FA || {};
+  global.FA.utils = {
     distanceMiles: distanceMiles,
     formatDate: formatDate,
     minutesToReadable: minutesToReadable,

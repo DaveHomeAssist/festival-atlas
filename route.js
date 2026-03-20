@@ -1,9 +1,9 @@
 (function attachRoutePage(global) {
   "use strict";
 
-  var app = global.BPQ && global.BPQ.app;
-  var utils = global.BPQ && global.BPQ.utils;
-  var logos = global.BPQ && global.BPQ.logos;
+  var app = global.FA && global.FA.app;
+  var utils = global.FA && global.FA.utils;
+  var logos = global.FA && global.FA.logos;
   if (!app) return;
   if (!utils) return;
 
@@ -123,7 +123,7 @@
       '  <div class="route-empty-title">' + escapeHtml(title) + '</div>',
       text ? '  <div class="route-empty-text">' + escapeHtml(text) + '</div>' : '',
       '  <div class="route-empty-actions">',
-      '    <a href="parks.html" class="btn btn-browse">Browse all 30 parks</a>',
+      '    <a href="festivals.html" class="btn btn-browse">Browse festivals</a>',
       '    <a href="index.html" class="btn btn-ghost">Back to home</a>',
       '  </div>',
       '</div>'
@@ -136,7 +136,7 @@
       '  <div class="leg-warning">Friday fireworks · avoid</div>',
       '  <div class="leg-header">',
       '    <div>',
-      '      <div class="leg-title">PNC Park</div>',
+      '      <div class="leg-title">Bonnaroo</div>',
       '      <div class="leg-subtitle">Good weekend trip</div>',
       '    </div>',
       '    <div class="leg-date-chip">Sat May 16</div>',
@@ -157,7 +157,7 @@
       '    <label class="leg-scratch-label">Notes</label>',
       '    <div class="leg-note-list">',
       '      <div>Friday drive out</div>',
-      '      <div>Saturday game</div>',
+      '      <div>Saturday headliner</div>',
       '      <div>Sunday home</div>',
       '    </div>',
       '  </div>',
@@ -253,7 +253,7 @@
       '  </svg>',
       (!activeTrip.legs.length ? [
         '  <div class="route-map-empty-copy">',
-        '    <div class="route-map-empty-title">Add your first park to start the route</div>',
+        '    <div class="route-map-empty-title">Add your first festival to start the route</div>',
         '  </div>'
       ].join("") : ''),
       '</div>'
@@ -307,7 +307,7 @@
     var activeTrip = app.getActiveTrip();
 
     if (!routeStops.length) {
-      routeGridEl.innerHTML = renderEmptyState("No stops yet. Start with a park.", "");
+      routeGridEl.innerHTML = renderEmptyState("No stops yet. Start with a festival.", "");
       return;
     }
 
@@ -332,7 +332,7 @@
         '        <div>',
         '          <div class="route-park-name">' + escapeHtml(park.name) + '</div>',
         '          <div class="route-team-city">' + escapeHtml(park.team) + ' · ' + escapeHtml(park.city) + '</div>',
-        game ? '        <div class="route-team-city">' + escapeHtml((window.BPQ.schedule && window.BPQ.schedule.formatGameLine ? window.BPQ.schedule.formatGameLine(game) : "")) + '</div>' : '',
+        game ? '        <div class="route-team-city">' + escapeHtml((window.FA.schedule && window.FA.schedule.formatGameLine ? window.FA.schedule.formatGameLine(game) : "")) + '</div>' : '',
         '        </div>',
         '      </div>',
         '      <div class="tier-stamp tier-' + safeToken(park.tier, 'C') + '">' + escapeHtml(park.tier) + '</div>',
@@ -348,7 +348,7 @@
         '        <button type="button" class="btn btn-success route-visit-btn" data-visit-toggle="' + escapeHtml(park.id) + '">' + (visited ? "Visited" : "Mark visited") + '</button>',
         '        <button type="button" class="btn ' + (onRoute ? 'btn-danger-outline' : 'btn-browse') + ' route-action-btn" data-route-toggle="' + escapeHtml(park.id) + '">' + (onRoute ? "Remove stop" : "Add stop") + '</button>',
         game ? '        <button type="button" class="btn btn-ghost route-action-btn" data-calendar-game="' + escapeHtml(game.gameId) + '">Calendar</button>' : '',
-        '        <a href="scorekeeper.html" class="btn btn-score route-plan-link" data-score-park="' + escapeHtml(park.id) + '"' + (game ? ' data-score-game="' + escapeHtml(game.gameId) + '"' : '') + '>Scorekeeper</a>',
+        '        <a href="setkeeper.html" class="btn btn-score route-plan-link" data-score-park="' + escapeHtml(park.id) + '"' + (game ? ' data-score-game="' + escapeHtml(game.gameId) + '"' : '') + '>Setkeeper</a>',
         '      </div>',
         '    </div>',
       '  </div>',
@@ -396,7 +396,7 @@
 
     if (!activeTrip.legs.length) {
       logisticsGridEl.innerHTML = [
-        renderEmptyState("No stops yet. Start with a park.", ""),
+        renderEmptyState("No stops yet. Start with a festival.", ""),
         renderDemoLegCard()
       ].join("");
       return;
@@ -412,7 +412,7 @@
       var anchor = extractAnchor(noteText);
       var warningText = anchor.warning || deriveEventWarning(toPark || {});
       var ticketBadge = getTicketBadge(toPark ? toPark.ticketApproach : "");
-      var schedule = global.BPQ && global.BPQ.schedule;
+      var schedule = global.FA && global.FA.schedule;
       var scheduleState = selectedGame ? {
         label: "Selected game",
         lines: [selectedGame],
@@ -447,7 +447,7 @@
         '  <div class="ticket-badge ' + ticketBadge.tone + '">' + escapeHtml(ticketBadge.label) + '</div>',
         '  <div class="leg-status-row">',
         app.LEG_STATUSES.map(function mapStatus(status) {
-          return '<button type="button" class="leg-status-chip ' + (status === leg.status ? 'active' : '') + '" data-leg-id="' + escapeHtml(leg.id) + '" data-leg-status="' + escapeHtml(status) + '">' + escapeHtml(status) + '</button>';
+          return '<button type="button" class="leg-status-chip ' + (status === leg.status ? 'is-active' : '') + '" data-leg-id="' + escapeHtml(leg.id) + '" data-leg-status="' + escapeHtml(status) + '">' + escapeHtml(status) + '</button>';
         }).join(""),
         '  </div>',
         '  <div class="leg-scratch-shell">',
@@ -456,7 +456,7 @@
         '  </div>',
         '  <div class="leg-actions">',
         selectedGame ? '    <button type="button" class="btn btn-ghost leg-score-btn" data-calendar-game="' + escapeHtml(selectedGame.gameId) + '">Add to calendar</button>' : '',
-        '    <a href="scorekeeper.html" class="btn btn-score leg-score-btn" data-score-park="' + escapeHtml(toPark.id) + '"' + (selectedGame ? ' data-score-game="' + escapeHtml(selectedGame.gameId) + '"' : '') + '>Score a game here</a>',
+        '    <a href="setkeeper.html" class="btn btn-score leg-score-btn" data-score-park="' + escapeHtml(toPark.id) + '"' + (selectedGame ? ' data-score-game="' + escapeHtml(selectedGame.gameId) + '"' : '') + '>Open setkeeper</a>',
         '    <a href="' + escapeHtml(app.buildMapsUrl(toPark.name + ', ' + toPark.city, fromPark.name + ', ' + fromPark.city, 'driving')) + '" class="btn btn-browse leg-score-btn" target="_blank" rel="noopener noreferrer">Open in Maps</a>',
         '  </div>',
         '</section>'
@@ -473,7 +473,7 @@
   document.addEventListener("click", function handleClick(event) {
     var scoreLink = event.target.closest("[data-score-park]");
     if (scoreLink) {
-      app.setScorekeeperContext({
+      app.setSetkeeperContext({
         parkId: scoreLink.dataset.scorePark,
         gameId: scoreLink.dataset.scoreGame || ""
       });

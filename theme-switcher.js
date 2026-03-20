@@ -1,13 +1,13 @@
 (function () {
   const STORAGE_KEY = "app-theme";
-  const FALLBACK_THEME = "phillies";
+  const FALLBACK_THEME = "sunset";
 
   const THEME_REGISTRY = [
-    { key: "phillies", label: "Phillies", swatch: "#E81828" },
-    { key: "yankees", label: "Yankees", swatch: "#132448" },
-    { key: "dodgers", label: "Dodgers", swatch: "#005A9C" },
-    { key: "cubs", label: "Cubs", swatch: "#0E3386" },
-    { key: "mets", label: "Mets", swatch: "#002D72" }
+    { key: "sunset", label: "Sunset", swatch: "#E8501A" },
+    { key: "midnight", label: "Midnight", swatch: "#132448" },
+    { key: "ocean", label: "Ocean", swatch: "#005A9C" },
+    { key: "neon", label: "Neon", swatch: "#6B1FCC" },
+    { key: "twilight", label: "Twilight", swatch: "#002D72" }
   ];
 
   const themeKeys = new Set(THEME_REGISTRY.map((theme) => theme.key));

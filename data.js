@@ -1,11 +1,11 @@
 (function attachDataModule(global) {
   "use strict";
 
-  var namespace = global.BPQ = global.BPQ || {};
+  var namespace = global.FA = global.FA || {};
   var storage = namespace.storage;
 
   if (!storage) {
-    throw new Error("BPQ.storage is required before loading data.js");
+    throw new Error("FA.storage is required before loading data.js");
   }
 
   var KEYS = {

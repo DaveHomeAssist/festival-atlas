@@ -108,7 +108,7 @@
   const list = wrapper.querySelector(".theme-switcher__list");
 
   function renderOptions() {
-    const activeTheme = root.getAttribute("data-theme") || "phillies";
+    const activeTheme = root.getAttribute("data-theme") || "sunset";
     list.innerHTML = window.THEME_REGISTRY.map((theme) => `
       <button
         class="theme-switcher__option"

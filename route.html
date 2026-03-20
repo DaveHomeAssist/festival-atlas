@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Festival Atlas · Route</title>
 <link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
 <meta name="theme-color" content="#101826">
 <link rel="stylesheet" href="shared.css">
 <style>
@@ -270,9 +272,9 @@
   </a>
   <div class="nav-links">
     <a href="index.html" class="nav-link">Home</a>
-    <a href="parks.html" class="nav-link">Festivals<span class="nav-shortlist-badge" id="shortlistBadge"></span></a>
-    <a href="route.html" class="nav-link active">Route</a>
-    <a href="scorekeeper.html" class="nav-link nav-cta">Setkeeper</a>
+    <a href="festivals.html" class="nav-link">Festivals<span class="nav-shortlist-badge" id="shortlistBadge"></span></a>
+    <a href="route.html" class="nav-link is-active">Route</a>
+    <a href="setkeeper.html" class="nav-link nav-cta">Setkeeper</a>
   </div>
 </nav>
 
@@ -346,10 +348,10 @@
 <script src="app.js"></script>
 <script>
 (function initRouteBoard() {
-  const app = window.BPQ.app;
-  const utils = window.BPQ.utils;
-  const logos = window.BPQ.logos;
-  const schedule = window.BPQ.schedule;
+  const app = window.FA.app;
+  const utils = window.FA.utils;
+  const logos = window.FA.logos;
+  const schedule = window.FA.schedule;
   const trip = app.getActiveTrip();
   const routeGrid = document.getElementById("routeGrid");
   const routeLegs = document.getElementById("routeLegs");
@@ -411,7 +413,7 @@
         <div class="empty">
           <div style="font-family:var(--font-display); font-size:32px; line-height:1; margin-bottom:8px;">No route yet.</div>
           <p style="margin-bottom:14px;">Add a festival from the explorer to start building the run.</p>
-          <a href="parks.html" class="btn btn-primary">Browse festivals</a>
+          <a href="festivals.html" class="btn btn-primary">Browse festivals</a>
         </div>
       `;
       routeLegs.innerHTML = "";
@@ -435,7 +437,7 @@
             <div class="stop-session-list">
               ${stop.game ? `
                 <button class="btn btn-export" data-calendar="${escapeHtml(stop.game.gameId)}">Calendar</button>
-                <a href="scorekeeper.html" class="btn btn-red" data-setkeeper-park="${escapeHtml(stop.park.id)}" data-setkeeper-game="${escapeHtml(stop.game.gameId)}">Open setkeeper</a>
+                <a href="setkeeper.html" class="btn btn-red" data-setkeeper-park="${escapeHtml(stop.park.id)}" data-setkeeper-game="${escapeHtml(stop.game.gameId)}">Open setkeeper</a>
                 <button class="btn btn-ghost" data-clear-session="${escapeHtml(stop.park.id)}">Clear session</button>
               ` : sessions.map((session) => `
                 <button class="btn btn-export" data-pick-session="${escapeHtml(stop.park.id)}" data-game-id="${escapeHtml(session.gameId)}">${escapeHtml(schedule.formatGameLine(session))}</button>
@@ -510,7 +512,7 @@
 
     const setkeeper = event.target.closest("[data-setkeeper-park]");
     if (setkeeper) {
-      app.setScorekeeperContext({
+      app.setSetkeeperContext({
         parkId: setkeeper.dataset.setkeeperPark,
         gameId: setkeeper.dataset.setkeeperGame
       });

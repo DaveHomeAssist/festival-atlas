@@ -1,7 +1,7 @@
 (function attachPrototypeApp(global) {
   "use strict";
 
-  var namespace = global.BPQ = global.BPQ || {};
+  var namespace = global.FA = global.FA || {};
   var storage = namespace.storage;
   var data = namespace.data;
   var utils = namespace.utils;
@@ -12,7 +12,7 @@
   }
 
   var LEG_STATUSES = ["idea", "active", "booked", "completed"];
-  var SCOREKEEPER_CONTEXT_KEY = "scorekeeperContext";
+  var SETKEEPER_CONTEXT_KEY = "setkeeperContext";
 
   function cloneValue(value) {
     if (value === null || value === undefined) return value;
@@ -512,7 +512,7 @@
     return saveNote("park", parkId, text);
   }
 
-  function setScorekeeperContext(input) {
+  function setSetkeeperContext(input) {
     var activeTrip = getActiveTrip();
     var targetGameId = input && typeof input === "object" ? input.gameId : null;
     var targetParkId = input && typeof input === "object"
@@ -543,28 +543,28 @@
       openedAt: nowIso()
     };
 
-    storage.set(SCOREKEEPER_CONTEXT_KEY, payload);
-    storage.flush(SCOREKEEPER_CONTEXT_KEY);
+    storage.set(SETKEEPER_CONTEXT_KEY, payload);
+    storage.flush(SETKEEPER_CONTEXT_KEY);
     return cloneValue(payload);
   }
 
-  function getScorekeeperContext() {
-    var explicitContext = storage.get(SCOREKEEPER_CONTEXT_KEY);
+  function getSetkeeperContext() {
+    var explicitContext = storage.get(SETKEEPER_CONTEXT_KEY);
     if (explicitContext && explicitContext.parkId && getParkById(explicitContext.parkId)) {
       return cloneValue(explicitContext);
     }
 
     var activeTrip = getActiveTrip();
     if (!activeTrip.parkIds.length) return null;
-    return setScorekeeperContext({
+    return setSetkeeperContext({
       parkId: activeTrip.parkIds[0],
       gameId: activeTrip.gameSelections[activeTrip.parkIds[0]] || ""
     });
   }
 
-  function clearScorekeeperContext() {
-    storage.set(SCOREKEEPER_CONTEXT_KEY, undefined);
-    storage.flush(SCOREKEEPER_CONTEXT_KEY);
+  function clearSetkeeperContext() {
+    storage.set(SETKEEPER_CONTEXT_KEY, undefined);
+    storage.flush(SETKEEPER_CONTEXT_KEY);
   }
 
   /* ── Shortlist ─────────────────────────── */
@@ -751,9 +751,9 @@
     saveLegScratchpad: saveLegScratchpad,
     getParkScratchpad: getParkScratchpad,
     saveParkScratchpad: saveParkScratchpad,
-    setScorekeeperContext: setScorekeeperContext,
-    getScorekeeperContext: getScorekeeperContext,
-    clearScorekeeperContext: clearScorekeeperContext,
+    setSetkeeperContext: setSetkeeperContext,
+    getSetkeeperContext: getSetkeeperContext,
+    clearSetkeeperContext: clearSetkeeperContext,
     buildMapsUrl: buildMapsUrl,
     buildGameICS: buildGameICS,
     downloadICS: downloadICS,
