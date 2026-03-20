@@ -327,6 +327,11 @@
   }
 }
 
+.skip-nav{position:absolute;top:-100%;left:8px;background:#1a1a2e;color:#e8e6e3;padding:8px 16px;border-radius:0 0 8px 8px;font-weight:600;font-size:.9rem;z-index:1000;text-decoration:none;transition:top .15s ease}
+.skip-nav:focus{top:0;outline:2px solid #e94560;outline-offset:2px}
+*:focus-visible{outline:2px solid #e94560;outline-offset:2px}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+
 @media (max-width: 640px) {
   .search {
     min-width: 0;
@@ -408,7 +413,8 @@
 </style>
 </head>
 <body>
-<nav class="site-nav">
+<a href="#main-content" class="skip-nav">Skip to content</a>
+<nav class="site-nav" role="navigation" aria-label="Site navigation">
   <a href="index.html" class="nav-brand">
     <span class="nav-brand-name">Festival Atlas</span>
     <span class="nav-brand-mark">Music planner</span>
@@ -421,7 +427,7 @@
   </div>
 </nav>
 
-<main class="page-wrap">
+<main id="main-content" class="page-wrap">
   <section class="hero fade-up">
     <div class="section-label">Festival explorer</div>
     <h1>Scan the full field. Pick the right stops fast.</h1>
@@ -430,7 +436,7 @@
 
   <section class="explorer">
     <section class="fade-up fade-up-1">
-      <div class="toolbar">
+      <div class="toolbar" role="search" aria-label="Festival search and filters">
         <input id="searchInput" class="search" type="search" placeholder="Search festivals, places, and traditions">
         <div style="font-size:13px;color:var(--text-secondary);margin:6px 0 2px;">Search matches festival name, city, region, and local name. It does not search lineups.</div>
         <div id="filterScopeLabel" style="font-size:13px;color:var(--text-secondary);margin:0 0 6px;"></div>
@@ -450,11 +456,16 @@
   </section>
 </main>
 
+<script src="shared/js/core/config.js"></script>
+<script src="config.js"></script>
+<script src="shared/js/core/storage.js"></script>
 <script src="storage.js"></script>
+<script src="shared/js/core/utils.js"></script>
 <script src="utils.js"></script>
 <script src="data.js"></script>
 <script src="logos.js"></script>
 <script src="schedule.js"></script>
+<script src="shared/js/core/device.js"></script>
 <script src="device.js"></script>
 <script src="app.js"></script>
 <script>
