@@ -122,6 +122,32 @@ async function validateBrowser() {
   assert(importProbe.countBeforeReset > importProbe.countAfterReset, "reset should remove imported festival pack data");
   await audit.close();
 
+  const calendar = await openPage("calendar.html");
+  const calendarProbe = await calendar.evaluate(() => {
+    const juneEvents = window.FA.app.getFestivalCalendarEvents({
+      startDate: "2026-06-01",
+      endDate: "2026-06-30"
+    });
+    const nextEvents = window.FA.app.getFestivalCalendarEvents({
+      startDate: "2027-01-01",
+      endDate: "2027-12-31",
+      filter: "next-confirmed"
+    });
+    return {
+      renderedEvents: document.querySelectorAll(".event-chip").length,
+      juneEvents: juneEvents.length,
+      hasBonnaroo: juneEvents.some((event) => event.festivalId === "bonnaroo"),
+      nextEvents: nextEvents.length,
+      hasCalendarNav: Boolean(document.querySelector('a[href="calendar.html"].is-active'))
+    };
+  });
+  assert(calendarProbe.renderedEvents > 0, "calendar should render visible events");
+  assert(calendarProbe.juneEvents > 0, "calendar helper should return June events");
+  assert(calendarProbe.hasBonnaroo, "calendar helper should include Bonnaroo in June 2026");
+  assert(calendarProbe.nextEvents >= 1, "calendar helper should include next-confirmed 2027 events");
+  assert(calendarProbe.hasCalendarNav, "calendar nav should be active");
+  await calendar.close();
+
   const festivals = await openPage("festivals.html");
   await festivals.click("[data-filter=\"review\"]");
   await festivals.waitForTimeout(100);
@@ -144,7 +170,7 @@ async function validateBrowser() {
   await setkeeper.close();
 
   const mobileContext = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true });
-  for (const file of ["index.html", "audit.html", "setkeeper.html"]) {
+  for (const file of ["index.html", "calendar.html", "audit.html", "setkeeper.html"]) {
     const page = await mobileContext.newPage();
     page.on("pageerror", (error) => errors.push(`${file} mobile: ${error.message}`));
     page.on("console", (message) => {

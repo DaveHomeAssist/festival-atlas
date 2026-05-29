@@ -10,19 +10,20 @@ Core planner validation for the copied festival fork.
 |---|------|----------|
 | 1 | `index.html` | Dashboard loads with seeded counts, happening-soon picks, and route context |
 | 2 | `festivals.html` | Festival list renders, guide status appears, and detail panel updates |
-| 3 | `route.html` | Empty state renders without errors when no route exists |
-| 4 | `setkeeper.html` | Setkeeper loads a fallback festival context |
-| 5 | `data.js` | Seeded festivals initialize into local storage with source metadata |
-| 6 | `schedule.js` | Session formatting and date-range helpers return readable festival dates |
-| 7 | `logos.js` | Generated monogram marks render for every scene label |
-| 8 | Mobile layout | Home and Setkeeper stay readable on phone width |
-| 9 | `shared/js/core/` | Shared core modules load before product shims |
-| 10 | Route reordering | Stop order can move up/down without dropping selected sessions |
-| 11 | Setkeeper history | Mark attended writes a dated history entry and preserves planner context |
-| 12 | Source freshness | Corrected 2026 dates show current `lastReviewed` where official sources were checked |
-| 13 | `SOURCE_AUDIT.md` | Seeded catalog has an official-source audit trail and unresolved items are explicit |
-| 14 | `audit.html` | Source audit, backup, restore, reset, diagnostics, and festival pack import controls render without errors |
-| 15 | `npm run validate` | Syntax and browser regression checks run from a single command |
+| 3 | `calendar.html` | Month grid renders festival sessions, filters, and selected event actions |
+| 4 | `route.html` | Empty state renders without errors when no route exists |
+| 5 | `setkeeper.html` | Setkeeper loads a fallback festival context |
+| 6 | `data.js` | Seeded festivals initialize into local storage with source metadata |
+| 7 | `schedule.js` | Session formatting and date-range helpers return readable festival dates |
+| 8 | `logos.js` | Generated monogram marks render for every scene label |
+| 9 | Mobile layout | Home, Calendar, Audit, and Setkeeper stay readable on phone width |
+| 10 | `shared/js/core/` | Shared core modules load before product shims |
+| 11 | Route reordering | Stop order can move up/down without dropping selected sessions |
+| 12 | Setkeeper history | Mark attended writes a dated history entry and preserves planner context |
+| 13 | Source freshness | Corrected 2026 dates show current `lastReviewed` where official sources were checked |
+| 14 | `SOURCE_AUDIT.md` | Seeded catalog has an official-source audit trail and unresolved items are explicit |
+| 15 | `audit.html` | Source audit, backup, restore, reset, diagnostics, and festival pack import controls render without errors |
+| 16 | `npm run validate` | Syntax and browser regression checks run from a single command |
 
 ## Latest Run
 
@@ -35,3 +36,4 @@ Core planner validation for the copied festival fork.
 | 2026-05-29 | pass | Source-notes smoke verified CRSSD Fall 2026, next-confirmed notes, empty review filter, route notes, and Setkeeper note export |
 | 2026-05-29 | pass | `npm run validate` passed after audit ops, festival pack import/reset checks, service worker cache update, cleanup changes, desktop smoke, and mobile smoke |
 | 2026-05-29 | pass | Deployed GitHub Pages smoke passed for home, audit, festivals review filter, route, and Setkeeper at `https://davehomeassist.github.io/festival-atlas/` |
+| 2026-05-29 | pass | Calendar validation covered visible month events, June 2026 helper events, next-confirmed events, active nav, and mobile render |

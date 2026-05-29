@@ -8,8 +8,8 @@ Status date: 2026-05-29
 2. Review `git status --short` and confirm only intended source, docs, shared core files, and legacy asset removals are present.
 3. Commit the release-ready changes.
 4. Deploy to the configured static host.
-5. Open the deployed `index.html`, `festivals.html`, `route.html`, `audit.html`, and `setkeeper.html`.
-6. Hard refresh once after deploy so the `festival-atlas-v3` service worker cache activates.
+5. Open the deployed `index.html`, `festivals.html`, `calendar.html`, `route.html`, `audit.html`, and `setkeeper.html`.
+6. Hard refresh once after deploy so the `festival-atlas-v4` service worker cache activates.
 
 Latest deployed smoke: pass on 2026-05-29 at `https://davehomeassist.github.io/festival-atlas/`.
 

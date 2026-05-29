@@ -471,6 +471,53 @@
     });
   }
 
+  function getFestivalCalendarEvents(options) {
+    var opts = options || {};
+    var startDate = normalizeTripDate(opts.startDate) || "0000-01-01";
+    var endDate = normalizeTripDate(opts.endDate) || "9999-12-31";
+    var filter = opts.filter || "all";
+    var activeTripIds = getActiveTrip().parkIds;
+    var shortlistIds = getShortlist();
+
+    return getParks().reduce(function collectEvents(events, park) {
+      var guide = getFestivalGuideMeta(park);
+      var onRoute = activeTripIds.indexOf(park.id) >= 0;
+      var shortlisted = shortlistIds.indexOf(park.id) >= 0;
+      var attended = isVisited(park.id);
+
+      if (filter === "route" && !onRoute) return events;
+      if (filter === "saved" && !shortlisted) return events;
+      if (filter === "attended" && !attended) return events;
+      if (filter === "next-confirmed" && guide.dataStatus !== "next-confirmed") return events;
+
+      getGamesByPark(park.id).forEach(function mapGame(game) {
+        if (!game.d || game.d < startDate || game.d > endDate) return;
+        events.push({
+          festivalId: park.id,
+          festivalName: park.name,
+          city: park.city,
+          team: park.team,
+          tier: park.tier,
+          color: park.color,
+          date: game.d,
+          time: game.t || "",
+          label: game.s || game.awayTeam || "Festival session",
+          gameId: game.gameId,
+          calendarLine: schedule && schedule.formatGameLine ? schedule.formatGameLine(game) : game.d,
+          guide: guide,
+          onRoute: onRoute,
+          shortlisted: shortlisted,
+          attended: attended
+        });
+      });
+
+      return events;
+    }, []).sort(function sortEvents(a, b) {
+      if (a.date !== b.date) return a.date.localeCompare(b.date);
+      return a.festivalName.localeCompare(b.festivalName);
+    });
+  }
+
   function getRawFestivalDateRange(parkId) {
     if (!schedule || !schedule.getDateRangeForPark) {
       return { start: "", end: "", count: 0, years: [] };
@@ -1217,6 +1264,7 @@
     getGameById: getGameById,
     getGamesByPark: getGamesByPark,
     getUpcomingGamesByPark: getUpcomingGamesByPark,
+    getFestivalCalendarEvents: getFestivalCalendarEvents,
     getFestivalDateRange: getFestivalDateRange,
     getFestivalGuideMeta: getFestivalGuideMeta,
     getHappeningSoon: getHappeningSoon,

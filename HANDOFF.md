@@ -8,9 +8,11 @@ Festival Atlas is a static local first music festival planner. It now ships as a
    Dashboard with progress, happening-soon picks, shortlist, and route context
 2. `festivals.html`
    Festival explorer with filters, source status, review scope, detail panel, and route actions
-3. `route.html`
+3. `calendar.html`
+   Month calendar for festival sessions, route stops, saved targets, and next-confirmed dates
+4. `route.html`
    Route board with reorderable stops, trip notes, source links, and travel leg planning
-4. `setkeeper.html`
+5. `setkeeper.html`
    Setkeeper journal for attended history, standout sets, and session export
 
 ## Current Product Shape
@@ -21,11 +23,12 @@ Main flows:
 
 1. Browse seeded festivals
 2. Add stops to the route
-3. Pick sessions for route stops
-4. Export selected sessions to calendar
-5. Journal the stop in Setkeeper and preserve attended history
-6. Mark the festival attended
-7. Recheck official source links before booking
+3. Scan festival dates in the calendar
+4. Pick sessions for route stops
+5. Export selected sessions to calendar
+6. Journal the stop in Setkeeper and preserve attended history
+7. Mark the festival attended
+8. Recheck official source links before booking
 
 ## Key Files
 
@@ -39,21 +42,23 @@ Main flows:
    Dashboard
 5. `festivals.html`
    Explorer
-6. `route.html`
+6. `calendar.html`
+   Calendar
+7. `route.html`
    Route board
-7. `setkeeper.html`
+8. `setkeeper.html`
    Setkeeper journal
-8. `shared.css`
+9. `shared.css`
    Shared tokens and shell styles
-9. `shared/js/core/`
+10. `shared/js/core/`
    Shared config, storage, utility, and device helpers required by the static pages
-10. `SOURCE_AUDIT.md`
+11. `SOURCE_AUDIT.md`
    Official source audit trail for seeded date ranges
-11. `audit.html`
+12. `audit.html`
    Operations page for source audit, backup, restore, reset, diagnostics, and festival pack import
-12. `package.json`
+13. `package.json`
    Provides `npm run validate` production smoke validation
-13. `PRODUCTION_READINESS.md`
+14. `PRODUCTION_READINESS.md`
    Release checklist, source policy, privacy notes, and known constraints
 
 ## Storage Notes
