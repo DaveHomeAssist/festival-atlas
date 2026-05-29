@@ -1,4 +1,4 @@
-# AGENTS.md
+# CLAUDE.md
 # /Users/daverobertson/Desktop/Code/20-prototypes/Music Festivals/
 
 ## Project Overview
@@ -20,6 +20,11 @@ Festival Atlas is a static local first music festival planning guide. The curren
 - Use generated monogram marks instead of stored brand logos
 - Keep the existing route and visit state shape to speed the reorientation
 - Replace the scorekeeper with a festival set journal
+
+## Documentation Maintenance
+
+- **Issues**: Track in the issue tracker table below
+- **Session log**: Append to `/Users/daverobertson/Desktop/Code/95-docs-personal/today.csv` after each meaningful change
 
 ## Issue Tracker
 
