@@ -34,3 +34,4 @@ Core planner validation for the copied festival fork.
 | 2026-05-29 | pass | Source-audit smoke verified corrected date labels, next-confirmed 2027 statuses, CRSSD-only review filter, route load, and Setkeeper load |
 | 2026-05-29 | pass | Source-notes smoke verified CRSSD Fall 2026, next-confirmed notes, empty review filter, route notes, and Setkeeper note export |
 | 2026-05-29 | pass | `npm run validate` passed after audit ops, festival pack import/reset checks, service worker cache update, cleanup changes, desktop smoke, and mobile smoke |
+| 2026-05-29 | pass | Deployed GitHub Pages smoke passed for home, audit, festivals review filter, route, and Setkeeper at `https://davehomeassist.github.io/festival-atlas/` |

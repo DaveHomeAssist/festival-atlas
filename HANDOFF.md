@@ -90,5 +90,5 @@ Verified on 2026-05-29:
 ## Recommended Next Work
 
 1. Replace generated marks with real festival-safe visual assets only when rights/source are clear
-2. Add post-deploy smoke results after GitHub Pages or the chosen static host is updated
-3. Consider richer festival pack validation previews before applying imports
+2. Consider richer festival pack validation previews before applying imports
+3. Add a lightweight release note page if this becomes a public-facing maintained project

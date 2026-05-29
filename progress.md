@@ -15,3 +15,4 @@ Original prompt: copy the entire mlb repo and reorient it for music festivals
 [2026-05-29] [MUSIC FESTIVALS] [production] Add audit ops page, backup/restore/reset, diagnostics, service worker cache update, and validation script
 [2026-05-29] [MUSIC FESTIVALS] [feat] Add festival pack import with custom sessions
 [2026-05-29] [MUSIC FESTIVALS] [chore] Archive unused prototype files and root smoke artifacts from the deployable path
+[2026-05-29] [MUSIC FESTIVALS] [release] Publish v0.1.0 and verify deployed GitHub Pages smoke

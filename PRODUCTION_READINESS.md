@@ -11,6 +11,8 @@ Status date: 2026-05-29
 5. Open the deployed `index.html`, `festivals.html`, `route.html`, `audit.html`, and `setkeeper.html`.
 6. Hard refresh once after deploy so the `festival-atlas-v3` service worker cache activates.
 
+Latest deployed smoke: pass on 2026-05-29 at `https://davehomeassist.github.io/festival-atlas/`.
+
 ## Production Controls
 
 `audit.html` is the operations surface:
