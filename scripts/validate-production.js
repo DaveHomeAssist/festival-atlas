@@ -80,7 +80,8 @@ async function validateBrowser() {
       nextConfirmed,
       crssdLabel: crssd && crssd.dateRangeLabel,
       crssdNote: crssd && crssd.sourceNote,
-      backupApp: window.FA.app.getBackupPayload().app
+      backupApp: window.FA.app.getBackupPayload().app,
+      outreachPackCount: window.FA.outreachPack && window.FA.outreachPack.festivals.length
     };
   });
   assert(auditProbe.rows > 40, "audit should include seeded catalog");
@@ -89,6 +90,35 @@ async function validateBrowser() {
   assert(auditProbe.crssdLabel === "Sep 26 - 27, 2026", `CRSSD label mismatch: ${auditProbe.crssdLabel}`);
   assert(String(auditProbe.crssdNote || "").includes("Fall 2026"), "CRSSD source note should render");
   assert(auditProbe.backupApp === "Festival Atlas", "backup payload should be labeled");
+  assert(auditProbe.outreachPackCount === 20, `outreach pack should expose 20 festivals, got ${auditProbe.outreachPackCount}`);
+  const outreachProbe = await audit.evaluate(() => {
+    const result = window.FA.app.importFestivalPack(window.FA.outreachPack);
+    const cma = window.FA.app.getParkById("cma-fest");
+    const gov = window.FA.app.getParkById("governors-ball");
+    const northCoastRange = window.FA.app.getFestivalDateRange("north-coast-music-festival").label;
+    const diagnosticsBeforeReset = window.FA.app.createDiagnostics();
+    const septemberEvents = window.FA.app.getFestivalCalendarEvents({
+      startDate: "2026-09-01",
+      endDate: "2026-09-30"
+    });
+    window.FA.app.resetLocalData();
+    return {
+      created: result.created,
+      merged: result.merged,
+      cmaOps: cma && cma.ops && cma.ops.opsModel,
+      govOps: gov && gov.ops && gov.ops.publicContact,
+      northCoastRange,
+      opsCount: diagnosticsBeforeReset.counts.opsIntelligence,
+      hasOceansCalling: septemberEvents.some((event) => event.festivalId === "oceans-calling")
+    };
+  });
+  assert(outreachProbe.created >= 6, `outreach pack should create new festivals, got ${outreachProbe.created}`);
+  assert(outreachProbe.merged >= 10, `outreach pack should merge existing festivals, got ${outreachProbe.merged}`);
+  assert(String(outreachProbe.cmaOps || "").includes("Citywide"), "CMA ops intelligence should be preserved");
+  assert(String(outreachProbe.govOps || "").includes("partners@govball.com"), "Gov Ball public contact should be preserved");
+  assert(outreachProbe.northCoastRange === "Sep 4 - 6, 2026", `North Coast date range mismatch: ${outreachProbe.northCoastRange}`);
+  assert(outreachProbe.opsCount >= 20, "diagnostics should count imported ops intelligence");
+  assert(outreachProbe.hasOceansCalling, "outreach pack should add September calendar events");
   const importProbe = await audit.evaluate(() => {
     window.FA.app.importFestivalPack({
       festivals: [{

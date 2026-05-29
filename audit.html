@@ -49,7 +49,7 @@
 
 .audit-summary {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 10px;
   margin-bottom: 14px;
 }
@@ -256,6 +256,9 @@
         <button class="btn btn-primary" id="exportBackup">Export backup</button>
         <button class="btn btn-export" id="downloadDiagnostics">Diagnostics</button>
       </div>
+      <div class="ops-actions">
+        <button class="btn btn-export" id="importOutreachPack">Import outreach pack</button>
+      </div>
       <label class="section-label" for="backupFile">Restore backup</label>
       <input class="file-input" id="backupFile" type="file" accept="application/json">
       <label class="section-label" for="packFile" style="margin-top:14px;">Import festival pack</label>
@@ -280,6 +283,7 @@
 <script src="shared/js/core/device.js"></script>
 <script src="device.js"></script>
 <script src="app.js"></script>
+<script src="outreach-pack.js"></script>
 <script>
 (function initAuditPage() {
   const app = window.FA.app;
@@ -315,6 +319,7 @@
       <div class="summary-tile"><div class="summary-value">${diagnostics.counts.sourceReviewNeeded}</div><div class="summary-label">Review queue</div></div>
       <div class="summary-tile"><div class="summary-value">${next}</div><div class="summary-label">Next confirmed</div></div>
       <div class="summary-tile"><div class="summary-value">${notes}</div><div class="summary-label">Source notes</div></div>
+      <div class="summary-tile"><div class="summary-value">${diagnostics.counts.opsIntelligence || 0}</div><div class="summary-label">Ops intel</div></div>
     `;
   }
 
@@ -362,6 +367,17 @@
   document.getElementById("downloadDiagnostics").addEventListener("click", () => {
     app.downloadDiagnostics();
     setStatus("Diagnostics downloaded.");
+  });
+
+  document.getElementById("importOutreachPack").addEventListener("click", () => {
+    const pack = window.FA.outreachPack;
+    if (!pack || !Array.isArray(pack.festivals)) {
+      setStatus("Outreach pack is not available.");
+      return;
+    }
+    const result = app.importFestivalPack(pack);
+    renderRows();
+    setStatus(`${pack.label || "Outreach pack"} imported: ${result.created} new, ${result.merged} merged, ${result.sessions} custom sessions.`);
   });
 
   document.getElementById("backupFile").addEventListener("change", (event) => {

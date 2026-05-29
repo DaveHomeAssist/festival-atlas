@@ -9,7 +9,7 @@ Status date: 2026-05-29
 3. Commit the release-ready changes.
 4. Deploy to the configured static host.
 5. Open the deployed `index.html`, `festivals.html`, `calendar.html`, `route.html`, `audit.html`, and `setkeeper.html`.
-6. Hard refresh once after deploy so the `festival-atlas-v4` service worker cache activates.
+6. Hard refresh once after deploy so the `festival-atlas-v5` service worker cache activates.
 
 Latest deployed smoke: pass on 2026-05-29 at `https://davehomeassist.github.io/festival-atlas/`.
 
@@ -23,8 +23,9 @@ Latest deployed smoke: pass on 2026-05-29 at `https://davehomeassist.github.io/f
 4. Local data reset
 5. Diagnostic JSON download
 6. Festival pack import
+7. Built-in Summer 2026 outreach pack import
 
-Backups include route, visits, notes, shortlist, Setkeeper context, journal drafts, attended history, theme, and the current seeded catalog snapshot.
+Backups include route, visits, notes, shortlist, Setkeeper context, journal drafts, attended history, theme, imported ops intelligence, and the current seeded catalog snapshot.
 
 Festival packs accept JSON shaped like:
 
@@ -43,6 +44,8 @@ Festival packs accept JSON shaped like:
   ]
 }
 ```
+
+Festival packs may also include an `ops` object with public outreach fields such as venue, organizer, contact path, production notes, event hours, market window, opportunity signals, watch items, ticket URL, and source links. Imported ops fields merge onto existing seeded festivals without replacing canonical date/source records unless a pack explicitly requests schedule overwrite.
 
 ## Source Policy
 

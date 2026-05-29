@@ -488,8 +488,8 @@
   <section class="explorer">
     <section class="fade-up fade-up-1">
       <div class="toolbar" role="search" aria-label="Festival search and filters">
-        <input id="searchInput" class="search" type="search" placeholder="Search festivals, places, and traditions">
-        <div style="font-size:13px;color:var(--text-secondary);margin:6px 0 2px;">Search matches festival name, city, region, and local name. It does not search lineups.</div>
+        <input id="searchInput" class="search" type="search" placeholder="Search festivals, places, ops signals, contacts, and venues">
+        <div style="font-size:13px;color:var(--text-secondary);margin:6px 0 2px;">Search matches festival name, city, region, venue, organizer, contact, and ops signals.</div>
         <div id="filterScopeLabel" style="font-size:13px;color:var(--text-secondary);margin:0 0 6px;"></div>
         <button class="chip is-active" data-filter="all">All</button>
         <button class="chip" data-filter="attended">Attended</button>
@@ -498,6 +498,7 @@
         <button class="chip" data-filter="urban">Urban</button>
         <button class="chip" data-filter="soon">Soon</button>
         <button class="chip" data-filter="review">Needs review</button>
+        <button class="chip" data-filter="ops">Ops intel</button>
         <button class="chip" data-filter="saved">Saved</button>
         <button class="chip" data-filter="elite">Tier S</button>
       </div>
@@ -551,7 +552,7 @@
   }
 
   function getSearchScopeLabel() {
-    return "Search matches festival name, city, region, and local name. It does not search lineups.";
+    return "Search matches festival name, city, region, venue, organizer, contact, and ops signals.";
   }
 
   function getFilterScopeLabel() {
@@ -561,6 +562,39 @@
 
   function needsGuideReview(meta) {
     return meta && (meta.dataStatus === "needs-review" || meta.dataStatus === "needs-recheck");
+  }
+
+  function renderOpsList(items) {
+    return (items || []).map((item) => `<span class="event-pill">${escapeHtml(item)}</span>`).join("");
+  }
+
+  function renderOpsIntelligence(ops) {
+    if (!ops) return "";
+    const hasTicketSource = (ops.sources || []).some((source) => source && source.url === ops.ticketUrl);
+    const links = (ops.sources || []).map((source) => `
+      <a href="${escapeHtml(source.url)}" target="_blank" rel="noopener" class="btn btn-ghost" style="color:var(--cream); border-color:rgba(255,255,255,0.12); margin:3px 4px 3px 0; display:inline-flex;">${escapeHtml(source.label || "Source")}</a>
+    `).join("");
+    return `
+      <div class="signal">
+        <div class="signal-label">Ops / outreach intelligence</div>
+        <div class="detail-grid" style="margin-top:10px;">
+          ${ops.status ? `<div class="datum"><div class="datum-label">Ops status</div><div class="datum-value">${escapeHtml(ops.status)}</div></div>` : ""}
+          ${ops.marketWindow ? `<div class="datum"><div class="datum-label">Window</div><div class="datum-value">${escapeHtml(ops.marketWindow)}</div></div>` : ""}
+          ${ops.opsModel ? `<div class="datum"><div class="datum-label">Ops model</div><div class="datum-value">${escapeHtml(ops.opsModel)}</div></div>` : ""}
+          ${ops.outreachPriority ? `<div class="datum"><div class="datum-label">Outreach</div><div class="datum-value">${escapeHtml(ops.outreachPriority)}</div></div>` : ""}
+        </div>
+        ${ops.venue ? `<div style="margin-top:10px;"><strong>Venue:</strong> ${escapeHtml(ops.venue)}</div>` : ""}
+        ${ops.organizer ? `<div style="margin-top:6px;"><strong>Organizer:</strong> ${escapeHtml(ops.organizer)}</div>` : ""}
+        ${ops.headliners ? `<div style="margin-top:6px;"><strong>Lineup signal:</strong> ${escapeHtml(ops.headliners)}</div>` : ""}
+        ${ops.publicContact ? `<div style="margin-top:6px;"><strong>Public contact:</strong> ${escapeHtml(ops.publicContact)}</div>` : ""}
+        ${ops.eventHours ? `<div style="margin-top:6px;"><strong>Public hours:</strong> ${escapeHtml(ops.eventHours)}</div>` : ""}
+        ${ops.loadIn ? `<div style="margin-top:6px;"><strong>Load-in proxy:</strong> ${escapeHtml(ops.loadIn)}</div>` : ""}
+        ${ops.productionNotes ? `<div style="margin-top:10px;color:rgba(248,243,232,0.76);">${escapeHtml(ops.productionNotes)}</div>` : ""}
+        ${ops.opportunitySignals && ops.opportunitySignals.length ? `<div class="event-pills" style="margin-top:10px;">${renderOpsList(ops.opportunitySignals)}</div>` : ""}
+        ${ops.watchItems && ops.watchItems.length ? `<div style="margin-top:10px;"><strong>Watch:</strong> ${escapeHtml(ops.watchItems.join("; "))}</div>` : ""}
+        ${links || ops.ticketUrl ? `<div class="detail-actions" style="margin-top:10px;">${links}${ops.ticketUrl && !hasTicketSource ? `<a href="${escapeHtml(ops.ticketUrl)}" target="_blank" rel="noopener" class="btn btn-export" style="margin:3px 4px 3px 0; display:inline-flex;">Tickets</a>` : ""}</div>` : ""}
+      </div>
+    `;
   }
 
   function updateFilterScopeLabel() {
@@ -575,7 +609,19 @@
     return app.getParks().filter((park) => {
       if (query) {
         const sm = park.searchMeta || {};
-        const haystack = [park.name, park.city, sm.region || "", sm.localName || ""].join(" ").toLowerCase();
+        const ops = app.getFestivalOps(park.id) || {};
+        const haystack = [
+          park.name,
+          park.city,
+          sm.region || "",
+          sm.localName || "",
+          ops.venue || "",
+          ops.organizer || "",
+          ops.publicContact || "",
+          ops.headliners || "",
+          ops.productionNotes || "",
+          (ops.opportunitySignals || []).join(" ")
+        ].join(" ").toLowerCase();
         if (!haystack.includes(query)) return false;
       }
 
@@ -589,6 +635,7 @@
         return meta.seasonStatus === "happening-now" || meta.seasonStatus === "happening-soon";
       }
       if (activeFilter === "review") return needsGuideReview(app.getFestivalGuideMeta(park));
+      if (activeFilter === "ops") return Boolean(app.getFestivalOps(park.id));
       if (activeFilter === "elite") return park.tier === "S";
       return true;
     });
@@ -643,6 +690,7 @@
     const scratch = app.getParkScratchpad(park.id);
     const sessions = app.getUpcomingGamesByPark(park.id, 4);
     const guide = app.getFestivalGuideMeta(park);
+    const ops = app.getFestivalOps(park.id);
     const hot = guide.seasonStatus === "happening-now" || guide.seasonStatus === "happening-soon";
 
     detailEl.innerHTML = `
@@ -711,6 +759,7 @@
         <div class="signal-label">Ticket call</div>
         <div>${escapeHtml(park.ticketApproach)}</div>
       </div>
+      ${renderOpsIntelligence(ops)}
       <div class="signal">
         <div class="signal-label">Travel note</div>
         <div>${escapeHtml(park.transitNote)}</div>

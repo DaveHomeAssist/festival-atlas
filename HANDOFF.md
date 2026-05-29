@@ -2,7 +2,7 @@
 
 ## Project Summary
 
-Festival Atlas is a static local first music festival planner. It now ships as a four page prototype:
+Festival Atlas is a static local first music festival planner. It now ships as a five page prototype:
 
 1. `index.html`
    Dashboard with progress, happening-soon picks, shortlist, and route context
@@ -17,7 +17,7 @@ Festival Atlas is a static local first music festival planner. It now ships as a
 
 ## Current Product Shape
 
-The app keeps the shared local state and route model from the source project, but the visible experience is now festival specific. The product direction is now a current 2026 planning guide, so the UI surfaces date ranges, official source links, season status, and data-review status.
+The app keeps the shared local state and route model from the source project, but the visible experience is now festival specific. The product direction is now a current 2026 planning guide, so the UI surfaces date ranges, official source links, season status, data-review status, and optional ops/outreach intelligence.
 
 Main flows:
 
@@ -29,6 +29,7 @@ Main flows:
 6. Journal the stop in Setkeeper and preserve attended history
 7. Mark the festival attended
 8. Recheck official source links before booking
+9. Import the Summer 2026 outreach pack when production, vendor, sponsor, or labor scouting is needed
 
 ## Key Files
 
@@ -38,27 +39,29 @@ Main flows:
    Seeded session data and formatting helpers
 3. `logos.js`
    Generated monogram marks for festival scenes
-4. `index.html`
+4. `outreach-pack.js`
+   Built-in Summer 2026 outreach pack harvested from local research artifacts
+5. `index.html`
    Dashboard
-5. `festivals.html`
+6. `festivals.html`
    Explorer
-6. `calendar.html`
+7. `calendar.html`
    Calendar
-7. `route.html`
+8. `route.html`
    Route board
-8. `setkeeper.html`
+9. `setkeeper.html`
    Setkeeper journal
-9. `shared.css`
+10. `shared.css`
    Shared tokens and shell styles
-10. `shared/js/core/`
+11. `shared/js/core/`
    Shared config, storage, utility, and device helpers required by the static pages
-11. `SOURCE_AUDIT.md`
+12. `SOURCE_AUDIT.md`
    Official source audit trail for seeded date ranges
-12. `audit.html`
+13. `audit.html`
    Operations page for source audit, backup, restore, reset, diagnostics, and festival pack import
-13. `package.json`
+14. `package.json`
    Provides `npm run validate` production smoke validation
-14. `PRODUCTION_READINESS.md`
+15. `PRODUCTION_READINESS.md`
    Release checklist, source policy, privacy notes, and known constraints
 
 ## Storage Notes
@@ -95,5 +98,6 @@ Verified on 2026-05-29:
 ## Recommended Next Work
 
 1. Replace generated marks with real festival-safe visual assets only when rights/source are clear
-2. Consider richer festival pack validation previews before applying imports
-3. Add a lightweight release note page if this becomes a public-facing maintained project
+2. Add a preview/diff step before applying imported festival packs
+3. Add search and CSV export to the calendar view using the preview prototype as reference
+4. Add a lightweight release note page if this becomes a public-facing maintained project

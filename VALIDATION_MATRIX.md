@@ -23,7 +23,8 @@ Core planner validation for the copied festival fork.
 | 13 | Source freshness | Corrected 2026 dates show current `lastReviewed` where official sources were checked |
 | 14 | `SOURCE_AUDIT.md` | Seeded catalog has an official-source audit trail and unresolved items are explicit |
 | 15 | `audit.html` | Source audit, backup, restore, reset, diagnostics, and festival pack import controls render without errors |
-| 16 | `npm run validate` | Syntax and browser regression checks run from a single command |
+| 16 | `outreach-pack.js` | Summer 2026 outreach pack imports, merges ops intelligence, adds new calendar events, and can be reset |
+| 17 | `npm run validate` | Syntax and browser regression checks run from a single command |
 
 ## Latest Run
 
@@ -37,3 +38,4 @@ Core planner validation for the copied festival fork.
 | 2026-05-29 | pass | `npm run validate` passed after audit ops, festival pack import/reset checks, service worker cache update, cleanup changes, desktop smoke, and mobile smoke |
 | 2026-05-29 | pass | Deployed GitHub Pages smoke passed for home, audit, festivals review filter, route, and Setkeeper at `https://davehomeassist.github.io/festival-atlas/` |
 | 2026-05-29 | pass | Calendar validation covered visible month events, June 2026 helper events, next-confirmed events, active nav, and mobile render |
+| 2026-05-29 | pass | Outreach pack validation covered 20 pack records, created/merged imports, ops metadata, September calendar events, and reset cleanup |

@@ -605,6 +605,9 @@
     } else if (!range.count) {
       dataStatus = "needs-review";
       dataLabel = "Needs dates";
+    } else if (park.dateConfidence === "outreach-review") {
+      dataStatus = "needs-review";
+      dataLabel = "Review ops source";
     } else if (!has2026Date && hasNextConfirmedDate && sourceIsFresh) {
       dataStatus = "next-confirmed";
       dataLabel = "Next date confirmed";
@@ -882,6 +885,96 @@
     return normalized || "";
   }
 
+  function normalizeTextArray(value, limit) {
+    var values = Array.isArray(value) ? value : (value ? [value] : []);
+    return values
+      .map(function mapText(item) { return String(item || "").trim(); })
+      .filter(Boolean)
+      .slice(0, limit || 8);
+  }
+
+  function normalizeOpsSources(value) {
+    if (!Array.isArray(value)) return [];
+    return value.map(function mapSource(source) {
+      if (!source || typeof source !== "object") return null;
+      var url = String(source.url || "").trim();
+      if (!url) return null;
+      return {
+        label: String(source.label || "Source").trim(),
+        url: url
+      };
+    }).filter(Boolean).slice(0, 8);
+  }
+
+  function normalizeImportedOps(rawPark) {
+    if (!rawPark || typeof rawPark !== "object") return null;
+    var rawOps = rawPark.ops && typeof rawPark.ops === "object" ? rawPark.ops : {};
+    var sources = normalizeOpsSources(rawOps.sources || rawPark.sources);
+    if (rawPark.officialUrl || rawPark.website) {
+      sources.unshift({
+        label: "Official site",
+        url: String(rawPark.officialUrl || rawPark.website).trim()
+      });
+    }
+    sources = sources.filter(function uniqueSource(source, index) {
+      return sources.findIndex(function findSame(candidate) {
+        return candidate.url === source.url && candidate.label === source.label;
+      }) === index;
+    });
+
+    var ops = {
+      packId: String(rawOps.packId || rawPark.packId || "").trim(),
+      status: String(rawOps.status || rawPark.status || "Needs verification").trim(),
+      region: String(rawOps.region || rawPark.region || (rawPark.searchMeta && rawPark.searchMeta.region) || "").trim(),
+      venue: String(rawOps.venue || rawPark.venue || "").trim(),
+      organizer: String(rawOps.organizer || rawPark.organizer || "").trim(),
+      headliners: String(rawOps.headliners || rawPark.headliners || "").trim(),
+      attendance: String(rawOps.attendance || rawPark.attendance || "").trim(),
+      publicContact: String(rawOps.publicContact || rawPark.publicContact || rawPark.contact || "").trim(),
+      eventHours: String(rawOps.eventHours || rawPark.eventHours || "").trim(),
+      loadIn: String(rawOps.loadIn || rawPark.loadIn || "").trim(),
+      productionNotes: String(rawOps.productionNotes || rawPark.productionNotes || "").trim(),
+      opsModel: String(rawOps.opsModel || rawPark.opsModel || "").trim(),
+      marketWindow: String(rawOps.marketWindow || rawPark.marketWindow || "").trim(),
+      outreachPriority: String(rawOps.outreachPriority || rawPark.outreachPriority || "").trim(),
+      ticketUrl: String(rawOps.ticketUrl || rawPark.ticketUrl || rawPark.ticket || "").trim(),
+      opportunitySignals: normalizeTextArray(rawOps.opportunitySignals || rawPark.opportunitySignals, 8),
+      watchItems: normalizeTextArray(rawOps.watchItems || rawPark.watchItems, 8),
+      sources: sources
+    };
+
+    var hasOps = Object.keys(ops).some(function hasValue(key) {
+      if (key === "sources" || key === "opportunitySignals" || key === "watchItems") return ops[key].length > 0;
+      return Boolean(ops[key]);
+    });
+
+    return hasOps ? ops : null;
+  }
+
+  function mergeImportedPark(existingPark, importedPark) {
+    var merged = cloneValue(existingPark);
+    var existingOps = existingPark.ops && typeof existingPark.ops === "object" ? existingPark.ops : {};
+    var incomingOps = importedPark.ops && typeof importedPark.ops === "object" ? importedPark.ops : {};
+
+    if (Object.keys(incomingOps).length) {
+      merged.ops = Object.assign({}, existingOps, incomingOps, {
+        importedAt: todayIsoDate()
+      });
+    }
+
+    if (existingPark.imported) {
+      if (!merged.officialUrl && importedPark.officialUrl) merged.officialUrl = importedPark.officialUrl;
+      if (!merged.sourceNote && importedPark.sourceNote) merged.sourceNote = importedPark.sourceNote;
+      if (!merged.lastReviewed && importedPark.lastReviewed) merged.lastReviewed = importedPark.lastReviewed;
+      if (!merged.dateConfidence && importedPark.dateConfidence) merged.dateConfidence = importedPark.dateConfidence;
+    }
+    if (!merged.searchMeta && importedPark.searchMeta) merged.searchMeta = importedPark.searchMeta;
+    if (!merged.booking && importedPark.booking) merged.booking = importedPark.booking;
+    merged.outreachPack = Boolean(importedPark.ops) || Boolean(existingPark.outreachPack);
+
+    return merged;
+  }
+
   function normalizeImportedPark(rawPark) {
     if (!rawPark || typeof rawPark !== "object") return null;
     var id = normalizeFestivalId(rawPark.id, rawPark.name);
@@ -909,11 +1002,12 @@
       specialEvents: Array.isArray(rawPark.specialEvents) ? rawPark.specialEvents.map(String).slice(0, 8) : ["Imported festival"],
       searchMeta: rawPark.searchMeta && typeof rawPark.searchMeta === "object" ? rawPark.searchMeta : { localName: name, region: "Imported" },
       booking: rawPark.booking && typeof rawPark.booking === "object" ? rawPark.booking : {},
-      officialUrl: String(rawPark.officialUrl || "").trim(),
+      officialUrl: String(rawPark.officialUrl || rawPark.website || "").trim(),
       lastReviewed: normalizeTripDate(rawPark.lastReviewed) || todayIsoDate(),
-      sourceLabel: rawPark.officialUrl ? "Official festival source" : "Imported source needed",
+      sourceLabel: (rawPark.officialUrl || rawPark.website) ? "Official festival source" : "Imported source needed",
       sourceNote: String(rawPark.sourceNote || "Imported festival pack entry; verify before booking.").trim(),
       dateConfidence: String(rawPark.dateConfidence || "imported").trim(),
+      ops: normalizeImportedOps(rawPark),
       imported: true
     };
   }
@@ -945,9 +1039,18 @@
 
     var importedIds = importedParks.map(function mapId(park) { return park.id; });
     var currentParks = getParks();
-    var nextParks = currentParks.filter(function keepExisting(park) {
-      return importedIds.indexOf(park.id) === -1;
-    }).concat(importedParks);
+    var existingIds = currentParks.map(function mapExisting(park) { return park.id; });
+    var importedById = importedParks.reduce(function indexImported(map, park) {
+      map[park.id] = park;
+      return map;
+    }, {});
+    var nextParks = currentParks.map(function mergeExisting(park) {
+      return importedById[park.id] ? mergeImportedPark(park, importedById[park.id]) : park;
+    });
+
+    importedParks.forEach(function appendNew(park) {
+      if (existingIds.indexOf(park.id) === -1) nextParks.push(park);
+    });
 
     var customSchedule = storage.get(data.KEYS.festivalCustomSchedule) || {};
     if (!customSchedule || typeof customSchedule !== "object" || Array.isArray(customSchedule)) customSchedule = {};
@@ -964,8 +1067,10 @@
         return a.d.localeCompare(b.d);
       });
 
-      if (sessions.length) customSchedule[park.id] = sessions;
-      else delete customSchedule[park.id];
+      var shouldOverwriteSchedule = Boolean(payload.overwriteSchedules || (sourcePark && sourcePark.overwriteSchedule));
+      var hasExistingSessions = existingIds.indexOf(park.id) >= 0 && getGamesByPark(park.id).length > 0;
+      if (sessions.length && (!hasExistingSessions || shouldOverwriteSchedule)) customSchedule[park.id] = sessions;
+      else if (!hasExistingSessions && !sessions.length) delete customSchedule[park.id];
     });
 
     storage.set(data.KEYS.parks, nextParks);
@@ -976,6 +1081,8 @@
     return {
       importedAt: nowIso(),
       festivals: importedParks.length,
+      created: importedIds.filter(function isNew(parkId) { return existingIds.indexOf(parkId) === -1; }).length,
+      merged: importedIds.filter(function isExisting(parkId) { return existingIds.indexOf(parkId) >= 0; }).length,
       sessions: importedIds.reduce(function countSessions(total, parkId) {
         return total + (Array.isArray(customSchedule[parkId]) ? customSchedule[parkId].length : 0);
       }, 0),
@@ -1062,7 +1169,8 @@
         visits: getVisits().length,
         shortlist: getShortlist().length,
         sourceReviewNeeded: reviewRows.length,
-        nextConfirmed: auditRows.filter(function next(row) { return row.dataStatus === "next-confirmed"; }).length
+        nextConfirmed: auditRows.filter(function next(row) { return row.dataStatus === "next-confirmed"; }).length,
+        opsIntelligence: parks.filter(function hasOps(park) { return Boolean(park.ops); }).length
       },
       sourceReviewNeeded: reviewRows.map(function mapReview(row) {
         return {
@@ -1113,6 +1221,11 @@
         if (reviewDelta) return -reviewDelta;
         return a.name.localeCompare(b.name);
       });
+  }
+
+  function getFestivalOps(parkId) {
+    var park = getParkById(parkId);
+    return park && park.ops && typeof park.ops === "object" ? cloneValue(park.ops) : null;
   }
 
   /* ── Share trip URLs ─────────────────── */
@@ -1267,6 +1380,7 @@
     getFestivalCalendarEvents: getFestivalCalendarEvents,
     getFestivalDateRange: getFestivalDateRange,
     getFestivalGuideMeta: getFestivalGuideMeta,
+    getFestivalOps: getFestivalOps,
     getHappeningSoon: getHappeningSoon,
     getSeasonGuideSummary: getSeasonGuideSummary,
     getNotes: getNotes,
