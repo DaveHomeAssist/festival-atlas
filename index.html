@@ -526,6 +526,7 @@
     <a href="index.html" class="nav-link is-active">Home</a>
     <a href="festivals.html" class="nav-link">Festivals<span class="nav-shortlist-badge" id="shortlistBadge"></span></a>
     <a href="route.html" class="nav-link">Route</a>
+    <a href="audit.html" class="nav-link">Audit</a>
     <a href="setkeeper.html" class="nav-link nav-cta">Setkeeper</a>
   </div>
 </nav>
@@ -553,7 +554,7 @@
           </div>
           <div class="hero-stat">
             <div class="hero-stat-value" id="statPriority">0</div>
-            <div class="hero-stat-label">Priority left</div>
+            <div class="hero-stat-label">Soon</div>
           </div>
         </div>
       </div>
@@ -563,7 +564,7 @@
           <div class="visual-orb one"></div>
           <div class="visual-orb two"></div>
           <div class="visual-topline">Live planning snapshot</div>
-          <div class="visual-title">Twelve seeded stops. One clean route.</div>
+          <div class="visual-title" id="visualTitle">2026 guide snapshot. One clean route.</div>
           <div class="visual-grid">
             <div class="visual-tile">
               <div class="visual-tile-label">Best use</div>
@@ -575,7 +576,7 @@
             </div>
             <div class="visual-tile">
               <div class="visual-tile-label">Signals</div>
-              <div class="visual-tile-value">Ticket strategy and travel notes</div>
+              <div class="visual-tile-value" id="visualSignals">Ticket strategy and travel notes</div>
             </div>
             <div class="visual-tile">
               <div class="visual-tile-label">Calendar</div>
@@ -612,7 +613,7 @@
     </aside>
   </section>
 
-  <div class="footer">Festival Atlas · Static · Local first · Seeded sample festival data</div>
+  <div class="footer" id="guideFooter">Festival Atlas · Static · Local first · Current 2026 planning guide</div>
 </main>
 
 <script src="shared/js/core/config.js"></script>
@@ -675,14 +676,18 @@
   const attended = app.getVisitedParks();
   const total = app.getParks().length;
   const route = app.getRouteParks();
-  const shortlist = route.length ? route : app.getNextTargets(4);
-  const priority = app.getParks().filter((park) => !app.isVisited(park.id) && (park.tier === "S" || park.tier === "A")).length;
+  const soon = app.getHappeningSoon(4);
+  const shortlist = route.length ? route : (soon.length ? soon : app.getNextTargets(4));
+  const summary = app.getSeasonGuideSummary();
 
   document.getElementById("statVisited").textContent = String(attended.length);
   document.getElementById("statRoute").textContent = String(route.length);
-  document.getElementById("statPriority").textContent = String(priority);
+  document.getElementById("statPriority").textContent = String(summary.happeningNow + summary.happeningSoon);
   document.getElementById("progressCount").textContent = `${attended.length} / ${total}`;
   document.getElementById("progressFill").style.width = `${total ? (attended.length / total) * 100 : 0}%`;
+  document.getElementById("visualTitle").textContent = `${summary.upcoming + summary.happeningNow + summary.happeningSoon} upcoming or active stops. ${route.length || soon.length || 1} route-ready picks.`;
+  document.getElementById("visualSignals").textContent = `${summary.needsReview} official source rechecks queued`;
+  document.getElementById("guideFooter").textContent = `Festival Atlas · Static · Local first · Guide seed reviewed ${summary.lastReviewed || "TBD"} · Verify official sources before booking`;
 
   const grid = document.getElementById("attendedGrid");
   if (!attended.length) {
@@ -716,17 +721,17 @@
     `).join("");
   }
 
-  document.getElementById("sidebarTitle").textContent = route.length ? "Current route" : "Priority shortlist";
+  document.getElementById("sidebarTitle").textContent = route.length ? "Current route" : (soon.length ? "Happening soon" : "Priority shortlist");
   document.getElementById("sidebarCopy").textContent = route.length
     ? "Your locked route stops and the current order."
-    : "The strongest remaining options based on priority and what is still untouched.";
+    : (soon.length ? "Upcoming festivals closest on the 2026 calendar." : "The strongest remaining options based on priority and what is still untouched.");
   document.getElementById("sidebarStops").innerHTML = shortlist.length ? shortlist.map((park) => `
     <a class="sidebar-stop-item" href="${route.length ? "route.html" : "festivals.html"}">
       <div class="sidebar-stop">
         ${logo(park.team, "sidebar-logo")}
         <div style="min-width:0;">
           <div class="sidebar-stop-name">${escapeHtml(park.name)}</div>
-          <div class="sidebar-stop-meta">${escapeHtml(park.city)} · Tier ${escapeHtml(park.tier)}</div>
+          <div class="sidebar-stop-meta">${escapeHtml(app.getFestivalGuideMeta(park).dateRangeLabel)} · Tier ${escapeHtml(park.tier)}</div>
           <div class="sidebar-stop-reason">${escapeHtml(park.note || park.ticketApproach)}</div>
         </div>
         <div class="tier-stamp tier-${safeToken(park.tier, "B")}">${escapeHtml(park.tier)}</div>

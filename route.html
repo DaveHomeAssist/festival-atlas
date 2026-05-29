@@ -282,6 +282,7 @@
     <a href="index.html" class="nav-link">Home</a>
     <a href="festivals.html" class="nav-link">Festivals<span class="nav-shortlist-badge" id="shortlistBadge"></span></a>
     <a href="route.html" class="nav-link is-active">Route</a>
+    <a href="audit.html" class="nav-link">Audit</a>
     <a href="setkeeper.html" class="nav-link nav-cta">Setkeeper</a>
   </div>
 </nav>
@@ -435,18 +436,20 @@
 
     routeGrid.innerHTML = stops.map((stop, index) => {
       const sessions = app.getUpcomingGamesByPark(stop.park.id, 3);
+      const guide = app.getFestivalGuideMeta(stop.park);
       return `
         <article class="route-stop-card card">
           <div>
             <div class="stop-brand">
               ${logo(stop.park.team)}
               <div>
-                <div class="stop-sub">Stop ${index + 1}</div>
+                <div class="stop-sub">Stop ${index + 1} · ${escapeHtml(guide.seasonLabel)}</div>
                 <div class="stop-name">${escapeHtml(stop.park.name)}</div>
-                <div class="stop-meta">${escapeHtml(stop.park.team)} · ${escapeHtml(stop.park.city)} · ${escapeHtml(stop.park.roof)}</div>
+                <div class="stop-meta">${escapeHtml(guide.dateRangeLabel)} · ${escapeHtml(stop.park.city)} · ${escapeHtml(stop.park.roof)}</div>
               </div>
             </div>
             <div class="stop-description">${escapeHtml(stop.park.note || stop.park.ticketApproach)}</div>
+            ${guide.sourceNote ? `<div class="stop-description">${escapeHtml(guide.sourceNote)}</div>` : ""}
             <div class="stop-session-list">
               ${stop.game ? `
                 <button class="btn btn-export" data-calendar="${escapeHtml(stop.game.gameId)}">Calendar</button>
@@ -458,7 +461,10 @@
             </div>
           </div>
           <div class="stop-actions">
+            <button class="btn btn-ghost" data-move-stop="${escapeHtml(stop.park.id)}" data-direction="up" ${index === 0 ? "disabled" : ""}>Move up</button>
+            <button class="btn btn-ghost" data-move-stop="${escapeHtml(stop.park.id)}" data-direction="down" ${index === stops.length - 1 ? "disabled" : ""}>Move down</button>
             <button class="btn btn-danger-outline" data-remove-stop="${escapeHtml(stop.park.id)}">Remove</button>
+            ${guide.officialUrl ? `<a href="${escapeHtml(guide.officialUrl)}" class="btn btn-ghost" target="_blank" rel="noreferrer">Official</a>` : ""}
             <a href="https://www.google.com/maps/search/${encodeURIComponent(stop.park.city)}" class="btn btn-ghost" target="_blank" rel="noreferrer">Map</a>
           </div>
         </article>
@@ -495,6 +501,13 @@
   }
 
   routeGrid.addEventListener("click", (event) => {
+    const move = event.target.closest("[data-move-stop]");
+    if (move) {
+      app.moveRouteStop(move.dataset.moveStop, move.dataset.direction);
+      renderStops();
+      return;
+    }
+
     const remove = event.target.closest("[data-remove-stop]");
     if (remove) {
       app.removeRouteStop(remove.dataset.removeStop);
@@ -600,7 +613,7 @@
       return '<div class="route-stop-card"><div class="stop-header"><span class="tier-stamp tier-' + utils.safeToken(park.tier, "B") + '">' + utils.escapeHtml(park.tier) + '</span><span class="stop-name">' + utils.escapeHtml(park.name) + '</span></div><div class="stop-description">' + utils.escapeHtml(park.city) + '</div></div>';
     }).join("");
     if (sharedHtml) {
-      stopsEl.innerHTML = '<div class="section-label">Shared route (' + shared.parkIds.length + ' stops)</div>' + sharedHtml + '<div style="padding:14px;display:flex;align-items:center;gap:12px;"><span style="font-size:13px;color:var(--text-secondary);">This is a read-only shared view.</span><button class="btn btn-export" id="btn-import-shared">Import to my route</button></div>';
+      routeGrid.innerHTML = '<div class="section-label">Shared route (' + shared.parkIds.length + ' stops)</div>' + sharedHtml + '<div style="padding:14px;display:flex;align-items:center;gap:12px;"><span style="font-size:13px;color:var(--text-secondary);">This is a read-only shared view.</span><button class="btn btn-export" id="btn-import-shared">Import to my route</button></div>';
     }
     if (shareBtn) shareBtn.style.display = "none";
     var importBtn = document.getElementById("btn-import-shared");
@@ -623,7 +636,7 @@
     assumptionsHtml += '<li>' + utils.escapeHtml(line) + '</li>';
   });
   assumptionsHtml += '</ul></div>';
-  stopsEl.insertAdjacentHTML("afterend", assumptionsHtml);
+  routeGrid.insertAdjacentHTML("afterend", assumptionsHtml);
 
   /* ── Sample itinerary ──────────────────── */
   var sample = app.getSampleItinerary();
@@ -646,7 +659,7 @@
   sampleHtml += '<div style="font-family:var(--font-data);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin:12px 0 6px;">Why this route</div>';
   sampleHtml += '<div style="font-size:13px;color:var(--text-secondary);">' + utils.escapeHtml(sample.whyThisRoute) + '</div>';
   sampleHtml += '</div>';
-  stopsEl.insertAdjacentHTML("afterend", sampleHtml);
+  routeGrid.insertAdjacentHTML("afterend", sampleHtml);
 })();
 </script>
 </body>

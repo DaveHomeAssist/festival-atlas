@@ -1,11 +1,16 @@
-const CACHE_NAME = "festival-atlas-v1";
+const CACHE_NAME = "festival-atlas-v3";
 const PRECACHE = [
   "./",
   "index.html",
   "festivals.html",
   "route.html",
+  "audit.html",
   "setkeeper.html",
   "shared.css",
+  "shared/js/core/config.js",
+  "shared/js/core/storage.js",
+  "shared/js/core/utils.js",
+  "shared/js/core/device.js",
   "device.js",
   "storage.js",
   "utils.js",

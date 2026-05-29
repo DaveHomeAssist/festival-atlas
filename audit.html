@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Festival Atlas source audit and local data operations.">
+<title>Festival Atlas · Audit</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="shared.css">
+<style>
+.audit-hero {
+  max-width: 1180px;
+  margin: 42px auto 24px;
+}
+
+.audit-hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(38px, 7vw, 82px);
+  line-height: .9;
+  letter-spacing: 0;
+  margin: 8px 0 14px;
+  max-width: 780px;
+}
+
+.audit-hero p {
+  color: var(--text-secondary);
+  max-width: 680px;
+  font-size: 17px;
+}
+
+.audit-grid {
+  max-width: 1180px;
+  margin: 0 auto 42px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 18px;
+  align-items: start;
+}
+
+.audit-panel,
+.ops-panel {
+  background: rgba(255,250,241,0.86);
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-md);
+  padding: 18px;
+}
+
+.audit-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.summary-tile {
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-md);
+  padding: 12px;
+  background: rgba(16,24,38,0.04);
+}
+
+.summary-value {
+  font-family: var(--font-display);
+  font-size: 30px;
+  line-height: 1;
+}
+
+.summary-label {
+  font-family: var(--font-data);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+.audit-toolbar,
+.ops-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.audit-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-md);
+}
+
+.audit-table {
+  width: 100%;
+  min-width: 860px;
+  border-collapse: collapse;
+  background: rgba(255,255,255,0.48);
+}
+
+.audit-table th,
+.audit-table td {
+  text-align: left;
+  vertical-align: top;
+  padding: 11px 12px;
+  border-bottom: 1px solid rgba(16,24,38,0.08);
+  font-size: 13px;
+}
+
+.audit-table th {
+  font-family: var(--font-data);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--text-muted);
+  background: rgba(16,24,38,0.05);
+}
+
+.audit-name {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.audit-note {
+  color: var(--text-secondary);
+  max-width: 320px;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-family: var(--font-data);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  border: 1px solid rgba(16,24,38,0.12);
+}
+
+.status-pill.is-review { color: #9A3412; background: rgba(251,146,60,0.14); }
+.status-pill.is-next { color: #1D4ED8; background: rgba(59,130,246,0.12); }
+.status-pill.is-ok { color: #166534; background: rgba(34,197,94,0.12); }
+
+.ops-panel {
+  position: sticky;
+  top: 76px;
+}
+
+.ops-panel h2 {
+  font-family: var(--font-display);
+  font-size: 28px;
+  line-height: 1;
+  margin-bottom: 10px;
+}
+
+.ops-copy,
+.ops-status {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.ops-status {
+  min-height: 44px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-md);
+  padding: 10px;
+  background: rgba(16,24,38,0.04);
+  margin-top: 12px;
+}
+
+.file-input {
+  width: 100%;
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-md);
+  padding: 10px;
+  background: rgba(255,255,255,0.54);
+  font-size: 13px;
+}
+
+@media (max-width: 900px) {
+  .audit-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ops-panel {
+    position: static;
+  }
+
+  .audit-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .audit-summary {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-nav">Skip to content</a>
+<nav class="site-nav" role="navigation" aria-label="Site navigation">
+  <a href="https://davehomeassist.github.io/" class="nav-back">&larr; All Projects</a>
+  <a href="index.html" class="nav-brand">
+    <span class="nav-brand-name">Festival Atlas</span>
+    <span class="nav-brand-mark">Music planner</span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html" class="nav-link">Home</a>
+    <a href="festivals.html" class="nav-link">Festivals<span class="nav-shortlist-badge" id="shortlistBadge"></span></a>
+    <a href="route.html" class="nav-link">Route</a>
+    <a href="audit.html" class="nav-link is-active">Audit</a>
+    <a href="setkeeper.html" class="nav-link nav-cta">Setkeeper</a>
+  </div>
+</nav>
+
+<main id="main-content" class="page-wrap">
+  <section class="audit-hero fade-up">
+    <div class="section-label">Operations</div>
+    <h1>Source audit and local data.</h1>
+    <p>Review source status, export or restore local planner data, reset the local state, and download a diagnostic snapshot.</p>
+  </section>
+
+  <section class="audit-grid">
+    <section class="audit-panel fade-up fade-up-1">
+      <div class="audit-summary" id="auditSummary"></div>
+      <div class="audit-toolbar" aria-label="Audit filters">
+        <button class="chip is-active" data-filter="all">All</button>
+        <button class="chip" data-filter="review">Needs review</button>
+        <button class="chip" data-filter="next">Next confirmed</button>
+        <button class="chip" data-filter="notes">Has notes</button>
+      </div>
+      <div class="audit-table-wrap">
+        <table class="audit-table">
+          <thead>
+            <tr>
+              <th>Festival</th>
+              <th>Dates</th>
+              <th>Status</th>
+              <th>Reviewed</th>
+              <th>Source</th>
+              <th>Note</th>
+            </tr>
+          </thead>
+          <tbody id="auditRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <aside class="ops-panel fade-up fade-up-2">
+      <h2>Local Data</h2>
+      <p class="ops-copy">Backups include route, attended history, journal entries, shortlist, notes, and the current seeded catalog snapshot.</p>
+      <div class="ops-actions">
+        <button class="btn btn-primary" id="exportBackup">Export backup</button>
+        <button class="btn btn-export" id="downloadDiagnostics">Diagnostics</button>
+      </div>
+      <label class="section-label" for="backupFile">Restore backup</label>
+      <input class="file-input" id="backupFile" type="file" accept="application/json">
+      <label class="section-label" for="packFile" style="margin-top:14px;">Import festival pack</label>
+      <input class="file-input" id="packFile" type="file" accept="application/json">
+      <div class="ops-actions">
+        <button class="btn btn-danger-outline" id="resetData">Reset local data</button>
+      </div>
+      <div class="ops-status" id="opsStatus" aria-live="polite">Ready.</div>
+    </aside>
+  </section>
+</main>
+
+<script src="shared/js/core/config.js"></script>
+<script src="config.js"></script>
+<script src="shared/js/core/storage.js"></script>
+<script src="storage.js"></script>
+<script src="shared/js/core/utils.js"></script>
+<script src="utils.js"></script>
+<script src="data.js"></script>
+<script src="logos.js"></script>
+<script src="schedule.js"></script>
+<script src="shared/js/core/device.js"></script>
+<script src="device.js"></script>
+<script src="app.js"></script>
+<script>
+(function initAuditPage() {
+  const app = window.FA.app;
+  const utils = window.FA.utils;
+  const rowsEl = document.getElementById("auditRows");
+  const summaryEl = document.getElementById("auditSummary");
+  const statusEl = document.getElementById("opsStatus");
+  let activeFilter = "all";
+
+  function escapeHtml(value) {
+    return utils.escapeHtml(value);
+  }
+
+  function needsReview(row) {
+    return row.dataStatus === "needs-review" || row.dataStatus === "needs-recheck";
+  }
+
+  function getFilteredRows() {
+    return app.getSourceAuditRows().filter((row) => {
+      if (activeFilter === "review") return needsReview(row);
+      if (activeFilter === "next") return row.dataStatus === "next-confirmed";
+      if (activeFilter === "notes") return Boolean(row.sourceNote);
+      return true;
+    });
+  }
+
+  function renderSummary(rows) {
+    const diagnostics = app.createDiagnostics();
+    const next = rows.filter((row) => row.dataStatus === "next-confirmed").length;
+    const notes = rows.filter((row) => row.sourceNote).length;
+    summaryEl.innerHTML = `
+      <div class="summary-tile"><div class="summary-value">${diagnostics.counts.festivals}</div><div class="summary-label">Festivals</div></div>
+      <div class="summary-tile"><div class="summary-value">${diagnostics.counts.sourceReviewNeeded}</div><div class="summary-label">Review queue</div></div>
+      <div class="summary-tile"><div class="summary-value">${next}</div><div class="summary-label">Next confirmed</div></div>
+      <div class="summary-tile"><div class="summary-value">${notes}</div><div class="summary-label">Source notes</div></div>
+    `;
+  }
+
+  function statusClass(row) {
+    if (needsReview(row)) return "is-review";
+    if (row.dataStatus === "next-confirmed") return "is-next";
+    return "is-ok";
+  }
+
+  function renderRows() {
+    const allRows = app.getSourceAuditRows();
+    const rows = getFilteredRows();
+    renderSummary(allRows);
+    rowsEl.innerHTML = rows.length ? rows.map((row) => `
+      <tr>
+        <td><div class="audit-name">${escapeHtml(row.name)}</div><div>${escapeHtml(row.city)}</div></td>
+        <td>${escapeHtml(row.dateRangeLabel)}</td>
+        <td><span class="status-pill ${statusClass(row)}">${escapeHtml(row.dataLabel)}</span></td>
+        <td>${escapeHtml(row.lastReviewed || "Not set")}</td>
+        <td>${row.officialUrl ? `<a href="${escapeHtml(row.officialUrl)}" target="_blank" rel="noopener">Official</a>` : "Needed"}</td>
+        <td class="audit-note">${escapeHtml(row.sourceNote || "")}</td>
+      </tr>
+    `).join("") : `
+      <tr><td colspan="6">No rows match this filter.</td></tr>
+    `;
+  }
+
+  function setStatus(message) {
+    statusEl.textContent = message;
+  }
+
+  document.querySelector(".audit-toolbar").addEventListener("click", (event) => {
+    const button = event.target.closest("[data-filter]");
+    if (!button) return;
+    activeFilter = button.dataset.filter;
+    document.querySelectorAll("[data-filter]").forEach((item) => item.classList.toggle("is-active", item === button));
+    renderRows();
+  });
+
+  document.getElementById("exportBackup").addEventListener("click", () => {
+    app.downloadBackup();
+    setStatus("Backup exported.");
+  });
+
+  document.getElementById("downloadDiagnostics").addEventListener("click", () => {
+    app.downloadDiagnostics();
+    setStatus("Diagnostics downloaded.");
+  });
+
+  document.getElementById("backupFile").addEventListener("change", (event) => {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const result = app.restoreBackupPayload(JSON.parse(String(reader.result || "{}")));
+        setStatus(`Backup restored: ${result.keys.length} keys.`);
+        renderRows();
+      } catch (error) {
+        setStatus(error && error.message ? error.message : "Restore failed.");
+      } finally {
+        event.target.value = "";
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  document.getElementById("packFile").addEventListener("change", (event) => {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const result = app.importFestivalPack(JSON.parse(String(reader.result || "{}")));
+        setStatus(`Festival pack imported: ${result.festivals} festivals, ${result.sessions} sessions.`);
+        renderRows();
+      } catch (error) {
+        setStatus(error && error.message ? error.message : "Festival pack import failed.");
+      } finally {
+        event.target.value = "";
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  document.getElementById("resetData").addEventListener("click", () => {
+    if (!window.confirm("Reset local Festival Atlas data on this browser?")) return;
+    const diagnostics = app.resetLocalData();
+    setStatus(`Local data reset. ${diagnostics.counts.festivals} seeded festivals loaded.`);
+    renderRows();
+  });
+
+  renderRows();
+})();
+</script>
+</body>
+</html>

@@ -13,6 +13,9 @@
 
   var LEG_STATUSES = ["idea", "active", "booked", "completed"];
   var SETKEEPER_CONTEXT_KEY = "setkeeperContext";
+  var GUIDE_REVIEW_WINDOW_DAYS = 45;
+  var HAPPENING_SOON_DAYS = 21;
+  var MS_PER_DAY = 24 * 60 * 60 * 1000;
 
   function cloneValue(value) {
     if (value === null || value === undefined) return value;
@@ -31,6 +34,33 @@
 
   function nowIso() {
     return new Date().toISOString();
+  }
+
+  function todayIsoDate() {
+    return nowIso().slice(0, 10);
+  }
+
+  function dateFromIsoDate(value) {
+    if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(String(value))) return null;
+    var date = new Date(String(value) + "T12:00:00");
+    return Number.isFinite(date.getTime()) ? date : null;
+  }
+
+  function daysBetweenIsoDates(startDate, endDate) {
+    var start = dateFromIsoDate(startDate);
+    var end = dateFromIsoDate(endDate);
+    if (!start || !end) return null;
+    return Math.round((end.getTime() - start.getTime()) / MS_PER_DAY);
+  }
+
+  function formatDateOnly(value, options) {
+    var date = dateFromIsoDate(value);
+    if (!date) return "";
+    return new Intl.DateTimeFormat("en-US", options || {
+      month: "short",
+      day: "numeric",
+      year: "numeric"
+    }).format(date);
   }
 
   function getParks() {
@@ -343,6 +373,25 @@
     });
   }
 
+  function moveRouteStop(parkId, direction) {
+    var delta = direction === "up" ? -1 : direction === "down" ? 1 : 0;
+    if (!delta) return getActiveTrip();
+
+    return updateActiveTrip(function moveStop(currentTrip) {
+      var currentIndex = currentTrip.parkIds.indexOf(parkId);
+      if (currentIndex < 0) return currentTrip;
+
+      var nextIndex = currentIndex + delta;
+      if (nextIndex < 0 || nextIndex >= currentTrip.parkIds.length) return currentTrip;
+
+      var nextParkIds = currentTrip.parkIds.slice();
+      var moved = nextParkIds.splice(currentIndex, 1)[0];
+      nextParkIds.splice(nextIndex, 0, moved);
+      currentTrip.parkIds = nextParkIds;
+      return currentTrip;
+    });
+  }
+
   function setLegStatus(legId, status) {
     if (!LEG_STATUSES.includes(status)) {
       throw new TypeError("Leg status must be idea, active, booked, or completed");
@@ -419,6 +468,176 @@
       decorated.startDateTimeLocal = buildLocalStartDateTime(game);
       decorated.venue = park.name;
       return decorated;
+    });
+  }
+
+  function getRawFestivalDateRange(parkId) {
+    if (!schedule || !schedule.getDateRangeForPark) {
+      return { start: "", end: "", count: 0, years: [] };
+    }
+    return schedule.getDateRangeForPark(parkId);
+  }
+
+  function formatRawDateRange(range) {
+    if (!range || !range.start) return "Dates TBD";
+    if (range.start === range.end) return formatDateOnly(range.start);
+
+    var startParts = range.start.split("-");
+    var endParts = range.end.split("-");
+    if (startParts[0] === endParts[0] && startParts[1] === endParts[1]) {
+      var endDay = String(Number(endParts[2]));
+      return formatDateOnly(range.start, { month: "short", day: "numeric" }) + " - " +
+        endDay + ", " + endParts[0];
+    }
+    if (startParts[0] === endParts[0]) {
+      return formatDateOnly(range.start, { month: "short", day: "numeric" }) + " - " +
+        formatDateOnly(range.end, { month: "short", day: "numeric" }) + ", " + endParts[0];
+    }
+    return formatDateOnly(range.start) + " - " + formatDateOnly(range.end);
+  }
+
+  function getFestivalDateRange(parkOrId) {
+    var parkId = typeof parkOrId === "string" ? parkOrId : parkOrId && parkOrId.id;
+    var rawRange = getRawFestivalDateRange(parkId);
+    return Object.assign({}, rawRange, {
+      label: formatRawDateRange(rawRange)
+    });
+  }
+
+  function getFestivalGuideMeta(parkOrId) {
+    var park = typeof parkOrId === "string" ? getParkById(parkOrId) : parkOrId;
+    if (!park) {
+      return {
+        dateStart: "",
+        dateEnd: "",
+        dateRangeLabel: "Dates TBD",
+        seasonStatus: "dates-tbd",
+        seasonLabel: "Dates TBD",
+        dataStatus: "needs-review",
+        dataLabel: "Needs source",
+        planningStatus: "Needs review",
+        officialUrl: "",
+        lastReviewed: "",
+        sourceNote: "",
+        dateConfidence: "unknown"
+      };
+    }
+
+    var range = getFestivalDateRange(park.id);
+    var today = todayIsoDate();
+    var daysUntilStart = range.start ? daysBetweenIsoDates(today, range.start) : null;
+    var seasonStatus = "dates-tbd";
+    var seasonLabel = "Dates TBD";
+
+    if (range.start && range.end) {
+      if (range.end < today) {
+        seasonStatus = "past";
+        seasonLabel = "Past";
+      } else if (range.start <= today && range.end >= today) {
+        seasonStatus = "happening-now";
+        seasonLabel = "Happening now";
+      } else if (daysUntilStart !== null && daysUntilStart <= HAPPENING_SOON_DAYS) {
+        seasonStatus = "happening-soon";
+        seasonLabel = "Happening soon";
+      } else {
+        seasonStatus = "upcoming";
+        seasonLabel = "Upcoming";
+      }
+    }
+
+    var reviewAgeDays = park.lastReviewed ? daysBetweenIsoDates(park.lastReviewed, today) : null;
+    var has2026Date = Array.isArray(range.years) && range.years.indexOf("2026") >= 0;
+    var sourceIsFresh = reviewAgeDays === null || reviewAgeDays <= GUIDE_REVIEW_WINDOW_DAYS;
+    var hasNextConfirmedDate = Boolean(range.start && range.start > today);
+    var dataStatus = "source-linked";
+    var dataLabel = "Source linked";
+
+    if (!park.officialUrl) {
+      dataStatus = "needs-review";
+      dataLabel = "Needs source";
+    } else if (!range.count) {
+      dataStatus = "needs-review";
+      dataLabel = "Needs dates";
+    } else if (!has2026Date && hasNextConfirmedDate && sourceIsFresh) {
+      dataStatus = "next-confirmed";
+      dataLabel = "Next date confirmed";
+    } else if (!has2026Date) {
+      dataStatus = "needs-review";
+      dataLabel = "Needs 2026 review";
+    } else if (reviewAgeDays !== null && reviewAgeDays > GUIDE_REVIEW_WINDOW_DAYS) {
+      dataStatus = "needs-recheck";
+      dataLabel = "Recheck source";
+    }
+
+    var routeIds = getActiveTrip().parkIds;
+    var planningStatus = "Scout";
+    if (isVisited(park.id)) planningStatus = "Attended";
+    else if (routeIds.indexOf(park.id) >= 0) planningStatus = "On route";
+    else if (seasonStatus === "happening-now" || seasonStatus === "happening-soon") planningStatus = "Needs decision";
+    else if (dataStatus === "needs-review" || dataStatus === "needs-recheck") planningStatus = "Needs review";
+
+    return {
+      dateStart: range.start,
+      dateEnd: range.end,
+      dateCount: range.count,
+      dateRangeLabel: range.label,
+      seasonStatus: seasonStatus,
+      seasonLabel: seasonLabel,
+      dataStatus: dataStatus,
+      dataLabel: dataLabel,
+      planningStatus: planningStatus,
+      officialUrl: park.officialUrl || "",
+      sourceLabel: park.sourceLabel || "Official source",
+      lastReviewed: park.lastReviewed || "",
+      reviewAgeDays: reviewAgeDays,
+      sourceNote: park.sourceNote || "",
+      dateConfidence: park.dateConfidence || (dataStatus === "next-confirmed" ? "next-confirmed" : "official")
+    };
+  }
+
+  function getHappeningSoon(count) {
+    var limit = Number.isFinite(count) ? Math.max(1, count) : 4;
+    return getParks()
+      .map(function mapPark(park) {
+        return { park: park, meta: getFestivalGuideMeta(park) };
+      })
+      .filter(function keepUpcoming(entry) {
+        return !isVisited(entry.park.id) &&
+          ["happening-now", "happening-soon"].indexOf(entry.meta.seasonStatus) >= 0 &&
+          entry.meta.dateStart;
+      })
+      .sort(function sortByStart(a, b) {
+        return a.meta.dateStart.localeCompare(b.meta.dateStart);
+      })
+      .slice(0, limit)
+      .map(function toPark(entry) {
+        return entry.park;
+      });
+  }
+
+  function getSeasonGuideSummary() {
+    return getParks().reduce(function summarize(summary, park) {
+      var meta = getFestivalGuideMeta(park);
+      summary.total += 1;
+      if (meta.seasonStatus === "happening-now") summary.happeningNow += 1;
+      if (meta.seasonStatus === "happening-soon") summary.happeningSoon += 1;
+      if (meta.seasonStatus === "upcoming") summary.upcoming += 1;
+      if (meta.seasonStatus === "past") summary.past += 1;
+      if (meta.seasonStatus === "dates-tbd") summary.datesTbd += 1;
+      if (meta.dataStatus === "needs-review" || meta.dataStatus === "needs-recheck") summary.needsReview += 1;
+      if (!summary.lastReviewed || (meta.lastReviewed && meta.lastReviewed < summary.lastReviewed)) {
+        summary.lastReviewed = meta.lastReviewed;
+      }
+      return summary;
+    }, {
+      total: 0,
+      happeningNow: 0,
+      happeningSoon: 0,
+      upcoming: 0,
+      past: 0,
+      datesTbd: 0,
+      needsReview: 0,
+      lastReviewed: ""
     });
   }
 
@@ -593,6 +812,262 @@
     return getShortlist().indexOf(festivalId) >= 0;
   }
 
+  /* ── Production operations ───────────── */
+  var BACKUP_VERSION = 1;
+  var DATA_BACKUP_KEYS = [
+    data.KEYS.parks,
+    data.KEYS.activeTrip,
+    data.KEYS.visits,
+    data.KEYS.planningNotes,
+    SHORTLIST_KEY,
+    SETKEEPER_CONTEXT_KEY,
+    "festivalJournalEntries",
+    "festivalJournalHistory",
+    data.KEYS.festivalCustomSchedule,
+    "sharedTripImports",
+    "setkeeperDraft",
+    "theme"
+  ];
+
+  function normalizeFestivalId(value, fallback) {
+    var base = String(value || fallback || "").trim().toLowerCase();
+    var normalized = base.replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+    return normalized || "";
+  }
+
+  function normalizeImportedPark(rawPark) {
+    if (!rawPark || typeof rawPark !== "object") return null;
+    var id = normalizeFestivalId(rawPark.id, rawPark.name);
+    var name = String(rawPark.name || "").trim();
+    if (!id || !name) return null;
+
+    var coordinates = rawPark.coordinates && Number.isFinite(Number(rawPark.coordinates.lat)) && Number.isFinite(Number(rawPark.coordinates.lng))
+      ? { lat: Number(rawPark.coordinates.lat), lng: Number(rawPark.coordinates.lng) }
+      : { lat: 39.5, lng: -98.35 };
+
+    return {
+      id: id,
+      name: name,
+      team: String(rawPark.team || rawPark.genre || "Music Festival").trim(),
+      city: String(rawPark.city || "Location TBD").trim(),
+      opened: Number.isFinite(Number(rawPark.opened)) ? Number(rawPark.opened) : null,
+      capacity: Number.isFinite(Number(rawPark.capacity)) ? Number(rawPark.capacity) : null,
+      roof: String(rawPark.roof || rawPark.setting || "Mixed").trim(),
+      tier: String(rawPark.tier || "B").trim().slice(0, 1).toUpperCase(),
+      color: utils.safeColor(rawPark.color || "", "#2563EB"),
+      note: String(rawPark.note || "Imported festival pack entry.").trim(),
+      ticketApproach: String(rawPark.ticketApproach || "Verify ticket details with the official festival source before booking.").trim(),
+      transitNote: String(rawPark.transitNote || "Confirm local transit, parking, and lodging before travel.").trim(),
+      coordinates: coordinates,
+      specialEvents: Array.isArray(rawPark.specialEvents) ? rawPark.specialEvents.map(String).slice(0, 8) : ["Imported festival"],
+      searchMeta: rawPark.searchMeta && typeof rawPark.searchMeta === "object" ? rawPark.searchMeta : { localName: name, region: "Imported" },
+      booking: rawPark.booking && typeof rawPark.booking === "object" ? rawPark.booking : {},
+      officialUrl: String(rawPark.officialUrl || "").trim(),
+      lastReviewed: normalizeTripDate(rawPark.lastReviewed) || todayIsoDate(),
+      sourceLabel: rawPark.officialUrl ? "Official festival source" : "Imported source needed",
+      sourceNote: String(rawPark.sourceNote || "Imported festival pack entry; verify before booking.").trim(),
+      dateConfidence: String(rawPark.dateConfidence || "imported").trim(),
+      imported: true
+    };
+  }
+
+  function normalizeImportedSession(rawSession, index) {
+    if (!rawSession || typeof rawSession !== "object") return null;
+    var date = normalizeTripDate(rawSession.d || rawSession.date);
+    if (!date) return null;
+    var dateObj = dateFromIsoDate(date);
+    var weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    return {
+      y: rawSession.y || weekdays[dateObj.getDay()],
+      d: date,
+      t: rawSession.t || rawSession.time || null,
+      o: rawSession.o || rawSession.artist || null,
+      s: rawSession.s || rawSession.label || ("Festival Day " + (index + 1))
+    };
+  }
+
+  function importFestivalPack(payload) {
+    if (!payload || typeof payload !== "object" || !Array.isArray(payload.festivals)) {
+      throw new TypeError("Festival pack must include a festivals array");
+    }
+
+    var importedParks = payload.festivals.map(normalizeImportedPark).filter(Boolean);
+    if (!importedParks.length) {
+      throw new TypeError("Festival pack did not include any valid festivals");
+    }
+
+    var importedIds = importedParks.map(function mapId(park) { return park.id; });
+    var currentParks = getParks();
+    var nextParks = currentParks.filter(function keepExisting(park) {
+      return importedIds.indexOf(park.id) === -1;
+    }).concat(importedParks);
+
+    var customSchedule = storage.get(data.KEYS.festivalCustomSchedule) || {};
+    if (!customSchedule || typeof customSchedule !== "object" || Array.isArray(customSchedule)) customSchedule = {};
+
+    importedParks.forEach(function importSessions(park) {
+      var rawSessions = [];
+      var sourcePark = payload.festivals.find(function match(rawPark) {
+        return normalizeFestivalId(rawPark.id, rawPark.name) === park.id;
+      });
+      if (sourcePark && Array.isArray(sourcePark.sessions)) rawSessions = sourcePark.sessions;
+      else if (payload.sessions && Array.isArray(payload.sessions[park.id])) rawSessions = payload.sessions[park.id];
+
+      var sessions = rawSessions.map(normalizeImportedSession).filter(Boolean).sort(function sortByDate(a, b) {
+        return a.d.localeCompare(b.d);
+      });
+
+      if (sessions.length) customSchedule[park.id] = sessions;
+      else delete customSchedule[park.id];
+    });
+
+    storage.set(data.KEYS.parks, nextParks);
+    storage.flush(data.KEYS.parks);
+    storage.set(data.KEYS.festivalCustomSchedule, customSchedule);
+    storage.flush(data.KEYS.festivalCustomSchedule);
+
+    return {
+      importedAt: nowIso(),
+      festivals: importedParks.length,
+      sessions: importedIds.reduce(function countSessions(total, parkId) {
+        return total + (Array.isArray(customSchedule[parkId]) ? customSchedule[parkId].length : 0);
+      }, 0),
+      ids: importedIds
+    };
+  }
+
+  function getBackupPayload() {
+    var state = {};
+    DATA_BACKUP_KEYS.forEach(function copyKey(key) {
+      state[key] = storage.get(key);
+    });
+
+    return {
+      app: "Festival Atlas",
+      version: BACKUP_VERSION,
+      exportedAt: nowIso(),
+      sourceReviewedThrough: getSeasonGuideSummary().lastReviewed,
+      state: state
+    };
+  }
+
+  function restoreBackupPayload(payload) {
+    if (!payload || typeof payload !== "object" || payload.app !== "Festival Atlas" || !payload.state || typeof payload.state !== "object") {
+      throw new TypeError("Backup file is not a Festival Atlas backup");
+    }
+
+    DATA_BACKUP_KEYS.forEach(function restoreKey(key) {
+      if (Object.prototype.hasOwnProperty.call(payload.state, key)) {
+        storage.set(key, cloneValue(payload.state[key]));
+        storage.flush(key);
+      }
+    });
+
+    data.initializeData();
+
+    return {
+      restoredAt: nowIso(),
+      keys: DATA_BACKUP_KEYS.filter(function restored(key) {
+        return Object.prototype.hasOwnProperty.call(payload.state, key);
+      })
+    };
+  }
+
+  function resetLocalData() {
+    DATA_BACKUP_KEYS.forEach(function removeKey(key) {
+      storage.remove(key);
+    });
+    data.initializeData();
+    return createDiagnostics();
+  }
+
+  function downloadJson(filename, payload) {
+    var blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    var link = global.document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    global.document.body.appendChild(link);
+    link.click();
+    URL.revokeObjectURL(link.href);
+    link.remove();
+  }
+
+  function downloadBackup() {
+    var stamp = todayIsoDate();
+    downloadJson("festival-atlas-backup-" + stamp + ".json", getBackupPayload());
+  }
+
+  function createDiagnostics() {
+    var parks = getParks();
+    var auditRows = getSourceAuditRows();
+    var reviewRows = auditRows.filter(function needsReview(row) {
+      return row.dataStatus === "needs-review" || row.dataStatus === "needs-recheck";
+    });
+
+    return {
+      app: "Festival Atlas",
+      generatedAt: nowIso(),
+      location: global.location ? global.location.href : "",
+      userAgent: global.navigator ? global.navigator.userAgent : "",
+      counts: {
+        festivals: parks.length,
+        routeStops: getActiveTrip().parkIds.length,
+        visits: getVisits().length,
+        shortlist: getShortlist().length,
+        sourceReviewNeeded: reviewRows.length,
+        nextConfirmed: auditRows.filter(function next(row) { return row.dataStatus === "next-confirmed"; }).length
+      },
+      sourceReviewNeeded: reviewRows.map(function mapReview(row) {
+        return {
+          id: row.id,
+          name: row.name,
+          dateRangeLabel: row.dateRangeLabel,
+          dataLabel: row.dataLabel,
+          lastReviewed: row.lastReviewed
+        };
+      }),
+      storageKeys: DATA_BACKUP_KEYS.map(function mapKey(key) {
+        return {
+          key: key,
+          present: storage.get(key) !== undefined
+        };
+      })
+    };
+  }
+
+  function downloadDiagnostics() {
+    downloadJson("festival-atlas-diagnostics-" + todayIsoDate() + ".json", createDiagnostics());
+  }
+
+  function getSourceAuditRows() {
+    return getParks()
+      .map(function mapPark(park) {
+        var meta = getFestivalGuideMeta(park);
+        return {
+          id: park.id,
+          name: park.name,
+          city: park.city,
+          dateRangeLabel: meta.dateRangeLabel,
+          dataStatus: meta.dataStatus,
+          dataLabel: meta.dataLabel,
+          seasonStatus: meta.seasonStatus,
+          seasonLabel: meta.seasonLabel,
+          planningStatus: meta.planningStatus,
+          dateConfidence: meta.dateConfidence,
+          sourceNote: meta.sourceNote,
+          officialUrl: meta.officialUrl,
+          lastReviewed: meta.lastReviewed,
+          reviewAgeDays: meta.reviewAgeDays
+        };
+      })
+      .sort(function sortAudit(a, b) {
+        var reviewDelta = Number(a.dataStatus === "needs-review" || a.dataStatus === "needs-recheck") -
+          Number(b.dataStatus === "needs-review" || b.dataStatus === "needs-recheck");
+        if (reviewDelta) return -reviewDelta;
+        return a.name.localeCompare(b.name);
+      });
+  }
+
   /* ── Share trip URLs ─────────────────── */
   function buildShareTripUrl(trip, options) {
     var opts = options || {};
@@ -670,7 +1145,7 @@
       "Timezone shifts: " + (PLANNER_ASSUMPTIONS.timezoneAware ? "accounted for" : "not modeled") + ".",
       "Travel modes considered: " + PLANNER_ASSUMPTIONS.travelModes.join(", ") + ".",
       "Visa or border requirements: not modeled.",
-      "Dates and availability are seeded samples — verify with official festival sources."
+      "Dates and availability come from the seeded 2026 guide - verify with official festival sources before booking."
     ];
   }
 
@@ -737,12 +1212,17 @@
     addRouteStop: addRouteStop,
     removeRouteStop: removeRouteStop,
     setRouteStopGame: setRouteStopGame,
+    moveRouteStop: moveRouteStop,
     getLegById: getLegById,
     setLegStatus: setLegStatus,
     getNextTargets: getNextTargets,
     getGameById: getGameById,
     getGamesByPark: getGamesByPark,
     getUpcomingGamesByPark: getUpcomingGamesByPark,
+    getFestivalDateRange: getFestivalDateRange,
+    getFestivalGuideMeta: getFestivalGuideMeta,
+    getHappeningSoon: getHappeningSoon,
+    getSeasonGuideSummary: getSeasonGuideSummary,
     getNotes: getNotes,
     saveNote: saveNote,
     getTripScratchpad: getTripScratchpad,
@@ -761,6 +1241,14 @@
     getShortlist: getShortlist,
     toggleShortlist: toggleShortlist,
     isShortlisted: isShortlisted,
+    getBackupPayload: getBackupPayload,
+    restoreBackupPayload: restoreBackupPayload,
+    resetLocalData: resetLocalData,
+    importFestivalPack: importFestivalPack,
+    downloadBackup: downloadBackup,
+    createDiagnostics: createDiagnostics,
+    downloadDiagnostics: downloadDiagnostics,
+    getSourceAuditRows: getSourceAuditRows,
     buildShareTripUrl: buildShareTripUrl,
     parseSharedTripState: parseSharedTripState,
     buildFlightLink: buildFlightLink,

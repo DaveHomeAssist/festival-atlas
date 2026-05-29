@@ -3,7 +3,7 @@
 
 ## Project Overview
 
-Festival Atlas is a static local first music festival planning prototype. The current goal is to reuse the stronger MLB planner structure, retheme it for festivals, and keep the app fast to browse, route, and journal.
+Festival Atlas is a static local first music festival planning guide. The current goal is to make the festival fork showready for the 2026 season: source-backed enough to trust, fast to browse, useful for routing, and clear about what still needs official recheck before booking.
 
 ## Stack
 
@@ -26,6 +26,7 @@ Festival Atlas is a static local first music festival planning prototype. The cu
 | ID | Severity | Status | Title | Notes |
 |----|----------|--------|-------|-------|
 | 001 | P2 | resolved | Reorient copied MLB planner for music festivals | Replaced seeded data, dashboard pages, route board, and scorekeeper with festival specific flows |
+| 002 | P1 | in progress | Make the 2026 guide showready | Added source metadata, season status helpers, guide freshness UI, standalone shared core scripts, route reordering, attended history, full seeded source audit, source notes, CRSSD Fall 2026 correction, audit ops page, backup/restore/reset, festival pack import, diagnostics, validation script, service worker cache update, and legacy asset cleanup; remaining work is post-deploy verification |
 
 ## Session Log
 
@@ -36,3 +37,7 @@ Festival Atlas is a static local first music festival planning prototype. The cu
 [2026-03-18] [MUSIC FESTIVALS] [docs] Rewrite copied handoff and writeup files for Festival Atlas
 [2026-03-18] [MUSIC FESTIVALS] [chore] Remove copied MLB only schedule pages from the festival fork
 [2026-03-18] [MUSIC FESTIVALS] [feat] Import 43 researched USA festivals and 2026 session dates into the prototype seed
+[2026-05-29] [MUSIC FESTIVALS] [showready] Add 2026 guide status helpers, official source links, and standalone shared core scripts
+[2026-05-29] [MUSIC FESTIVALS] [showready] Correct verified guide dates, add route stop reordering, preserve attended history, and archive legacy MLB media
+[2026-05-29] [MUSIC FESTIVALS] [showready] Audit seeded official sources and update next-confirmed date ranges
+[2026-05-29] [MUSIC FESTIVALS] [production] Add audit ops, local data recovery, diagnostics, validation script, and production readiness docs

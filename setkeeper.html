@@ -268,6 +268,7 @@ body {
     <a href="index.html" class="nav-link">Home</a>
     <a href="festivals.html" class="nav-link">Festivals<span class="nav-shortlist-badge" id="shortlistBadge"></span></a>
     <a href="route.html" class="nav-link">Route</a>
+    <a href="audit.html" class="nav-link">Audit</a>
     <a href="setkeeper.html" class="nav-link is-active nav-cta">Setkeeper</a>
   </div>
 </nav>
@@ -355,6 +356,8 @@ body {
     <aside class="journal-side fade-up fade-up-1">
       <div class="section-label">Upcoming sessions</div>
       <div id="sessionList" class="session-list"></div>
+      <div class="section-label" style="margin-top:20px;">Attended history</div>
+      <div id="historyList" class="session-list"></div>
       <div class="save-note" id="saveNote">Autosave ready</div>
     </aside>
   </section>
@@ -375,6 +378,7 @@ body {
 <script>
 (function initSetkeeper() {
   const STORAGE_KEY = "festivalJournalEntries";
+  const HISTORY_KEY = "festivalJournalHistory";
   const app = window.FA.app;
   const storage = window.FA.storage;
   const utils = window.FA.utils;
@@ -405,6 +409,50 @@ body {
     storage.set(STORAGE_KEY, entries);
     storage.flush(STORAGE_KEY);
     return entries;
+  }
+
+  function getHistoryMap() {
+    const value = storage.get(HISTORY_KEY) || {};
+    return value && typeof value === "object" ? value : {};
+  }
+
+  function saveHistoryMap(historyMap) {
+    storage.set(HISTORY_KEY, historyMap);
+    storage.flush(HISTORY_KEY);
+    return historyMap;
+  }
+
+  function getHistoryEntries(parkId) {
+    const history = getHistoryMap()[parkId];
+    return Array.isArray(history) ? history.slice().sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()) : [];
+  }
+
+  function addHistoryEntry(payload) {
+    if (!payload || !payload.parkId) return [];
+    const historyMap = getHistoryMap();
+    const entries = Array.isArray(historyMap[payload.parkId]) ? historyMap[payload.parkId] : [];
+    const saved = Object.assign({}, payload, {
+      id: "journal-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8),
+      capturedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+    entries.unshift(saved);
+    historyMap[payload.parkId] = entries.slice(0, 20);
+    saveHistoryMap(historyMap);
+    return historyMap[payload.parkId].slice();
+  }
+
+  function renderHistory(parkId) {
+    const historyList = document.getElementById("historyList");
+    if (!historyList) return;
+    const entries = getHistoryEntries(parkId).slice(0, 6);
+    historyList.innerHTML = entries.length ? entries.map((entry) => `
+      <div class="session-card">
+        <div class="session-title">${escapeHtml(entry.visitDate || "Date not set")}</div>
+        <div class="session-line">${escapeHtml(entry.bestSet || entry.standout || entry.sessionLine || "Festival memory")}</div>
+        <div class="session-tag">${escapeHtml(entry.energy || "Logged entry")}</div>
+      </div>
+    `).join("") : `<div class="session-card"><div class="session-line">No attended history yet.</div><div class="session-tag">Mark attended to preserve a dated entry.</div></div>`;
   }
 
   function getEntry(parkId) {
@@ -446,17 +494,18 @@ body {
     const plannerNote = app.getParkScratchpad(context.parkId);
     const selectedGame = context.gameId ? app.getGameById(context.gameId) : null;
     const sessions = app.getUpcomingGamesByPark(context.parkId, 4);
+    const guide = park ? app.getFestivalGuideMeta(park) : null;
 
     document.getElementById("journalTitle").textContent = park ? park.name : "Setkeeper";
-    document.getElementById("journalMeta").textContent = park ? `${park.team} · ${park.city} · ${park.roof}` : "Pick a festival from the planner";
+    document.getElementById("journalMeta").textContent = park ? `${guide.dateRangeLabel} · ${park.city} · ${guide.seasonLabel}` : "Pick a festival from the planner";
     document.getElementById("journalLogo").src = park ? logos.getTeamLogo(park.team) : logos.getTeamLogo("Festival Atlas");
     document.getElementById("journalLogo").alt = park ? `${park.team} badge` : "Festival Atlas badge";
     document.getElementById("visitStatus").textContent = visitMeta ? "Attended" : "Planning";
     document.getElementById("headlineTitle").textContent = selectedGame ? selectedGame.awayTeam : (park ? park.name : "Capture the sets worth remembering.");
     document.getElementById("headlineCopy").textContent = selectedGame
       ? `${schedule.formatGameLine(selectedGame)}${selectedGame.s ? ` · ${selectedGame.s}` : ""}`
-      : (park ? park.note : "Use this page as the post set notebook for the route.");
-    document.getElementById("plannerNote").textContent = plannerNote && plannerNote.text ? plannerNote.text : (park ? park.ticketApproach : "No planner note saved for this festival yet.");
+      : (park ? `${guide.planningStatus} · ${park.note}` : "Use this page as the post set notebook for the route.");
+    document.getElementById("plannerNote").textContent = plannerNote && plannerNote.text ? plannerNote.text : (park ? `${guide.dataLabel}. ${guide.sourceNote ? guide.sourceNote + " " : ""}${park.ticketApproach}` : "No planner note saved for this festival yet.");
 
     fields.visitDate.value = (entry && entry.visitDate) || (visitMeta && visitMeta.visitDate) || new Date().toISOString().slice(0, 10);
     fields.energy.value = (entry && entry.energy) || "";
@@ -479,11 +528,13 @@ body {
         </div>
       </div>
     `).join("") : `<div class="session-card"><div class="session-line">No future sessions loaded.</div></div>`;
+    renderHistory(context.parkId);
   }
 
   function markAttended() {
     if (!context || !context.parkId) return;
     const payload = buildPayload();
+    addHistoryEntry(payload);
     app.markVisited(context.parkId, {
       visitDate: payload.visitDate || new Date().toISOString().slice(0, 10),
       bestFeature: payload.bestSet || payload.standout || "Festival memory",
@@ -554,7 +605,9 @@ body {
       context: context,
       fields: buildPayload(),
       attended: Boolean(context && app.getVisitedMeta(context.parkId)),
-      plannerNote: context ? ((app.getParkScratchpad(context.parkId) || {}).text || "") : ""
+      plannerNote: context ? ((app.getParkScratchpad(context.parkId) || {}).text || "") : "",
+      sourceNote: context ? (app.getFestivalGuideMeta(context.parkId).sourceNote || "") : "",
+      history: context ? getHistoryEntries(context.parkId) : []
     });
   };
 

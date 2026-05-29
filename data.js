@@ -15,7 +15,8 @@
     parks: "parks",
     activeTrip: storageKeys.activeTrip || "activeTrip",
     visits: storageKeys.visits || "visits",
-    planningNotes: storageKeys.planningNotes || "planningNotes"
+    planningNotes: storageKeys.planningNotes || "planningNotes",
+    festivalCustomSchedule: storageKeys.festivalCustomSchedule || "festivalCustomSchedule"
   };
 
   var VALID_NOTE_SCOPES = ["park", "leg", "trip"];
@@ -132,24 +133,196 @@
     "kilby-block-party": { searchMeta: { localName: "Kilby Block Party", region: "Mountain West" }, booking: { airportCode: "SLC", lodgingQuery: "Salt Lake City hotels", groundQuery: "SLC UTA transit Fairpark" } }
   };
 
+  var GUIDE_REVIEWED_ON = "2026-03-18";
+  var OFFICIAL_SOURCES = {
+    "coachella": "https://www.coachella.com/",
+    "lollapalooza": "https://www.lollapalooza.com/",
+    "bonnaroo": "https://www.bonnaroo.com/",
+    "outside-lands": "https://www.sfoutsidelands.com/",
+    "governors-ball": "https://www.governorsballmusicfestival.com/",
+    "boston-calling": "https://bostoncalling.com/",
+    "newport-folk-festival": "https://newportfolk.org/",
+    "newport-jazz-festival": "https://newportjazz.org/",
+    "sea-hear-now": "https://www.seahearnowfestival.com/",
+    "elements-music-arts-festival": "https://www.elementsfest.us/",
+    "ultra-music-festival": "https://ultramusicfestival.com/",
+    "iii-points": "https://iiipoints.com/",
+    "shaky-knees": "https://www.shakykneesfestival.com/",
+    "new-orleans-jazz-heritage-festival": "https://www.nojazzfest.com/",
+    "essence-festival-of-culture": "https://www.essencefestival.com/",
+    "railbird-festival": "https://www.railbirdfest.com/",
+    "riot-fest": "https://riotfest.org/",
+    "summerfest": "https://www.summerfest.com/",
+    "movement": "https://movementfestival.com/",
+    "electric-forest": "https://www.electricforest.com/",
+    "hinterland-music-festival": "https://www.hinterlandiowa.com/",
+    "summer-camp-music-festival": "https://summercampfestival.com/",
+    "edc-las-vegas": "https://lasvegas.electricdaisycarnival.com/",
+    "austin-city-limits": "https://www.aclfestival.com/",
+    "sxsw-music-festival": "https://www.sxsw.com/",
+    "seismic-dance-event": "https://seismicdanceevent.com/",
+    "ubbi-dubbi-festival": "https://ubbidubbifestival.com/",
+    "m3f-music-festival": "https://www.m3ffest.com/",
+    "goldrush-festival": "https://relentlessbeats.com/festival/goldrush-midnight-riders/",
+    "bottlerock-napa-valley": "https://www.bottlerocknapavalley.com/info/",
+    "crssd-festival": "https://www.crssdfest.com/",
+    "bumbershoot": "https://bumbershoot.com/",
+    "capitol-hill-block-party": "https://www.capitolhillblockparty.com/",
+    "lightning-in-a-bottle": "https://www.libfestival.org/",
+    "hard-summer": "https://www.hardsummer.com/",
+    "ohana-festival": "https://www.ohanafest.com/",
+    "pickathon": "https://pickathon.com/",
+    "bass-canyon": "https://www.basscanyon.com/",
+    "beyond-wonderland-at-the-gorge": "https://www.insomniac.com/events/beyond-wonderland-at-the-gorge-2026-2026-06-27-george-wa/",
+    "group-therapy-700": "https://anjunabeats.com/events/abgt700",
+    "treefort-music-fest": "https://treefortmusicfest.com/",
+    "kilby-block-party": "https://kilbyblockparty.com/",
+    "telluride-bluegrass-festival": "https://bluegrass.com/telluride/"
+  };
+
+  var SOURCE_REVIEWED_ON = {
+    "coachella": "2026-05-29",
+    "lollapalooza": "2026-05-29",
+    "bonnaroo": "2026-05-29",
+    "outside-lands": "2026-05-29",
+    "governors-ball": "2026-05-29",
+    "boston-calling": "2026-05-29",
+    "newport-folk-festival": "2026-05-29",
+    "newport-jazz-festival": "2026-05-29",
+    "sea-hear-now": "2026-05-29",
+    "elements-music-arts-festival": "2026-05-29",
+    "ultra-music-festival": "2026-05-29",
+    "iii-points": "2026-05-29",
+    "shaky-knees": "2026-05-29",
+    "new-orleans-jazz-heritage-festival": "2026-05-29",
+    "essence-festival-of-culture": "2026-05-29",
+    "railbird-festival": "2026-05-29",
+    "riot-fest": "2026-05-29",
+    "summerfest": "2026-05-29",
+    "movement": "2026-05-29",
+    "electric-forest": "2026-05-29",
+    "hinterland-music-festival": "2026-05-29",
+    "summer-camp-music-festival": "2026-05-29",
+    "edc-las-vegas": "2026-05-29",
+    "austin-city-limits": "2026-05-29",
+    "sxsw-music-festival": "2026-05-29",
+    "seismic-dance-event": "2026-05-29",
+    "ubbi-dubbi-festival": "2026-05-29",
+    "m3f-music-festival": "2026-05-29",
+    "goldrush-festival": "2026-05-29",
+    "bottlerock-napa-valley": "2026-05-29",
+    "crssd-festival": "2026-05-29",
+    "bumbershoot": "2026-05-29",
+    "capitol-hill-block-party": "2026-05-29",
+    "lightning-in-a-bottle": "2026-05-29",
+    "hard-summer": "2026-05-29",
+    "ohana-festival": "2026-05-29",
+    "pickathon": "2026-05-29",
+    "bass-canyon": "2026-05-29",
+    "beyond-wonderland-at-the-gorge": "2026-05-29",
+    "group-therapy-700": "2026-05-29",
+    "treefort-music-fest": "2026-05-29",
+    "kilby-block-party": "2026-05-29",
+    "telluride-bluegrass-festival": "2026-05-29"
+  };
+
+  var SOURCE_NOTES = {
+    "boston-calling": "Official source currently points to the next Boston Calling weekend in 2027; no upcoming 2026 festival date is listed.",
+    "ultra-music-festival": "Ultra's current official date signal is the next Miami festival weekend in March 2027.",
+    "edc-las-vegas": "EDC Las Vegas is now modeled from the official 2027 two-weekend announcement.",
+    "sxsw-music-festival": "SXSW Music is next-confirmed for March 2027 after the 2026 edition.",
+    "bottlerock-napa-valley": "BottleRock's current official source points to Memorial Day weekend 2027.",
+    "crssd-festival": "CRSSD's live official page now points to the Fall 2026 weekend at Waterfront Park.",
+    "kilby-block-party": "Kilby Block Party is next-confirmed for May 2027."
+  };
+
+  var DATE_CONFIDENCE = {
+    "boston-calling": "next-confirmed",
+    "ultra-music-festival": "next-confirmed",
+    "edc-las-vegas": "next-confirmed",
+    "sxsw-music-festival": "next-confirmed",
+    "bottlerock-napa-valley": "next-confirmed",
+    "kilby-block-party": "next-confirmed"
+  };
+
+  function getGuideReviewDate(parkId) {
+    return SOURCE_REVIEWED_ON[parkId] || GUIDE_REVIEWED_ON;
+  }
+
+  function getSourceNote(parkId) {
+    return SOURCE_NOTES[parkId] || "";
+  }
+
+  function getDateConfidence(parkId) {
+    return DATE_CONFIDENCE[parkId] || "official";
+  }
+
   SEEDED_PARKS.forEach(function enrichPark(park) {
     var meta = ENRICHMENT[park.id];
-    if (!meta) return;
-    if (meta.searchMeta) park.searchMeta = meta.searchMeta;
-    if (meta.booking) park.booking = meta.booking;
+    var officialUrl = OFFICIAL_SOURCES[park.id];
+    if (meta && meta.searchMeta) park.searchMeta = meta.searchMeta;
+    if (meta && meta.booking) park.booking = meta.booking;
+    park.officialUrl = officialUrl || "";
+    park.lastReviewed = getGuideReviewDate(park.id);
+    park.sourceLabel = officialUrl ? "Official festival source" : "Source needed";
+    park.sourceNote = getSourceNote(park.id);
+    park.dateConfidence = getDateConfidence(park.id);
   });
 
   var SEEDED_PARK_IDS = SEEDED_PARKS.map(function mapParkId(park) { return park.id; });
 
   var SEEDED_VISITS = [];
 
+  function isSeededParkId(parkId) {
+    return SEEDED_PARK_IDS.indexOf(parkId) >= 0;
+  }
+
+  function normalizeCustomPark(park) {
+    var id = park && typeof park.id === "string" ? park.id.trim() : "";
+    if (!id) return null;
+
+    return Object.assign({
+      id: id,
+      name: park.name || id,
+      team: park.team || "Music Festival",
+      city: park.city || "Location TBD",
+      opened: null,
+      capacity: null,
+      roof: park.roof || "Mixed",
+      tier: park.tier || "B",
+      color: park.color || "#2563EB",
+      note: park.note || "Imported festival pack entry.",
+      ticketApproach: park.ticketApproach || "Verify ticket details with the official festival source before booking.",
+      transitNote: park.transitNote || "Confirm local transit, parking, and lodging before travel.",
+      coordinates: park.coordinates || { lat: 39.5, lng: -98.35 },
+      specialEvents: Array.isArray(park.specialEvents) ? park.specialEvents : ["Imported festival"],
+      officialUrl: park.officialUrl || "",
+      lastReviewed: park.lastReviewed || GUIDE_REVIEWED_ON,
+      sourceLabel: park.officialUrl ? "Official festival source" : "Imported source needed",
+      sourceNote: park.sourceNote || "Imported festival pack entry; verify before booking.",
+      dateConfidence: park.dateConfidence || "imported",
+      imported: true
+    }, park);
+  }
+
   function shouldRefreshParks(parks) {
     if (!Array.isArray(parks) || !parks.length) return true;
-    if (parks.length !== SEEDED_PARK_IDS.length) return true;
+    if (parks.length < SEEDED_PARK_IDS.length) return true;
 
     var storedIds = parks.map(function mapParkId(park) {
       return park && park.id;
     });
+
+    if (parks.some(function missingGuideFields(park) {
+      if (!park || !park.lastReviewed || park.officialUrl === undefined || park.sourceNote === undefined || park.dateConfidence === undefined) return true;
+      if (!isSeededParkId(park.id)) return false;
+      return park.officialUrl !== (OFFICIAL_SOURCES[park.id] || "") ||
+        park.lastReviewed !== getGuideReviewDate(park.id) ||
+        park.sourceNote !== getSourceNote(park.id) ||
+        park.dateConfidence !== getDateConfidence(park.id);
+    })) {
+      return true;
+    }
 
     return SEEDED_PARK_IDS.some(function isMissing(parkId) {
       return storedIds.indexOf(parkId) === -1;
@@ -188,8 +361,15 @@
       return cloneValue(parks);
     }
 
-    storage.set(KEYS.parks, SEEDED_PARKS);
-    return cloneValue(SEEDED_PARKS);
+    var customParks = Array.isArray(parks)
+      ? parks.filter(function keepCustom(park) {
+        return park && park.id && !isSeededParkId(park.id);
+      }).map(normalizeCustomPark).filter(Boolean)
+      : [];
+
+    var nextParks = SEEDED_PARKS.concat(customParks);
+    storage.set(KEYS.parks, nextParks);
+    return cloneValue(nextParks);
   }
 
   function initializeActiveTrip() {

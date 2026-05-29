@@ -25,6 +25,8 @@
         context: "context",
         shortlistFestivalIds: "shortlistFestivalIds",
         festivalJournalEntries: "festivalJournalEntries",
+        festivalJournalHistory: "festivalJournalHistory",
+        festivalCustomSchedule: "festivalCustomSchedule",
         sharedTripImports: "sharedTripImports",
         setkeeperDraft: "setkeeperDraft"
       }
