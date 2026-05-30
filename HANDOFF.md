@@ -32,7 +32,9 @@ Main flows:
 7. Mark the festival attended
 8. Recheck official source links before booking
 9. Preview and apply the Summer 2026 outreach pack when production, vendor, sponsor, or labor scouting is needed
-10. Prioritize outreach with ops opportunity scores and source verification flags
+10. Preview and apply the ChatGPT Deep Research Summer Music Festivals 2026 pack when the research output should seed missing opportunities
+11. Preview and apply the ChatGPT Deep Research International Summer Festivals 2026 pack when international opportunities should be added
+12. Prioritize outreach with ops opportunity scores and any remaining non-canonical source flags
 
 ## Key Files
 
@@ -44,27 +46,31 @@ Main flows:
    Generated monogram marks for festival scenes
 4. `outreach-pack.js`
    Built-in Summer 2026 outreach pack harvested from local research artifacts
-5. `index.html`
+5. `deep-research-pack.js`
+   Built-in canonical ChatGPT Deep Research Summer Music Festivals 2026 pack
+6. `international-research-pack.js`
+   Built-in canonical ChatGPT Deep Research International Summer Festivals 2026 pack with separate entries for non-contiguous festival weekends
+7. `index.html`
    Dashboard
-6. `festivals.html`
+8. `festivals.html`
    Explorer
-7. `calendar.html`
+9. `calendar.html`
    Calendar
-8. `route.html`
+10. `route.html`
    Route board
-9. `setkeeper.html`
+11. `setkeeper.html`
    Setkeeper journal
-10. `shared.css`
+12. `shared.css`
    Shared tokens and shell styles
-11. `shared/js/core/`
+13. `shared/js/core/`
    Shared config, storage, utility, and device helpers required by the static pages
-12. `SOURCE_AUDIT.md`
+14. `SOURCE_AUDIT.md`
    Official source audit trail for seeded date ranges
-13. `audit.html`
+15. `audit.html`
    Operations page for source audit, verification queue, backup, restore, reset, diagnostics, and festival pack preview/apply
-14. `package.json`
+16. `package.json`
    Provides `npm run validate` production smoke validation
-15. `PRODUCTION_READINESS.md`
+17. `PRODUCTION_READINESS.md`
    Release checklist, source policy, privacy notes, and known constraints
 
 ## Storage Notes
@@ -103,4 +109,5 @@ Verified on 2026-05-29:
 1. Replace generated marks with real festival-safe visual assets only when rights/source are clear
 2. Add CSV and print export to the calendar view using the preview prototype as reference
 3. Add manual verification status controls so reviewed queue items can be resolved in local state
-4. Add a lightweight release note page if this becomes a public-facing maintained project
+4. Add a manual canonical/non-canonical toggle if future research packs need local override controls
+5. Add a lightweight release note page if this becomes a public-facing maintained project

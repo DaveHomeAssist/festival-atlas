@@ -353,6 +353,8 @@
       </div>
       <div class="ops-actions">
         <button class="btn btn-export" id="importOutreachPack">Preview outreach pack</button>
+        <button class="btn btn-export" id="importResearchPack">Preview Deep Research</button>
+        <button class="btn btn-export" id="importInternationalPack">Preview International</button>
         <button class="btn btn-primary" id="applyImportPreview" hidden>Apply preview</button>
       </div>
       <label class="section-label" for="backupFile">Restore backup</label>
@@ -381,6 +383,8 @@
 <script src="device.js"></script>
 <script src="app.js"></script>
 <script src="outreach-pack.js"></script>
+<script src="deep-research-pack.js"></script>
+<script src="international-research-pack.js"></script>
 <script>
 (function initAuditPage() {
   const app = window.FA.app;
@@ -487,7 +491,7 @@
     applyPreviewBtn.hidden = false;
     previewEl.innerHTML = `
       <div class="preview-title">${escapeHtml(preview.label)}</div>
-      <p class="ops-copy">Review creates, merges, schedule writes, verification flags, and opportunity scores before applying this pack.</p>
+      <p class="ops-copy">Review creates, merges, schedule writes, source flags, and opportunity scores before applying this pack.</p>
       <div class="preview-grid">
         <div class="preview-metric"><strong>${preview.created}</strong><span>Create</span></div>
         <div class="preview-metric"><strong>${preview.merged}</strong><span>Merge</span></div>
@@ -512,7 +516,10 @@
     pendingPack = pack;
     pendingPreview = app.previewFestivalPack(pack);
     renderPackPreview(pendingPreview);
-    setStatus(`${pendingPreview.label} preview ready: ${pendingPreview.created} new, ${pendingPreview.merged} merged, ${pendingPreview.verificationNeeded} need verification.`);
+    const sourceFlagText = pendingPreview.verificationNeeded
+      ? `${pendingPreview.verificationNeeded} source flags`
+      : "canonical source status clean";
+    setStatus(`${pendingPreview.label} preview ready: ${pendingPreview.created} new, ${pendingPreview.merged} merged, ${sourceFlagText}.`);
   }
 
   document.querySelector(".audit-toolbar").addEventListener("click", (event) => {
@@ -537,6 +544,24 @@
     const pack = window.FA.outreachPack;
     if (!pack || !Array.isArray(pack.festivals)) {
       setStatus("Outreach pack is not available.");
+      return;
+    }
+    setPendingPack(pack);
+  });
+
+  document.getElementById("importResearchPack").addEventListener("click", () => {
+    const pack = window.FA.deepResearchPack;
+    if (!pack || !Array.isArray(pack.festivals)) {
+      setStatus("Deep Research festival pack is not available.");
+      return;
+    }
+    setPendingPack(pack);
+  });
+
+  document.getElementById("importInternationalPack").addEventListener("click", () => {
+    const pack = window.FA.internationalResearchPack;
+    if (!pack || !Array.isArray(pack.festivals)) {
+      setStatus("International research pack is not available.");
       return;
     }
     setPendingPack(pack);

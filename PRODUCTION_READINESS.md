@@ -1,6 +1,6 @@
 # Festival Atlas Production Readiness
 
-Status date: 2026-05-29
+Status date: 2026-05-30
 
 ## Release Checklist
 
@@ -9,9 +9,10 @@ Status date: 2026-05-29
 3. Commit the release-ready changes.
 4. Deploy to the configured static host.
 5. Open the deployed `index.html`, `festivals.html`, `calendar.html`, `route.html`, `audit.html`, and `setkeeper.html`.
-6. Hard refresh once after deploy so the `festival-atlas-v6` service worker cache activates.
+6. Hard refresh once after deploy so the `festival-atlas-v8` service worker cache activates.
 
 Latest deployed smoke: pass on 2026-05-29 at `https://davehomeassist.github.io/festival-atlas/`.
+Latest local validation: pass on 2026-05-30 with domestic and international ChatGPT Deep Research pack import coverage.
 
 ## Production Controls
 
@@ -25,7 +26,9 @@ Latest deployed smoke: pass on 2026-05-29 at `https://davehomeassist.github.io/f
 6. Festival pack preview with created, merged, schedule-write, score, and verification counts
 7. Explicit apply step for previewed festival packs
 8. Built-in Summer 2026 outreach pack preview
-9. Source verification queue ranked by ops opportunity score
+9. Built-in ChatGPT Deep Research Summer Music Festivals 2026 pack preview
+10. Built-in ChatGPT Deep Research International Summer Festivals 2026 pack preview
+11. Source verification queue ranked by ops opportunity score
 
 Backups include route, visits, notes, shortlist, Setkeeper context, journal drafts, attended history, theme, imported ops intelligence, and the current seeded catalog snapshot.
 
@@ -47,7 +50,11 @@ Festival packs accept JSON shaped like:
 }
 ```
 
-Festival packs may also include an `ops` object with public outreach fields such as venue, organizer, contact path, production notes, event hours, market window, opportunity signals, watch items, ticket URL, and source links. Imported ops fields merge onto existing seeded festivals without replacing canonical date/source records unless a pack explicitly requests schedule overwrite. The audit page now previews those changes before import and flags records that still need source verification.
+Festival packs may also include an `ops` object with public outreach fields such as venue, organizer, contact path, production notes, event hours, market window, opportunity signals, watch items, ticket URL, and source links. Imported ops fields merge onto existing seeded festivals without replacing canonical date/source records unless a pack explicitly requests schedule overwrite. The audit page previews those changes before import and flags only records that are explicitly non-canonical.
+
+The ChatGPT Deep Research Summer Music Festivals 2026 pack is canonical app data. It imports 36 research rows captured in Notion, merges 13 seeded festivals by stable IDs, creates 23 missing festivals, writes 74 custom schedule sessions for new rows, and does not add Deep Research rows to the source verification queue.
+
+The ChatGPT Deep Research International Summer Festivals 2026 pack is canonical app data. It imports 29 international rows from the local Markdown report, creates 105 custom schedule sessions, preserves non-contiguous weekend splits such as Tomorrowland, Rock in Japan, and Rock in Rio as separate entries, and does not add those rows to the source verification queue.
 
 ## Source Policy
 

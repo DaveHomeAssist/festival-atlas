@@ -19,3 +19,6 @@ Original prompt: copy the entire mlb repo and reorient it for music festivals
 [2026-05-29] [MUSIC FESTIVALS] [feat] Add calendar month view with route, saved, attended, and next-confirmed filters
 [2026-05-29] [MUSIC FESTIVALS] [feat] Add Summer 2026 ops outreach pack with import, merge, and detail-card intelligence
 [2026-05-29] [MUSIC FESTIVALS] [showready] Add calendar search/month jump/stats, import preview diff, ops scoring, verification queue, and mobile bottom tabs
+[2026-05-30] [MUSIC FESTIVALS] [feat] Add ChatGPT Deep Research festival import pack with preview, merge, schedules, and canonical coverage
+[2026-05-30] [MUSIC FESTIVALS] [feat] Add ChatGPT Deep Research international import pack with split-weekend schedules and canonical coverage
+[2026-05-30] [MUSIC FESTIVALS] [showready] Treat domestic and international Deep Research packs as canonical source-linked data

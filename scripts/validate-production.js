@@ -76,6 +76,8 @@ async function validateBrowser() {
     const nextConfirmed = rows.filter((row) => row.dataStatus === "next-confirmed").length;
     const verificationQueue = window.FA.app.getSourceVerificationQueue();
     const preview = window.FA.app.previewFestivalPack(window.FA.outreachPack);
+    const researchPreview = window.FA.app.previewFestivalPack(window.FA.deepResearchPack);
+    const internationalPreview = window.FA.app.previewFestivalPack(window.FA.internationalResearchPack);
     return {
       rows: rows.length,
       reviewNeeded: diagnostics.counts.sourceReviewNeeded,
@@ -85,10 +87,24 @@ async function validateBrowser() {
       crssdNote: crssd && crssd.sourceNote,
       backupApp: window.FA.app.getBackupPayload().app,
       outreachPackCount: window.FA.outreachPack && window.FA.outreachPack.festivals.length,
+      researchPackCount: window.FA.deepResearchPack && window.FA.deepResearchPack.festivals.length,
+      internationalPackCount: window.FA.internationalResearchPack && window.FA.internationalResearchPack.festivals.length,
+      hasResearchButton: Boolean(document.getElementById("importResearchPack")),
+      hasInternationalButton: Boolean(document.getElementById("importInternationalPack")),
       previewCreated: preview.created,
       previewMerged: preview.merged,
       previewRows: preview.rows.length,
       previewVerify: preview.verificationNeeded,
+      researchPreviewCreated: researchPreview.created,
+      researchPreviewMerged: researchPreview.merged,
+      researchPreviewRows: researchPreview.rows.length,
+      researchPreviewVerify: researchPreview.verificationNeeded,
+      researchPreviewScheduleWrites: researchPreview.scheduleWrites,
+      internationalPreviewCreated: internationalPreview.created,
+      internationalPreviewMerged: internationalPreview.merged,
+      internationalPreviewRows: internationalPreview.rows.length,
+      internationalPreviewVerify: internationalPreview.verificationNeeded,
+      internationalPreviewScheduleWrites: internationalPreview.scheduleWrites,
       verificationRows: verificationQueue.length
     };
   });
@@ -100,10 +116,24 @@ async function validateBrowser() {
   assert(String(auditProbe.crssdNote || "").includes("Fall 2026"), "CRSSD source note should render");
   assert(auditProbe.backupApp === "Festival Atlas", "backup payload should be labeled");
   assert(auditProbe.outreachPackCount === 20, `outreach pack should expose 20 festivals, got ${auditProbe.outreachPackCount}`);
+  assert(auditProbe.researchPackCount === 36, `Deep Research pack should expose 36 festivals, got ${auditProbe.researchPackCount}`);
+  assert(auditProbe.internationalPackCount === 29, `International research pack should expose 29 festivals, got ${auditProbe.internationalPackCount}`);
+  assert(auditProbe.hasResearchButton, "audit should include Deep Research pack preview control");
+  assert(auditProbe.hasInternationalButton, "audit should include international research pack preview control");
   assert(auditProbe.previewCreated >= 6, "outreach preview should include created festivals");
   assert(auditProbe.previewMerged >= 10, "outreach preview should include merged festivals");
   assert(auditProbe.previewRows === 20, "outreach preview should include all pack rows");
   assert(auditProbe.previewVerify >= 1, "outreach preview should flag verification work");
+  assert(auditProbe.researchPreviewCreated >= 15, "Deep Research preview should include created festivals");
+  assert(auditProbe.researchPreviewMerged >= 10, "Deep Research preview should include merged festivals");
+  assert(auditProbe.researchPreviewRows === 36, "Deep Research preview should include all pack rows");
+  assert(auditProbe.researchPreviewVerify === 0, "canonical Deep Research preview should not add source verification work");
+  assert(auditProbe.researchPreviewScheduleWrites >= 15, "Deep Research preview should add custom schedule rows for new festivals");
+  assert(auditProbe.internationalPreviewCreated === 29, `international preview should create 29 festivals, got ${auditProbe.internationalPreviewCreated}`);
+  assert(auditProbe.internationalPreviewMerged === 0, "international preview should not merge seeded festivals");
+  assert(auditProbe.internationalPreviewRows === 29, "international preview should include all pack rows");
+  assert(auditProbe.internationalPreviewVerify === 0, "canonical international preview should not add source verification work");
+  assert(auditProbe.internationalPreviewScheduleWrites === 29, "international preview should add custom schedule rows for every international festival");
   const outreachProbe = await audit.evaluate(() => {
     const result = window.FA.app.importFestivalPack(window.FA.outreachPack);
     const cma = window.FA.app.getParkById("cma-fest");
@@ -139,6 +169,114 @@ async function validateBrowser() {
   assert(outreachProbe.opsCount >= 20, "diagnostics should count imported ops intelligence");
   assert(outreachProbe.verificationCount >= 1, "diagnostics should count source verification queue");
   assert(outreachProbe.hasOceansCalling, "outreach pack should add September calendar events");
+  const researchProbe = await audit.evaluate(() => {
+    const pack = window.FA.deepResearchPack;
+    const result = window.FA.app.importFestivalPack(pack);
+    const mountain = window.FA.app.getParkById("mountain-music-festival");
+    const arc = window.FA.app.getParkById("arc-music-festival");
+    const gov = window.FA.app.getParkById("governors-ball");
+    const elements = window.FA.app.getParkById("elements-music-arts-festival");
+    const diagnosticsBeforeReset = window.FA.app.createDiagnostics();
+    const juneEvents = window.FA.app.getFestivalCalendarEvents({
+      startDate: "2026-06-01",
+      endDate: "2026-06-30"
+    });
+    const septemberEvents = window.FA.app.getFestivalCalendarEvents({
+      startDate: "2026-09-01",
+      endDate: "2026-09-30"
+    });
+    const mountainRange = window.FA.app.getFestivalDateRange("mountain-music-festival").label;
+    const arcRange = window.FA.app.getFestivalDateRange("arc-music-festival").label;
+    const duplicateElementsId = Boolean(window.FA.app.getParkById("elements-music-and-arts-festival"));
+    const duplicateSeaId = Boolean(window.FA.app.getParkById("sea-hear-now-festival"));
+    const countBeforeReset = diagnosticsBeforeReset.counts.festivals;
+    window.FA.app.resetLocalData();
+    return {
+      created: result.created,
+      merged: result.merged,
+      sessions: result.sessions,
+      mountainImported: Boolean(mountain),
+      arcImported: Boolean(arc),
+      mountainRange,
+      arcRange,
+      govResearchSource: Boolean(gov && gov.ops && (gov.ops.sources || []).some((source) => String(source.url || "").includes("notion.so"))),
+      elementsMerged: Boolean(elements && elements.ops && elements.ops.packId === pack.id),
+      duplicateElementsId,
+      duplicateSeaId,
+      opsCount: diagnosticsBeforeReset.counts.opsIntelligence,
+      verificationCount: diagnosticsBeforeReset.counts.sourceVerificationQueue,
+      hasMountainJune: juneEvents.some((event) => event.festivalId === "mountain-music-festival"),
+      hasArcSeptember: septemberEvents.some((event) => event.festivalId === "arc-music-festival"),
+      countBeforeReset,
+      countAfterReset: window.FA.app.createDiagnostics().counts.festivals
+    };
+  });
+  assert(researchProbe.created >= 15, `Deep Research pack should create missing festivals, got ${researchProbe.created}`);
+  assert(researchProbe.merged >= 10, `Deep Research pack should merge seeded festivals, got ${researchProbe.merged}`);
+  assert(researchProbe.sessions >= 70, `Deep Research pack should create custom schedule sessions, got ${researchProbe.sessions}`);
+  assert(researchProbe.mountainImported, "Deep Research pack should import Mountain Music Festival");
+  assert(researchProbe.arcImported, "Deep Research pack should import ARC Music Festival");
+  assert(researchProbe.mountainRange === "Jun 4 - 6, 2026", `Mountain Music Festival date range mismatch: ${researchProbe.mountainRange}`);
+  assert(researchProbe.arcRange === "Sep 4 - 7, 2026", `ARC Music Festival date range mismatch: ${researchProbe.arcRange}`);
+  assert(researchProbe.govResearchSource, "Deep Research pack should merge Gov Ball source intelligence");
+  assert(researchProbe.elementsMerged, "Deep Research pack should merge Elements by seeded app ID");
+  assert(!researchProbe.duplicateElementsId, "Deep Research pack should not create duplicate Elements IDs");
+  assert(!researchProbe.duplicateSeaId, "Deep Research pack should not create duplicate Sea.Hear.Now IDs");
+  assert(researchProbe.opsCount >= 30, "diagnostics should count Deep Research ops intelligence");
+  assert(researchProbe.verificationCount === auditProbe.verificationNeeded, "canonical Deep Research import should not add source verification rows");
+  assert(researchProbe.hasMountainJune, "Deep Research pack should add June calendar events");
+  assert(researchProbe.hasArcSeptember, "Deep Research pack should add September calendar events");
+  assert(researchProbe.countBeforeReset > researchProbe.countAfterReset, "reset should remove Deep Research imported festivals");
+  const internationalProbe = await audit.evaluate(() => {
+    const pack = window.FA.internationalResearchPack;
+    const result = window.FA.app.importFestivalPack(pack);
+    const download = window.FA.app.getParkById("download-2026");
+    const mawazine = window.FA.app.getParkById("mawazine-2026");
+    const diagnosticsBeforeReset = window.FA.app.createDiagnostics();
+    const juneEvents = window.FA.app.getFestivalCalendarEvents({
+      startDate: "2026-06-01",
+      endDate: "2026-06-30"
+    });
+    const septemberEvents = window.FA.app.getFestivalCalendarEvents({
+      startDate: "2026-09-01",
+      endDate: "2026-09-30"
+    });
+    const downloadRange = window.FA.app.getFestivalDateRange("download-2026").label;
+    const tomorrowlandRange = window.FA.app.getFestivalDateRange("tomorrowland-belgium-w2-2026").label;
+    const countBeforeReset = diagnosticsBeforeReset.counts.festivals;
+    window.FA.app.resetLocalData();
+    return {
+      created: result.created,
+      merged: result.merged,
+      sessions: result.sessions,
+      downloadImported: Boolean(download),
+      downloadRange,
+      tomorrowlandRange,
+      downloadCity: download && download.city,
+      downloadLatitude: download && download.coordinates && download.coordinates.lat,
+      mawazineCanonical: Boolean(mawazine && mawazine.ops && mawazine.ops.status === "Canonical ChatGPT Deep Research record" && mawazine.dateConfidence === "canonical"),
+      opsCount: diagnosticsBeforeReset.counts.opsIntelligence,
+      verificationCount: diagnosticsBeforeReset.counts.sourceVerificationQueue,
+      hasDownloadJune: juneEvents.some((event) => event.festivalId === "download-2026"),
+      hasRockInRioSeptember: septemberEvents.some((event) => event.festivalId === "rock-in-rio-rio-w1-2026"),
+      countBeforeReset,
+      countAfterReset: window.FA.app.createDiagnostics().counts.festivals
+    };
+  });
+  assert(internationalProbe.created === 29, `international pack should create 29 festivals, got ${internationalProbe.created}`);
+  assert(internationalProbe.merged === 0, `international pack should not merge seeded festivals, got ${internationalProbe.merged}`);
+  assert(internationalProbe.sessions === 105, `international pack should create 105 custom schedule sessions, got ${internationalProbe.sessions}`);
+  assert(internationalProbe.downloadImported, "international pack should import Download Festival");
+  assert(internationalProbe.downloadRange === "Jun 10 - 14, 2026", `Download Festival date range mismatch: ${internationalProbe.downloadRange}`);
+  assert(internationalProbe.tomorrowlandRange === "Jul 24 - 26, 2026", `Tomorrowland Weekend 2 date range mismatch: ${internationalProbe.tomorrowlandRange}`);
+  assert(internationalProbe.downloadCity === "Donington, United Kingdom", "international pack should preserve country in city labels");
+  assert(internationalProbe.downloadLatitude && internationalProbe.downloadLatitude !== 39.5, "international pack should provide non-default coordinates");
+  assert(internationalProbe.mawazineCanonical, "international pack should import Mawazine as canonical");
+  assert(internationalProbe.opsCount >= 29, "diagnostics should count international ops intelligence");
+  assert(internationalProbe.verificationCount === auditProbe.verificationNeeded, "canonical international import should not add source verification rows");
+  assert(internationalProbe.hasDownloadJune, "international pack should add June calendar events");
+  assert(internationalProbe.hasRockInRioSeptember, "international pack should add September calendar events");
+  assert(internationalProbe.countBeforeReset > internationalProbe.countAfterReset, "reset should remove international imported festivals");
   const importProbe = await audit.evaluate(() => {
     window.FA.app.importFestivalPack({
       festivals: [{
@@ -268,7 +406,7 @@ async function validateBrowser() {
 }
 
 (async () => {
-  ["data.js", "schedule.js", "app.js", "config.js", "sw.js"].forEach((file) => {
+  ["data.js", "schedule.js", "app.js", "config.js", "sw.js", "outreach-pack.js", "deep-research-pack.js", "international-research-pack.js"].forEach((file) => {
     run("node", ["--check", file]);
   });
 

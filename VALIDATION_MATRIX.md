@@ -24,7 +24,9 @@ Core planner validation for the copied festival fork.
 | 14 | `SOURCE_AUDIT.md` | Seeded catalog has an official-source audit trail and unresolved items are explicit |
 | 15 | `audit.html` | Source audit, backup, restore, reset, diagnostics, and festival pack import controls render without errors |
 | 16 | `outreach-pack.js` | Summer 2026 outreach pack imports, merges ops intelligence, adds new calendar events, and can be reset |
-| 17 | `npm run validate` | Syntax and browser regression checks run from a single command |
+| 17 | `deep-research-pack.js` | Canonical ChatGPT Deep Research Summer Music Festivals 2026 pack previews 36 rows, merges seeded IDs, creates missing festivals, writes schedules, and does not add verification work |
+| 18 | `international-research-pack.js` | Canonical ChatGPT Deep Research International Summer Festivals 2026 pack previews 29 rows, creates international festivals, and writes split-weekend schedules without adding verification work |
+| 19 | `npm run validate` | Syntax and browser regression checks run from a single command |
 
 ## Latest Run
 
@@ -40,3 +42,5 @@ Core planner validation for the copied festival fork.
 | 2026-05-29 | pass | Calendar validation covered visible month events, June 2026 helper events, next-confirmed events, active nav, and mobile render |
 | 2026-05-29 | pass | Outreach pack validation covered 20 pack records, created/merged imports, ops metadata, September calendar events, and reset cleanup |
 | 2026-05-29 | pass | Showready validation covered import preview/diff helpers, ops opportunity scoring, verification queue counts, calendar search/month jump/stats, and fixed mobile bottom tabs |
+| 2026-05-30 | pass | Canonical ChatGPT Deep Research pack validation covered 36 research rows captured in Notion, audit preview control, 23 created festivals, 13 seeded merges, 74 custom schedule sessions, duplicate-ID guards, no added verification rows, and reset cleanup |
+| 2026-05-30 | pass | Canonical International Deep Research pack validation covered 29 rows, 105 custom schedule sessions, Tomorrowland/Rock in Japan/Rock in Rio split entries, no added verification rows, non-default coordinates, and reset cleanup |

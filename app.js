@@ -1258,6 +1258,33 @@
       var hasExistingSessions = existingIds.indexOf(park.id) >= 0 && getGamesByPark(park.id).length > 0;
       var changes = previewChangedFields(existing, merged);
       var score = getOpsOpportunityScore(merged);
+      var guideMeta = getFestivalGuideMeta(merged);
+
+      if (!existing && packSessions.sessions.length) {
+        var previewDates = packSessions.sessions.map(function mapDate(session) { return session.d; }).filter(Boolean).sort();
+        if (previewDates.length) {
+          guideMeta = Object.assign({}, guideMeta, {
+            dateStart: previewDates[0],
+            dateEnd: previewDates[previewDates.length - 1],
+            dateCount: previewDates.length,
+            dateRangeLabel: formatRawDateRange({
+              start: previewDates[0],
+              end: previewDates[previewDates.length - 1],
+              count: previewDates.length,
+              years: previewDates.reduce(function collectYears(list, date) {
+                var year = String(date).slice(0, 4);
+                if (list.indexOf(year) === -1) list.push(year);
+                return list;
+              }, [])
+            }),
+            dataStatus: merged.officialUrl ? "source-linked" : "needs-review",
+            dataLabel: merged.officialUrl ? "Source linked" : "Needs source",
+            officialUrl: merged.officialUrl || "",
+            sourceNote: merged.sourceNote || "",
+            dateConfidence: merged.dateConfidence || guideMeta.dateConfidence
+          });
+        }
+      }
 
       return {
         id: park.id,
@@ -1268,7 +1295,7 @@
         changes: changes.slice(0, 6),
         sessionCount: packSessions.sessions.length,
         scheduleAction: packSessions.sessions.length && (!hasExistingSessions || shouldOverwriteSchedule) ? "write" : (hasExistingSessions ? "preserve" : "none"),
-        sourceNeedsVerification: needsSourceVerification(merged, getFestivalGuideMeta(merged), merged.ops),
+        sourceNeedsVerification: needsSourceVerification(merged, guideMeta, merged.ops),
         score: score.score,
         scoreTier: score.tier,
         warnings: score.warnings
