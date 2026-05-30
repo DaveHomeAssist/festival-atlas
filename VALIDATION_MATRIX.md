@@ -39,3 +39,4 @@ Core planner validation for the copied festival fork.
 | 2026-05-29 | pass | Deployed GitHub Pages smoke passed for home, audit, festivals review filter, route, and Setkeeper at `https://davehomeassist.github.io/festival-atlas/` |
 | 2026-05-29 | pass | Calendar validation covered visible month events, June 2026 helper events, next-confirmed events, active nav, and mobile render |
 | 2026-05-29 | pass | Outreach pack validation covered 20 pack records, created/merged imports, ops metadata, September calendar events, and reset cleanup |
+| 2026-05-29 | pass | Showready validation covered import preview/diff helpers, ops opportunity scoring, verification queue counts, calendar search/month jump/stats, and fixed mobile bottom tabs |

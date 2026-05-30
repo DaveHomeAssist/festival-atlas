@@ -2,18 +2,20 @@
 
 ## Project Summary
 
-Festival Atlas is a static local first music festival planner. It now ships as a five page prototype:
+Festival Atlas is a static local first music festival planner. It now ships as a six page prototype:
 
 1. `index.html`
    Dashboard with progress, happening-soon picks, shortlist, and route context
 2. `festivals.html`
    Festival explorer with filters, source status, review scope, detail panel, and route actions
 3. `calendar.html`
-   Month calendar for festival sessions, route stops, saved targets, and next-confirmed dates
+   Month calendar with search, month jump, stats, route stops, saved targets, and next-confirmed dates
 4. `route.html`
    Route board with reorderable stops, trip notes, source links, and travel leg planning
 5. `setkeeper.html`
    Setkeeper journal for attended history, standout sets, and session export
+6. `audit.html`
+   Operations surface for source audit, verification queue, backups, diagnostics, and import preview/apply
 
 ## Current Product Shape
 
@@ -29,7 +31,8 @@ Main flows:
 6. Journal the stop in Setkeeper and preserve attended history
 7. Mark the festival attended
 8. Recheck official source links before booking
-9. Import the Summer 2026 outreach pack when production, vendor, sponsor, or labor scouting is needed
+9. Preview and apply the Summer 2026 outreach pack when production, vendor, sponsor, or labor scouting is needed
+10. Prioritize outreach with ops opportunity scores and source verification flags
 
 ## Key Files
 
@@ -58,7 +61,7 @@ Main flows:
 12. `SOURCE_AUDIT.md`
    Official source audit trail for seeded date ranges
 13. `audit.html`
-   Operations page for source audit, backup, restore, reset, diagnostics, and festival pack import
+   Operations page for source audit, verification queue, backup, restore, reset, diagnostics, and festival pack preview/apply
 14. `package.json`
    Provides `npm run validate` production smoke validation
 15. `PRODUCTION_READINESS.md`
@@ -98,6 +101,6 @@ Verified on 2026-05-29:
 ## Recommended Next Work
 
 1. Replace generated marks with real festival-safe visual assets only when rights/source are clear
-2. Add a preview/diff step before applying imported festival packs
-3. Add search and CSV export to the calendar view using the preview prototype as reference
+2. Add CSV and print export to the calendar view using the preview prototype as reference
+3. Add manual verification status controls so reviewed queue items can be resolved in local state
 4. Add a lightweight release note page if this becomes a public-facing maintained project

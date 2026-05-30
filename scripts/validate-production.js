@@ -74,27 +74,41 @@ async function validateBrowser() {
     const diagnostics = window.FA.app.createDiagnostics();
     const crssd = rows.find((row) => row.id === "crssd-festival");
     const nextConfirmed = rows.filter((row) => row.dataStatus === "next-confirmed").length;
+    const verificationQueue = window.FA.app.getSourceVerificationQueue();
+    const preview = window.FA.app.previewFestivalPack(window.FA.outreachPack);
     return {
       rows: rows.length,
       reviewNeeded: diagnostics.counts.sourceReviewNeeded,
+      verificationNeeded: diagnostics.counts.sourceVerificationQueue,
       nextConfirmed,
       crssdLabel: crssd && crssd.dateRangeLabel,
       crssdNote: crssd && crssd.sourceNote,
       backupApp: window.FA.app.getBackupPayload().app,
-      outreachPackCount: window.FA.outreachPack && window.FA.outreachPack.festivals.length
+      outreachPackCount: window.FA.outreachPack && window.FA.outreachPack.festivals.length,
+      previewCreated: preview.created,
+      previewMerged: preview.merged,
+      previewRows: preview.rows.length,
+      previewVerify: preview.verificationNeeded,
+      verificationRows: verificationQueue.length
     };
   });
   assert(auditProbe.rows > 40, "audit should include seeded catalog");
   assert(auditProbe.reviewNeeded === 0, `source review queue should be empty, got ${auditProbe.reviewNeeded}`);
+  assert(auditProbe.verificationNeeded >= auditProbe.nextConfirmed, "verification queue should include next-confirmed rows");
   assert(auditProbe.nextConfirmed >= 1, "audit should include next-confirmed rows");
   assert(auditProbe.crssdLabel === "Sep 26 - 27, 2026", `CRSSD label mismatch: ${auditProbe.crssdLabel}`);
   assert(String(auditProbe.crssdNote || "").includes("Fall 2026"), "CRSSD source note should render");
   assert(auditProbe.backupApp === "Festival Atlas", "backup payload should be labeled");
   assert(auditProbe.outreachPackCount === 20, `outreach pack should expose 20 festivals, got ${auditProbe.outreachPackCount}`);
+  assert(auditProbe.previewCreated >= 6, "outreach preview should include created festivals");
+  assert(auditProbe.previewMerged >= 10, "outreach preview should include merged festivals");
+  assert(auditProbe.previewRows === 20, "outreach preview should include all pack rows");
+  assert(auditProbe.previewVerify >= 1, "outreach preview should flag verification work");
   const outreachProbe = await audit.evaluate(() => {
     const result = window.FA.app.importFestivalPack(window.FA.outreachPack);
     const cma = window.FA.app.getParkById("cma-fest");
     const gov = window.FA.app.getParkById("governors-ball");
+    const cmaScore = window.FA.app.getOpsOpportunityScore(cma);
     const northCoastRange = window.FA.app.getFestivalDateRange("north-coast-music-festival").label;
     const diagnosticsBeforeReset = window.FA.app.createDiagnostics();
     const septemberEvents = window.FA.app.getFestivalCalendarEvents({
@@ -107,8 +121,11 @@ async function validateBrowser() {
       merged: result.merged,
       cmaOps: cma && cma.ops && cma.ops.opsModel,
       govOps: gov && gov.ops && gov.ops.publicContact,
+      cmaScore: cmaScore.score,
+      cmaScoreTier: cmaScore.tier,
       northCoastRange,
       opsCount: diagnosticsBeforeReset.counts.opsIntelligence,
+      verificationCount: diagnosticsBeforeReset.counts.sourceVerificationQueue,
       hasOceansCalling: septemberEvents.some((event) => event.festivalId === "oceans-calling")
     };
   });
@@ -116,8 +133,11 @@ async function validateBrowser() {
   assert(outreachProbe.merged >= 10, `outreach pack should merge existing festivals, got ${outreachProbe.merged}`);
   assert(String(outreachProbe.cmaOps || "").includes("Citywide"), "CMA ops intelligence should be preserved");
   assert(String(outreachProbe.govOps || "").includes("partners@govball.com"), "Gov Ball public contact should be preserved");
+  assert(outreachProbe.cmaScore >= 60, `CMA ops score should be actionable, got ${outreachProbe.cmaScore}`);
+  assert(["Prime", "Strong"].includes(outreachProbe.cmaScoreTier), "CMA ops tier should be Prime or Strong");
   assert(outreachProbe.northCoastRange === "Sep 4 - 6, 2026", `North Coast date range mismatch: ${outreachProbe.northCoastRange}`);
   assert(outreachProbe.opsCount >= 20, "diagnostics should count imported ops intelligence");
+  assert(outreachProbe.verificationCount >= 1, "diagnostics should count source verification queue");
   assert(outreachProbe.hasOceansCalling, "outreach pack should add September calendar events");
   const importProbe = await audit.evaluate(() => {
     window.FA.app.importFestivalPack({
@@ -154,6 +174,12 @@ async function validateBrowser() {
 
   const calendar = await openPage("calendar.html");
   const calendarProbe = await calendar.evaluate(() => {
+    const monthJump = document.getElementById("monthJump");
+    const search = document.getElementById("calendarSearch");
+    monthJump.value = "2026-06";
+    monthJump.dispatchEvent(new Event("change", { bubbles: true }));
+    search.value = "Bonnaroo";
+    search.dispatchEvent(new Event("input", { bubbles: true }));
     const juneEvents = window.FA.app.getFestivalCalendarEvents({
       startDate: "2026-06-01",
       endDate: "2026-06-30"
@@ -165,6 +191,10 @@ async function validateBrowser() {
     });
     return {
       renderedEvents: document.querySelectorAll(".event-chip").length,
+      statsTiles: document.querySelectorAll(".calendar-stat").length,
+      monthValue: monthJump.value,
+      searchValue: search.value,
+      visibleText: document.getElementById("calendarGrid").textContent,
       juneEvents: juneEvents.length,
       hasBonnaroo: juneEvents.some((event) => event.festivalId === "bonnaroo"),
       nextEvents: nextEvents.length,
@@ -172,6 +202,10 @@ async function validateBrowser() {
     };
   });
   assert(calendarProbe.renderedEvents > 0, "calendar should render visible events");
+  assert(calendarProbe.statsTiles === 5, "calendar should render stats tiles");
+  assert(calendarProbe.monthValue === "2026-06", "calendar should support month jump");
+  assert(calendarProbe.searchValue === "Bonnaroo", "calendar should support search");
+  assert(calendarProbe.visibleText.includes("Bonnaroo"), "calendar search should show Bonnaroo");
   assert(calendarProbe.juneEvents > 0, "calendar helper should return June events");
   assert(calendarProbe.hasBonnaroo, "calendar helper should include Bonnaroo in June 2026");
   assert(calendarProbe.nextEvents >= 1, "calendar helper should include next-confirmed 2027 events");
@@ -209,6 +243,19 @@ async function validateBrowser() {
     await page.goto(base + file, { waitUntil: "load" });
     await page.waitForTimeout(120);
     assert((await page.textContent("body")).trim().length > 200, `${file} mobile should render content`);
+    const navProbe = await page.evaluate(() => {
+      const nav = document.querySelector(".site-nav");
+      const styles = nav ? getComputedStyle(nav) : null;
+      return {
+        hasNav: Boolean(nav),
+        position: styles && styles.position,
+        bottom: styles && styles.bottom,
+        columns: document.querySelectorAll(".nav-link").length
+      };
+    });
+    assert(navProbe.hasNav, `${file} mobile should keep nav visible`);
+    assert(navProbe.position === "fixed", `${file} mobile nav should be fixed bottom tabs`);
+    assert(navProbe.columns >= 6, `${file} mobile nav should include primary app tabs`);
     await page.close();
   }
   await mobileContext.close();

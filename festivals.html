@@ -176,6 +176,11 @@
   color: #7A5414;
 }
 
+.guide-badge.is-score {
+  background: rgba(20,184,166,0.14);
+  color: #0F766E;
+}
+
 .detail .guide-badge {
   background: rgba(255,255,255,0.08);
   color: rgba(248,243,232,0.78);
@@ -189,6 +194,45 @@
 .detail .guide-badge.is-review {
   background: rgba(227,176,75,0.2);
   color: var(--cream);
+}
+
+.detail .guide-badge.is-score {
+  background: rgba(20,184,166,0.2);
+  color: var(--cream);
+}
+
+.score-meter {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.score-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(20,184,166,0.18);
+  border: 1px solid rgba(20,184,166,0.3);
+  color: var(--cream);
+  font-family: var(--font-display);
+  font-size: 26px;
+  line-height: 1;
+}
+
+.score-meter ul {
+  margin: 0;
+  padding-left: 18px;
+  color: rgba(248,243,232,0.76);
+  font-size: 13px;
+}
+
+.score-meter li + li {
+  margin-top: 3px;
 }
 
 .detail {
@@ -499,6 +543,7 @@
         <button class="chip" data-filter="soon">Soon</button>
         <button class="chip" data-filter="review">Needs review</button>
         <button class="chip" data-filter="ops">Ops intel</button>
+        <button class="chip" data-filter="prime-ops">Prime ops</button>
         <button class="chip" data-filter="saved">Saved</button>
         <button class="chip" data-filter="elite">Tier S</button>
       </div>
@@ -568,15 +613,26 @@
     return (items || []).map((item) => `<span class="event-pill">${escapeHtml(item)}</span>`).join("");
   }
 
-  function renderOpsIntelligence(ops) {
+  function renderOpsIntelligence(park, ops) {
     if (!ops) return "";
     const hasTicketSource = (ops.sources || []).some((source) => source && source.url === ops.ticketUrl);
+    const score = app.getOpsOpportunityScore(park);
     const links = (ops.sources || []).map((source) => `
       <a href="${escapeHtml(source.url)}" target="_blank" rel="noopener" class="btn btn-ghost" style="color:var(--cream); border-color:rgba(255,255,255,0.12); margin:3px 4px 3px 0; display:inline-flex;">${escapeHtml(source.label || "Source")}</a>
     `).join("");
     return `
       <div class="signal">
         <div class="signal-label">Ops / outreach intelligence</div>
+        <div class="score-meter">
+          <div class="score-number">${score.score}</div>
+          <div>
+            <div><strong>${escapeHtml(score.tier)} opportunity</strong></div>
+            <ul>
+              ${score.factors.slice(0, 3).map((factor) => `<li>${escapeHtml(factor)}</li>`).join("")}
+              ${score.warnings.slice(0, 2).map((warning) => `<li>${escapeHtml(warning)}</li>`).join("")}
+            </ul>
+          </div>
+        </div>
         <div class="detail-grid" style="margin-top:10px;">
           ${ops.status ? `<div class="datum"><div class="datum-label">Ops status</div><div class="datum-value">${escapeHtml(ops.status)}</div></div>` : ""}
           ${ops.marketWindow ? `<div class="datum"><div class="datum-label">Window</div><div class="datum-value">${escapeHtml(ops.marketWindow)}</div></div>` : ""}
@@ -636,6 +692,7 @@
       }
       if (activeFilter === "review") return needsGuideReview(app.getFestivalGuideMeta(park));
       if (activeFilter === "ops") return Boolean(app.getFestivalOps(park.id));
+      if (activeFilter === "prime-ops") return app.getOpsOpportunityScore(park).score >= 62;
       if (activeFilter === "elite") return park.tier === "S";
       return true;
     });
@@ -661,6 +718,7 @@
     listEl.innerHTML = festivals.map((park) => {
       const guide = app.getFestivalGuideMeta(park);
       const hot = guide.seasonStatus === "happening-now" || guide.seasonStatus === "happening-soon";
+      const score = app.getOpsOpportunityScore(park);
       return `
       <article class="festival-row ${selectedId === park.id ? "selected" : ""}" data-park-id="${escapeHtml(park.id)}">
         <div class="tier-stamp tier-${safeToken(park.tier, "B")}">${escapeHtml(park.tier)}</div>
@@ -673,6 +731,7 @@
           </div>
         </div>
         <div class="guide-badges">
+          ${score.score ? `<span class="guide-badge is-score">Ops ${score.score}</span>` : ""}
           <span class="guide-badge ${hot ? "is-hot" : ""}">${escapeHtml(guide.seasonLabel)}</span>
           <span class="guide-badge ${needsGuideReview(guide) ? "is-review" : ""}">${escapeHtml(guide.planningStatus)}</span>
         </div>
@@ -691,6 +750,7 @@
     const sessions = app.getUpcomingGamesByPark(park.id, 4);
     const guide = app.getFestivalGuideMeta(park);
     const ops = app.getFestivalOps(park.id);
+    const score = app.getOpsOpportunityScore(park);
     const hot = guide.seasonStatus === "happening-now" || guide.seasonStatus === "happening-soon";
 
     detailEl.innerHTML = `
@@ -704,6 +764,7 @@
       </div>
       <div class="guide-badges" style="justify-content:flex-start; margin-top:14px;">
         <span class="guide-badge ${hot ? "is-hot" : ""}">${escapeHtml(guide.seasonLabel)}</span>
+        ${score.score ? `<span class="guide-badge is-score">Ops ${score.score} · ${escapeHtml(score.tier)}</span>` : ""}
         <span class="guide-badge ${needsGuideReview(guide) ? "is-review" : ""}">${escapeHtml(guide.dataLabel)}</span>
         <span class="guide-badge">${escapeHtml(guide.dateConfidence === "next-confirmed" ? "Next confirmed" : "Official dates")}</span>
         <span class="guide-badge">${escapeHtml(guide.planningStatus)}</span>
@@ -759,7 +820,7 @@
         <div class="signal-label">Ticket call</div>
         <div>${escapeHtml(park.ticketApproach)}</div>
       </div>
-      ${renderOpsIntelligence(ops)}
+      ${renderOpsIntelligence(park, ops)}
       <div class="signal">
         <div class="signal-label">Travel note</div>
         <div>${escapeHtml(park.transitNote)}</div>

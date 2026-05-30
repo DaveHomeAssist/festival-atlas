@@ -18,3 +18,4 @@ Original prompt: copy the entire mlb repo and reorient it for music festivals
 [2026-05-29] [MUSIC FESTIVALS] [release] Publish v0.1.0 and verify deployed GitHub Pages smoke
 [2026-05-29] [MUSIC FESTIVALS] [feat] Add calendar month view with route, saved, attended, and next-confirmed filters
 [2026-05-29] [MUSIC FESTIVALS] [feat] Add Summer 2026 ops outreach pack with import, merge, and detail-card intelligence
+[2026-05-29] [MUSIC FESTIVALS] [showready] Add calendar search/month jump/stats, import preview diff, ops scoring, verification queue, and mobile bottom tabs

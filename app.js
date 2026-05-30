@@ -1027,7 +1027,7 @@
     };
   }
 
-  function importFestivalPack(payload) {
+  function normalizeFestivalPack(payload) {
     if (!payload || typeof payload !== "object" || !Array.isArray(payload.festivals)) {
       throw new TypeError("Festival pack must include a festivals array");
     }
@@ -1036,6 +1036,261 @@
     if (!importedParks.length) {
       throw new TypeError("Festival pack did not include any valid festivals");
     }
+
+    return importedParks;
+  }
+
+  function getRawPackSessions(payload, park) {
+    var rawSessions = [];
+    var sourcePark = payload.festivals.find(function match(rawPark) {
+      return normalizeFestivalId(rawPark.id, rawPark.name) === park.id;
+    });
+    if (sourcePark && Array.isArray(sourcePark.sessions)) rawSessions = sourcePark.sessions;
+    else if (payload.sessions && Array.isArray(payload.sessions[park.id])) rawSessions = payload.sessions[park.id];
+
+    return {
+      sourcePark: sourcePark,
+      sessions: rawSessions.map(normalizeImportedSession).filter(Boolean).sort(function sortByDate(a, b) {
+        return a.d.localeCompare(b.d);
+      })
+    };
+  }
+
+  function summarizePreviewValue(value) {
+    if (value === undefined || value === null || value === "") return "";
+    if (Array.isArray(value)) return value.length ? value.join(", ").slice(0, 90) : "";
+    if (typeof value === "object") return JSON.stringify(value).slice(0, 90);
+    return String(value).slice(0, 90);
+  }
+
+  function previewChangedFields(existingPark, mergedPark) {
+    if (!existingPark) return [];
+    var fields = [
+      "officialUrl",
+      "lastReviewed",
+      "sourceNote",
+      "dateConfidence",
+      "searchMeta",
+      "booking",
+      "ops",
+      "ticketApproach",
+      "transitNote",
+      "note",
+      "roof",
+      "tier"
+    ];
+
+    return fields.reduce(function collect(changes, field) {
+      var before = summarizePreviewValue(existingPark[field]);
+      var after = summarizePreviewValue(mergedPark[field]);
+      if (before !== after) {
+        changes.push({
+          field: field,
+          before: before || "blank",
+          after: after || "blank"
+        });
+      }
+      return changes;
+    }, []);
+  }
+
+  function parseAttendanceScore(value) {
+    var text = String(value || "").replace(/,/g, "");
+    var match = text.match(/(\d+(?:\.\d+)?)\s*(m|million|k|thousand)?/i);
+    if (!match) return 0;
+    var number = Number(match[1]);
+    var suffix = String(match[2] || "").toLowerCase();
+    if (suffix === "m" || suffix === "million") number *= 1000000;
+    if (suffix === "k" || suffix === "thousand") number *= 1000;
+    if (number >= 200000) return 12;
+    if (number >= 90000) return 9;
+    if (number >= 45000) return 6;
+    if (number >= 15000) return 3;
+    return 0;
+  }
+
+  function getOpsOpportunityScore(parkOrId) {
+    var park = typeof parkOrId === "string" ? getParkById(parkOrId) : parkOrId;
+    var ops = park && park.ops && typeof park.ops === "object" ? park.ops : null;
+    if (!park || !ops) {
+      return {
+        score: 0,
+        tier: "No ops intel",
+        factors: [],
+        warnings: ["No ops intelligence loaded"]
+      };
+    }
+
+    var score = 20;
+    var factors = ["Ops intelligence loaded"];
+    var warnings = [];
+    var priority = String(ops.outreachPriority || "").toLowerCase();
+    var complexityText = [
+      ops.opsModel,
+      ops.productionNotes,
+      ops.loadIn,
+      ops.eventHours
+    ].join(" ").toLowerCase();
+
+    if (ops.publicContact) { score += 15; factors.push("Public contact available"); }
+    else warnings.push("No public contact captured");
+
+    if ((ops.sources || []).length) { score += Math.min(12, ops.sources.length * 4); factors.push("Source links captured"); }
+    else warnings.push("No ops source links");
+
+    if (ops.ticketUrl) { score += 5; factors.push("Ticket path known"); }
+    if (ops.marketWindow) { score += 5; factors.push("Market window known"); }
+    if (ops.eventHours) { score += 5; factors.push("Public hours known"); }
+    if (ops.loadIn) { score += 5; factors.push("Load-in proxy known"); }
+    if (priority.indexOf("high") >= 0) { score += 16; factors.push("High outreach priority"); }
+    else if (priority.indexOf("medium") >= 0) { score += 8; factors.push("Medium outreach priority"); }
+
+    if (/(stadium|citywide|broadcast|multi|campus|downtown|waterfront|stages)/i.test(complexityText)) {
+      score += 10;
+      factors.push("Complex production footprint");
+    }
+
+    var signalScore = Math.min(12, (ops.opportunitySignals || []).length * 3);
+    if (signalScore) {
+      score += signalScore;
+      factors.push("Opportunity signals captured");
+    }
+
+    score += parseAttendanceScore(ops.attendance);
+
+    if (!park.officialUrl) {
+      score -= 6;
+      warnings.push("Official URL missing");
+    }
+    if (park.dateConfidence === "outreach-review" || String(ops.status || "").toLowerCase().indexOf("verify") >= 0) {
+      warnings.push("Needs source verification");
+    }
+
+    score = Math.max(0, Math.min(100, Math.round(score)));
+
+    return {
+      score: score,
+      tier: score >= 80 ? "Prime" : (score >= 62 ? "Strong" : (score >= 42 ? "Developing" : "Low")),
+      factors: factors.slice(0, 6),
+      warnings: warnings.slice(0, 5)
+    };
+  }
+
+  function getOpsOpportunityRows(options) {
+    var opts = options || {};
+    var rows = getParks().map(function mapPark(park) {
+      var score = getOpsOpportunityScore(park);
+      var guide = getFestivalGuideMeta(park);
+      return {
+        id: park.id,
+        name: park.name,
+        city: park.city,
+        dateRangeLabel: guide.dateRangeLabel,
+        dataStatus: guide.dataStatus,
+        dataLabel: guide.dataLabel,
+        score: score.score,
+        tier: score.tier,
+        factors: score.factors,
+        warnings: score.warnings,
+        hasOps: Boolean(park.ops)
+      };
+    }).filter(function keep(row) {
+      if (opts.opsOnly) return row.hasOps;
+      return row.hasOps || row.score > 0;
+    }).sort(function sortRows(a, b) {
+      if (b.score !== a.score) return b.score - a.score;
+      return a.name.localeCompare(b.name);
+    });
+
+    return rows;
+  }
+
+  function needsSourceVerification(park, meta, ops) {
+    if (!park || !meta) return false;
+    if (meta.dataStatus === "needs-review" || meta.dataStatus === "needs-recheck" || meta.dataStatus === "next-confirmed") return true;
+    if (meta.dateConfidence === "outreach-review" || meta.dateConfidence === "imported") return true;
+    if (ops && String(ops.status || "").toLowerCase().indexOf("verify") >= 0) return true;
+    if (!meta.officialUrl) return true;
+    return false;
+  }
+
+  function getSourceVerificationQueue() {
+    return getParks().map(function mapPark(park) {
+      var meta = getFestivalGuideMeta(park);
+      var ops = getFestivalOps(park.id);
+      var score = getOpsOpportunityScore(park);
+      return {
+        id: park.id,
+        name: park.name,
+        city: park.city,
+        dateRangeLabel: meta.dateRangeLabel,
+        dataStatus: meta.dataStatus,
+        dataLabel: meta.dataLabel,
+        dateConfidence: meta.dateConfidence,
+        officialUrl: meta.officialUrl,
+        sourceNote: meta.sourceNote,
+        lastReviewed: meta.lastReviewed,
+        opsStatus: ops ? ops.status : "",
+        score: score.score,
+        scoreTier: score.tier,
+        reason: meta.dataStatus === "next-confirmed" ? "Next season date needs 2026 follow-up" :
+          (!meta.officialUrl ? "Official source missing" :
+          (meta.dateConfidence === "outreach-review" || (ops && String(ops.status || "").toLowerCase().indexOf("verify") >= 0) ? "Ops source needs verification" : meta.dataLabel))
+      };
+    }).filter(function keep(row) {
+      var park = getParkById(row.id);
+      return needsSourceVerification(park, getFestivalGuideMeta(park), getFestivalOps(row.id));
+    }).sort(function sortRows(a, b) {
+      if (b.score !== a.score) return b.score - a.score;
+      return a.name.localeCompare(b.name);
+    });
+  }
+
+  function previewFestivalPack(payload) {
+    var importedParks = normalizeFestivalPack(payload);
+    var currentParks = getParks();
+    var existingIds = currentParks.map(function mapExisting(park) { return park.id; });
+    var rows = importedParks.map(function previewPark(park) {
+      var existing = currentParks.find(function findExisting(candidate) { return candidate.id === park.id; });
+      var merged = existing ? mergeImportedPark(existing, park) : park;
+      var packSessions = getRawPackSessions(payload, park);
+      var shouldOverwriteSchedule = Boolean(payload.overwriteSchedules || (packSessions.sourcePark && packSessions.sourcePark.overwriteSchedule));
+      var hasExistingSessions = existingIds.indexOf(park.id) >= 0 && getGamesByPark(park.id).length > 0;
+      var changes = previewChangedFields(existing, merged);
+      var score = getOpsOpportunityScore(merged);
+
+      return {
+        id: park.id,
+        name: park.name,
+        city: park.city,
+        action: existing ? (changes.length ? "merge" : "unchanged") : "create",
+        changeCount: changes.length,
+        changes: changes.slice(0, 6),
+        sessionCount: packSessions.sessions.length,
+        scheduleAction: packSessions.sessions.length && (!hasExistingSessions || shouldOverwriteSchedule) ? "write" : (hasExistingSessions ? "preserve" : "none"),
+        sourceNeedsVerification: needsSourceVerification(merged, getFestivalGuideMeta(merged), merged.ops),
+        score: score.score,
+        scoreTier: score.tier,
+        warnings: score.warnings
+      };
+    });
+
+    return {
+      label: payload.label || payload.id || "Festival pack",
+      payloadId: payload.id || "",
+      festivals: rows.length,
+      created: rows.filter(function created(row) { return row.action === "create"; }).length,
+      merged: rows.filter(function merged(row) { return row.action === "merge"; }).length,
+      unchanged: rows.filter(function unchanged(row) { return row.action === "unchanged"; }).length,
+      sessions: rows.reduce(function count(total, row) { return total + row.sessionCount; }, 0),
+      scheduleWrites: rows.filter(function writes(row) { return row.scheduleAction === "write"; }).length,
+      verificationNeeded: rows.filter(function verify(row) { return row.sourceNeedsVerification; }).length,
+      rows: rows
+    };
+  }
+
+  function importFestivalPack(payload) {
+    var importedParks = normalizeFestivalPack(payload);
 
     var importedIds = importedParks.map(function mapId(park) { return park.id; });
     var currentParks = getParks();
@@ -1056,16 +1311,9 @@
     if (!customSchedule || typeof customSchedule !== "object" || Array.isArray(customSchedule)) customSchedule = {};
 
     importedParks.forEach(function importSessions(park) {
-      var rawSessions = [];
-      var sourcePark = payload.festivals.find(function match(rawPark) {
-        return normalizeFestivalId(rawPark.id, rawPark.name) === park.id;
-      });
-      if (sourcePark && Array.isArray(sourcePark.sessions)) rawSessions = sourcePark.sessions;
-      else if (payload.sessions && Array.isArray(payload.sessions[park.id])) rawSessions = payload.sessions[park.id];
-
-      var sessions = rawSessions.map(normalizeImportedSession).filter(Boolean).sort(function sortByDate(a, b) {
-        return a.d.localeCompare(b.d);
-      });
+      var packSessions = getRawPackSessions(payload, park);
+      var sourcePark = packSessions.sourcePark;
+      var sessions = packSessions.sessions;
 
       var shouldOverwriteSchedule = Boolean(payload.overwriteSchedules || (sourcePark && sourcePark.overwriteSchedule));
       var hasExistingSessions = existingIds.indexOf(park.id) >= 0 && getGamesByPark(park.id).length > 0;
@@ -1157,6 +1405,7 @@
     var reviewRows = auditRows.filter(function needsReview(row) {
       return row.dataStatus === "needs-review" || row.dataStatus === "needs-recheck";
     });
+    var verificationRows = getSourceVerificationQueue();
 
     return {
       app: "Festival Atlas",
@@ -1169,6 +1418,7 @@
         visits: getVisits().length,
         shortlist: getShortlist().length,
         sourceReviewNeeded: reviewRows.length,
+        sourceVerificationQueue: verificationRows.length,
         nextConfirmed: auditRows.filter(function next(row) { return row.dataStatus === "next-confirmed"; }).length,
         opsIntelligence: parks.filter(function hasOps(park) { return Boolean(park.ops); }).length
       },
@@ -1404,11 +1654,15 @@
     getBackupPayload: getBackupPayload,
     restoreBackupPayload: restoreBackupPayload,
     resetLocalData: resetLocalData,
+    previewFestivalPack: previewFestivalPack,
     importFestivalPack: importFestivalPack,
     downloadBackup: downloadBackup,
     createDiagnostics: createDiagnostics,
     downloadDiagnostics: downloadDiagnostics,
     getSourceAuditRows: getSourceAuditRows,
+    getSourceVerificationQueue: getSourceVerificationQueue,
+    getOpsOpportunityScore: getOpsOpportunityScore,
+    getOpsOpportunityRows: getOpsOpportunityRows,
     buildShareTripUrl: buildShareTripUrl,
     parseSharedTripState: parseSharedTripState,
     buildFlightLink: buildFlightLink,

@@ -70,6 +70,54 @@
   gap: 8px;
 }
 
+.calendar-controls {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) 170px;
+  gap: 10px;
+  margin: 0 0 12px;
+}
+
+.calendar-input {
+  min-width: 0;
+  min-height: 42px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-md);
+  background: rgba(255,255,255,0.68);
+  color: var(--text-primary);
+  font-family: var(--font-data);
+  font-size: 12px;
+  padding: 10px 12px;
+}
+
+.calendar-stats {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin: 12px 0 14px;
+}
+
+.calendar-stat {
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-md);
+  background: rgba(16,24,38,0.04);
+  padding: 10px;
+}
+
+.calendar-stat-value {
+  font-family: var(--font-display);
+  font-size: 26px;
+  line-height: 1;
+}
+
+.calendar-stat-label {
+  color: var(--text-muted);
+  font-family: var(--font-data);
+  font-size: 9px;
+  letter-spacing: .1em;
+  margin-top: 5px;
+  text-transform: uppercase;
+}
+
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -223,6 +271,11 @@
 }
 
 @media (max-width: 700px) {
+  .calendar-controls,
+  .calendar-stats {
+    grid-template-columns: 1fr;
+  }
+
   .calendar-grid {
     display: block;
     border: 0;
@@ -292,6 +345,11 @@
         <button class="chip" data-filter="attended">Attended</button>
         <button class="chip" data-filter="next-confirmed">Next confirmed</button>
       </div>
+      <div class="calendar-controls">
+        <input class="calendar-input" id="calendarSearch" type="search" placeholder="Search festival, city, source note, ops signal">
+        <input class="calendar-input" id="monthJump" type="month" aria-label="Jump to month">
+      </div>
+      <div class="calendar-stats" id="calendarStats" aria-live="polite"></div>
       <div class="calendar-grid" id="calendarGrid" aria-live="polite"></div>
     </section>
 
@@ -318,10 +376,18 @@
   const gridEl = document.getElementById("calendarGrid");
   const detailEl = document.getElementById("calendarDetail");
   const monthTitle = document.getElementById("monthTitle");
+  const searchInput = document.getElementById("calendarSearch");
+  const monthJump = document.getElementById("monthJump");
+  const statsEl = document.getElementById("calendarStats");
   const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  let activeFilter = "all";
+  const CALENDAR_STATE_KEY = "festivalAtlasCalendarState";
+  const savedState = loadCalendarState();
+  let activeFilter = savedState.filter || "all";
   let selectedGameId = "";
-  let visibleMonth = getInitialMonth();
+  let visibleMonth = parseMonthValue(savedState.month) || getInitialMonth();
+  let searchQuery = savedState.query || "";
+
+  searchInput.value = searchQuery;
 
   function escapeHtml(value) {
     return utils.escapeHtml(value);
@@ -338,6 +404,15 @@
   function parseIsoDate(value) {
     const parts = String(value || "").split("-").map(Number);
     return new Date(parts[0], parts[1] - 1, parts[2] || 1, 12);
+  }
+
+  function parseMonthValue(value) {
+    const match = String(value || "").match(/^(\d{4})-(\d{2})$/);
+    if (!match) return null;
+    const year = Number(match[1]);
+    const month = Number(match[2]);
+    if (!Number.isFinite(year) || !Number.isFinite(month) || month < 1 || month > 12) return null;
+    return new Date(year, month - 1, 1, 12);
   }
 
   function addMonths(date, delta) {
@@ -362,13 +437,61 @@
     return first ? new Date(parseIsoDate(first.date).getFullYear(), parseIsoDate(first.date).getMonth(), 1, 12) : new Date(today.getFullYear(), today.getMonth(), 1, 12);
   }
 
+  function loadCalendarState() {
+    try {
+      return JSON.parse(window.localStorage.getItem(CALENDAR_STATE_KEY) || "{}") || {};
+    } catch (error) {
+      return {};
+    }
+  }
+
+  function saveCalendarState() {
+    try {
+      window.localStorage.setItem(CALENDAR_STATE_KEY, JSON.stringify({
+        month: monthKey(visibleMonth),
+        filter: activeFilter,
+        query: searchQuery
+      }));
+    } catch (error) {}
+  }
+
+  function eventSearchText(event) {
+    const ops = app.getFestivalOps(event.festivalId) || {};
+    return [
+      event.festivalName,
+      event.city,
+      event.label,
+      event.calendarLine,
+      event.guide && event.guide.dateRangeLabel,
+      event.guide && event.guide.dataLabel,
+      event.guide && event.guide.sourceNote,
+      ops.region,
+      ops.venue,
+      ops.organizer,
+      ops.publicContact,
+      ops.headliners,
+      ops.productionNotes,
+      (ops.opportunitySignals || []).join(" ")
+    ].filter(Boolean).join(" ").toLowerCase();
+  }
+
+  function filterEventsBySearch(events) {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return events;
+    return events.filter((event) => eventSearchText(event).includes(query));
+  }
+
+  function getEventsForRange(startDate, endDate) {
+    return filterEventsBySearch(app.getFestivalCalendarEvents({
+      startDate,
+      endDate,
+      filter: activeFilter
+    }));
+  }
+
   function getVisibleEvents() {
     const bounds = getMonthBounds(visibleMonth);
-    return app.getFestivalCalendarEvents({
-      startDate: isoDate(bounds.gridStart),
-      endDate: isoDate(bounds.gridEnd),
-      filter: activeFilter
-    });
+    return getEventsForRange(isoDate(bounds.gridStart), isoDate(bounds.gridEnd));
   }
 
   function eventsByDate(events) {
@@ -385,6 +508,8 @@
     const grouped = eventsByDate(events);
     const todayIso = isoDate(new Date());
     monthTitle.textContent = visibleMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+    monthJump.value = monthKey(visibleMonth);
+    document.querySelectorAll(".calendar-filters [data-filter]").forEach((item) => item.classList.toggle("is-active", item.dataset.filter === activeFilter));
 
     let html = weekdays.map((day) => `<div class="weekday">${day}</div>`).join("");
     const cursor = new Date(bounds.gridStart);
@@ -411,7 +536,32 @@
     if (!selectedGameId || !events.some((event) => event.gameId === selectedGameId)) {
       selectedGameId = events[0] ? events[0].gameId : "";
     }
+    renderStats(getEventsForRange(isoDate(bounds.start), isoDate(bounds.end)));
     renderDetail(events);
+    saveCalendarState();
+  }
+
+  function countUnique(events, key) {
+    return new Set(events.map((event) => event[key]).filter(Boolean)).size;
+  }
+
+  function renderStats(monthEvents) {
+    const routeCount = monthEvents.filter((event) => event.onRoute).length;
+    const savedCount = monthEvents.filter((event) => event.shortlisted).length;
+    const reviewCount = monthEvents.filter((event) => event.guide && (event.guide.dataStatus === "needs-review" || event.guide.dataStatus === "needs-recheck" || event.guide.dateConfidence === "outreach-review")).length;
+    const nextCount = monthEvents.filter((event) => event.guide && event.guide.dateConfidence === "next-confirmed").length;
+    statsEl.innerHTML = [
+      ["Events", monthEvents.length],
+      ["Festivals", countUnique(monthEvents, "festivalId")],
+      ["Route", routeCount],
+      ["Saved", savedCount],
+      ["Verify", reviewCount + nextCount]
+    ].map(([label, value]) => `
+      <div class="calendar-stat">
+        <div class="calendar-stat-value">${value}</div>
+        <div class="calendar-stat-label">${label}</div>
+      </div>
+    `).join("");
   }
 
   function renderDetail(events) {
@@ -499,6 +649,20 @@
 
   document.getElementById("todayMonth").addEventListener("click", () => {
     visibleMonth = getInitialMonth();
+    selectedGameId = "";
+    renderCalendar();
+  });
+
+  searchInput.addEventListener("input", () => {
+    searchQuery = searchInput.value;
+    selectedGameId = "";
+    renderCalendar();
+  });
+
+  monthJump.addEventListener("change", () => {
+    const nextMonth = parseMonthValue(monthJump.value);
+    if (!nextMonth) return;
+    visibleMonth = nextMonth;
     selectedGameId = "";
     renderCalendar();
   });

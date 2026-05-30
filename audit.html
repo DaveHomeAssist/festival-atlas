@@ -49,7 +49,7 @@
 
 .audit-summary {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 10px;
   margin-bottom: 14px;
 }
@@ -92,7 +92,7 @@
 
 .audit-table {
   width: 100%;
-  min-width: 860px;
+  min-width: 1040px;
   border-collapse: collapse;
   background: rgba(255,255,255,0.48);
 }
@@ -168,6 +168,92 @@
   margin-top: 12px;
 }
 
+.ops-preview,
+.verification-panel {
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-md);
+  background: rgba(16,24,38,0.04);
+  padding: 12px;
+  margin-top: 14px;
+}
+
+.ops-preview[hidden] {
+  display: none;
+}
+
+.preview-title,
+.verification-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.preview-metric {
+  border: 1px solid rgba(16,24,38,0.08);
+  border-radius: var(--r-sm);
+  background: rgba(255,255,255,0.48);
+  padding: 9px;
+}
+
+.preview-metric strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 22px;
+  line-height: 1;
+}
+
+.preview-metric span,
+.verification-row span {
+  display: block;
+  color: var(--text-muted);
+  font-family: var(--font-data);
+  font-size: 9px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.preview-list,
+.verification-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.preview-row,
+.verification-row {
+  border: 1px solid rgba(16,24,38,0.08);
+  border-radius: var(--r-sm);
+  background: rgba(255,255,255,0.52);
+  padding: 10px;
+}
+
+.preview-row strong,
+.verification-row strong {
+  display: block;
+  color: var(--text-primary);
+}
+
+.score-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 42px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(16,24,38,0.08);
+  color: var(--text-primary);
+  font-family: var(--font-data);
+  font-size: 10px;
+}
+
 .file-input {
   width: 100%;
   border: 1px solid var(--border-light);
@@ -189,10 +275,15 @@
   .audit-summary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .preview-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 560px) {
-  .audit-summary {
+  .audit-summary,
+  .preview-grid {
     grid-template-columns: 1fr;
   }
 }
@@ -229,6 +320,7 @@
       <div class="audit-toolbar" aria-label="Audit filters">
         <button class="chip is-active" data-filter="all">All</button>
         <button class="chip" data-filter="review">Needs review</button>
+        <button class="chip" data-filter="verify">Verify queue</button>
         <button class="chip" data-filter="next">Next confirmed</button>
         <button class="chip" data-filter="notes">Has notes</button>
       </div>
@@ -240,13 +332,16 @@
               <th>Dates</th>
               <th>Status</th>
               <th>Reviewed</th>
+              <th>Score</th>
               <th>Source</th>
               <th>Note</th>
+              <th>Reason</th>
             </tr>
           </thead>
           <tbody id="auditRows"></tbody>
         </table>
       </div>
+      <div class="verification-panel" id="verificationQueue"></div>
     </section>
 
     <aside class="ops-panel fade-up fade-up-2">
@@ -257,7 +352,8 @@
         <button class="btn btn-export" id="downloadDiagnostics">Diagnostics</button>
       </div>
       <div class="ops-actions">
-        <button class="btn btn-export" id="importOutreachPack">Import outreach pack</button>
+        <button class="btn btn-export" id="importOutreachPack">Preview outreach pack</button>
+        <button class="btn btn-primary" id="applyImportPreview" hidden>Apply preview</button>
       </div>
       <label class="section-label" for="backupFile">Restore backup</label>
       <input class="file-input" id="backupFile" type="file" accept="application/json">
@@ -266,6 +362,7 @@
       <div class="ops-actions">
         <button class="btn btn-danger-outline" id="resetData">Reset local data</button>
       </div>
+      <div class="ops-preview" id="importPreview" hidden></div>
       <div class="ops-status" id="opsStatus" aria-live="polite">Ready.</div>
     </aside>
   </section>
@@ -291,7 +388,12 @@
   const rowsEl = document.getElementById("auditRows");
   const summaryEl = document.getElementById("auditSummary");
   const statusEl = document.getElementById("opsStatus");
+  const previewEl = document.getElementById("importPreview");
+  const verificationEl = document.getElementById("verificationQueue");
+  const applyPreviewBtn = document.getElementById("applyImportPreview");
   let activeFilter = "all";
+  let pendingPack = null;
+  let pendingPreview = null;
 
   function escapeHtml(value) {
     return utils.escapeHtml(value);
@@ -302,6 +404,7 @@
   }
 
   function getFilteredRows() {
+    if (activeFilter === "verify") return app.getSourceVerificationQueue();
     return app.getSourceAuditRows().filter((row) => {
       if (activeFilter === "review") return needsReview(row);
       if (activeFilter === "next") return row.dataStatus === "next-confirmed";
@@ -314,9 +417,11 @@
     const diagnostics = app.createDiagnostics();
     const next = rows.filter((row) => row.dataStatus === "next-confirmed").length;
     const notes = rows.filter((row) => row.sourceNote).length;
+    const verify = diagnostics.counts.sourceVerificationQueue || app.getSourceVerificationQueue().length;
     summaryEl.innerHTML = `
       <div class="summary-tile"><div class="summary-value">${diagnostics.counts.festivals}</div><div class="summary-label">Festivals</div></div>
       <div class="summary-tile"><div class="summary-value">${diagnostics.counts.sourceReviewNeeded}</div><div class="summary-label">Review queue</div></div>
+      <div class="summary-tile"><div class="summary-value">${verify}</div><div class="summary-label">Verify queue</div></div>
       <div class="summary-tile"><div class="summary-value">${next}</div><div class="summary-label">Next confirmed</div></div>
       <div class="summary-tile"><div class="summary-value">${notes}</div><div class="summary-label">Source notes</div></div>
       <div class="summary-tile"><div class="summary-value">${diagnostics.counts.opsIntelligence || 0}</div><div class="summary-label">Ops intel</div></div>
@@ -339,16 +444,75 @@
         <td>${escapeHtml(row.dateRangeLabel)}</td>
         <td><span class="status-pill ${statusClass(row)}">${escapeHtml(row.dataLabel)}</span></td>
         <td>${escapeHtml(row.lastReviewed || "Not set")}</td>
+        <td>${Number.isFinite(row.score) ? `<span class="score-pill">${row.score}</span>` : ""}</td>
         <td>${row.officialUrl ? `<a href="${escapeHtml(row.officialUrl)}" target="_blank" rel="noopener">Official</a>` : "Needed"}</td>
         <td class="audit-note">${escapeHtml(row.sourceNote || "")}</td>
+        <td class="audit-note">${escapeHtml(row.reason || "")}</td>
       </tr>
     `).join("") : `
-      <tr><td colspan="6">No rows match this filter.</td></tr>
+      <tr><td colspan="8">No rows match this filter.</td></tr>
     `;
+    renderVerificationQueue();
   }
 
   function setStatus(message) {
     statusEl.textContent = message;
+  }
+
+  function renderVerificationQueue() {
+    const queue = app.getSourceVerificationQueue().slice(0, 5);
+    verificationEl.innerHTML = `
+      <div class="verification-title">Verification queue</div>
+      <p class="ops-copy">${queue.length ? "Highest-scoring records that still need source confidence before bid work." : "No verification work is currently queued."}</p>
+      <div class="verification-list">
+        ${queue.map((row) => `
+          <div class="verification-row">
+            <strong>${escapeHtml(row.name)} <span class="score-pill">${row.score}</span></strong>
+            <span>${escapeHtml(row.dateRangeLabel)} · ${escapeHtml(row.scoreTier)} · ${escapeHtml(row.reason)}</span>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  function renderPackPreview(preview) {
+    if (!preview) {
+      previewEl.hidden = true;
+      previewEl.innerHTML = "";
+      applyPreviewBtn.hidden = true;
+      return;
+    }
+
+    previewEl.hidden = false;
+    applyPreviewBtn.hidden = false;
+    previewEl.innerHTML = `
+      <div class="preview-title">${escapeHtml(preview.label)}</div>
+      <p class="ops-copy">Review creates, merges, schedule writes, verification flags, and opportunity scores before applying this pack.</p>
+      <div class="preview-grid">
+        <div class="preview-metric"><strong>${preview.created}</strong><span>Create</span></div>
+        <div class="preview-metric"><strong>${preview.merged}</strong><span>Merge</span></div>
+        <div class="preview-metric"><strong>${preview.sessions}</strong><span>Sessions</span></div>
+        <div class="preview-metric"><strong>${preview.scheduleWrites}</strong><span>Schedule writes</span></div>
+        <div class="preview-metric"><strong>${preview.verificationNeeded}</strong><span>Verify</span></div>
+      </div>
+      <div class="preview-list">
+        ${preview.rows.slice(0, 8).map((row) => `
+          <div class="preview-row">
+            <strong>${escapeHtml(row.name)} <span class="score-pill">${row.score}</span></strong>
+            <span>${escapeHtml(row.action)} · ${escapeHtml(row.scheduleAction)} schedule · ${row.changeCount} field change${row.changeCount === 1 ? "" : "s"} · ${escapeHtml(row.scoreTier)}</span>
+            ${row.changes.length ? `<div class="audit-note">${escapeHtml(row.changes.map((change) => change.field).join(", "))}</div>` : ""}
+            ${row.warnings.length ? `<div class="audit-note">${escapeHtml(row.warnings.join("; "))}</div>` : ""}
+          </div>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  function setPendingPack(pack) {
+    pendingPack = pack;
+    pendingPreview = app.previewFestivalPack(pack);
+    renderPackPreview(pendingPreview);
+    setStatus(`${pendingPreview.label} preview ready: ${pendingPreview.created} new, ${pendingPreview.merged} merged, ${pendingPreview.verificationNeeded} need verification.`);
   }
 
   document.querySelector(".audit-toolbar").addEventListener("click", (event) => {
@@ -375,9 +539,20 @@
       setStatus("Outreach pack is not available.");
       return;
     }
-    const result = app.importFestivalPack(pack);
+    setPendingPack(pack);
+  });
+
+  applyPreviewBtn.addEventListener("click", () => {
+    if (!pendingPack) {
+      setStatus("Preview a festival pack before applying.");
+      return;
+    }
+    const result = app.importFestivalPack(pendingPack);
+    pendingPack = null;
+    pendingPreview = null;
+    renderPackPreview(null);
     renderRows();
-    setStatus(`${pack.label || "Outreach pack"} imported: ${result.created} new, ${result.merged} merged, ${result.sessions} custom sessions.`);
+    setStatus(`Festival pack applied: ${result.created} new, ${result.merged} merged, ${result.sessions} custom sessions.`);
   });
 
   document.getElementById("backupFile").addEventListener("change", (event) => {
@@ -404,11 +579,9 @@
     const reader = new FileReader();
     reader.onload = () => {
       try {
-        const result = app.importFestivalPack(JSON.parse(String(reader.result || "{}")));
-        setStatus(`Festival pack imported: ${result.festivals} festivals, ${result.sessions} sessions.`);
-        renderRows();
+        setPendingPack(JSON.parse(String(reader.result || "{}")));
       } catch (error) {
-        setStatus(error && error.message ? error.message : "Festival pack import failed.");
+        setStatus(error && error.message ? error.message : "Festival pack preview failed.");
       } finally {
         event.target.value = "";
       }
@@ -419,6 +592,9 @@
   document.getElementById("resetData").addEventListener("click", () => {
     if (!window.confirm("Reset local Festival Atlas data on this browser?")) return;
     const diagnostics = app.resetLocalData();
+    pendingPack = null;
+    pendingPreview = null;
+    renderPackPreview(null);
     setStatus(`Local data reset. ${diagnostics.counts.festivals} seeded festivals loaded.`);
     renderRows();
   });
