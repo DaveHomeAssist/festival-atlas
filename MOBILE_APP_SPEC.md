@@ -394,13 +394,29 @@ Each milestone keeps the app shippable as a TestFlight/internal track build.
 
 ---
 
-## 14. Open questions
+## 14. Decisions & rationale
 
-1. **International:** ship US-only at launch, or include the international pack as
-   an opt-in download? (Affects map tiles + seed QA.)
-2. **Sync ambition:** is manual export/share enough for v1, or is E2E cloud
-   backup required at launch?
-3. **Monetization/distribution:** free, paid, or free with an optional supporter
-   tier? Influences account/entitlement design.
-4. **Brand assets:** stay with generated monograms, or source licensed festival
-   art where rights are clear?
+The framework and the four launch-scope questions are now decided. Each can be
+revisited, but v1 builds against these.
+
+1. **Framework — React Native + Expo.** See §2. Keeps us in the existing JS/TS
+   world and lets the seed/helpers port with minimal rewrite.
+2. **Geography — US-only at launch; international ships as an opt-in pack.** The
+   seed, the bundled offline map tiles, and source QA are all US-centric today
+   (§11). Launching US-only keeps tile size and verification scope tight; the
+   international research pack becomes a downloadable add-on once its entries
+   carry structured `dateRange` and valid coordinates.
+3. **Sync — manual export/share for v1; E2E cloud backup in v1.1.** Local-first
+   stays the default and multi-device is covered by file/QR/deep-link share
+   (§8). No server, no account, no sync-conflict machinery at launch; E2E backup
+   to the user's own cloud document follows once the core is stable.
+4. **Monetization — free, with an optional supporter tier.** The whole app is
+   free and fully functional with no account. A later, optional supporter tier
+   (e.g. a one-time unlock or tip) can fund development without gating core
+   features or introducing a mandatory login — consistent with the local-first,
+   no-tracking model. Entitlement, if added, rides the platform purchase APIs,
+   not a Festival Atlas account.
+5. **Brand assets — keep generated monograms for v1.** `logos.js`-style on-device
+   monograms ship at launch; sourcing licensed festival art is deferred and only
+   pursued where rights/source are unambiguous (mirrors the web product's
+   stance). Avoids a licensing dependency on the critical path.
