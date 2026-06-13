@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "Festival Atlas",
+    "slug": "festival-atlas",
+    "scheme": "festivalatlas",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#101826"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.festivalatlas.app"
+    },
+    "android": {
+      "package": "com.festivalatlas.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#101826"
+      }
+    },
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
