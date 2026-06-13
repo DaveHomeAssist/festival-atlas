@@ -61,16 +61,19 @@ integration) that a phone makes possible.
 | Concern | Decision | Rationale |
 |---|---|---|
 | Platforms | iOS 16+, Android 10+ (API 29+) | Covers ~95% of active festival-goer devices |
-| Approach | Single cross-platform codebase (recommend **React Native + Expo** or **Flutter**) | One team, shared data layer; both have mature offline storage, maps, notifications |
+| Approach | **React Native + Expo** (decided) | Keeps the team in the existing JS/TS world; lets us port `data.js`, `schedule.js`, `logos.js`, and `shared/js/core/*` with minimal rewrite; first-class offline + notification + share modules |
 | Offline store | SQLite (via expo-sqlite / Drift) + a thin KV layer | Structured queries for the directory; KV mirrors the web `localStorage` keys for migration |
 | Maps | MapLibre GL (vector, offline tiles) or Mapbox | Replaces the SVG US projection; works internationally |
 | Push | Expo Notifications / FCM + APNs | Date and route reminders |
 | Build/CI | EAS Build (or Codemagic) + the existing `npm run validate` smoke gate adapted | Reuse the validation discipline already in the repo |
 
-> **Recommendation:** React Native + Expo. It keeps the team in the JS/TS world
-> the web app already lives in, lets us port `data.js`, `schedule.js`,
-> `logos.js`, and the `shared/js/core/*` helpers with minimal rewrite, and has
-> first-class offline + notification + share modules.
+> **Decision:** React Native + Expo. It keeps the team in the JS/TS world the
+> web app already lives in, lets us port `data.js`, `schedule.js`, `logos.js`,
+> and the `shared/js/core/*` helpers with minimal rewrite, and has first-class
+> offline + notification + share modules. Concretely: expo-sqlite for the store,
+> expo-location, expo-notifications, expo-camera/image-picker, expo-sharing, and
+> expo-calendar; MapLibre via `@maplibre/maplibre-react-native` for the map; EAS
+> Build for CI.
 
 ---
 
@@ -393,13 +396,11 @@ Each milestone keeps the app shippable as a TestFlight/internal track build.
 
 ## 14. Open questions
 
-1. **Framework:** React Native + Expo (recommended) vs Flutter — confirm team
-   preference, since it sets the data-layer port path.
-2. **International:** ship US-only at launch, or include the international pack as
+1. **International:** ship US-only at launch, or include the international pack as
    an opt-in download? (Affects map tiles + seed QA.)
-3. **Sync ambition:** is manual export/share enough for v1, or is E2E cloud
+2. **Sync ambition:** is manual export/share enough for v1, or is E2E cloud
    backup required at launch?
-4. **Monetization/distribution:** free, paid, or free with an optional supporter
+3. **Monetization/distribution:** free, paid, or free with an optional supporter
    tier? Influences account/entitlement design.
-5. **Brand assets:** stay with generated monograms, or source licensed festival
+4. **Brand assets:** stay with generated monograms, or source licensed festival
    art where rights are clear?
