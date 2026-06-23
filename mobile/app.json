@@ -13,15 +13,55 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.festivalatlas.app"
+      "bundleIdentifier": "com.festivalatlas.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Festival Atlas uses your location to center the map and sort festivals by distance.",
+        "NSCameraUsageDescription": "Festival Atlas uses the camera to attach photos to your set journal entries.",
+        "NSPhotoLibraryUsageDescription": "Festival Atlas attaches photos from your library to your set journal entries.",
+        "NSCalendarsUsageDescription": "Festival Atlas adds festival sessions to your device calendar."
+      }
     },
     "android": {
       "package": "com.festivalatlas.app",
       "adaptiveIcon": {
         "backgroundColor": "#101826"
-      }
+      },
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "CAMERA",
+        "READ_CALENDAR",
+        "WRITE_CALENDAR"
+      ]
     },
-    "plugins": ["expo-router"],
+    "plugins": [
+      "expo-router",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Festival Atlas uses your location to center the map and sort festivals by distance."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Festival Atlas attaches photos from your library to your set journal entries.",
+          "cameraPermission": "Festival Atlas uses the camera to attach photos to your set journal entries."
+        }
+      ],
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "Festival Atlas adds festival sessions to your device calendar."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#101826"
+        }
+      ]
+    ],
     "experiments": {
       "typedRoutes": true
     }

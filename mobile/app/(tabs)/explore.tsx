@@ -1,6 +1,7 @@
 import { useRouter } from "expo-router";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import {
+  Alert,
   FlatList,
   Pressable,
   StyleSheet,
@@ -9,11 +10,15 @@ import {
   View,
 } from "react-native";
 import { FestivalCard } from "@/components/FestivalCard";
-import type { Festival, Tier } from "@/data/types";
+import { FestivalMap, type FestivalMapHandle } from "@/components/FestivalMap";
+import type { Coordinates, Festival, Tier } from "@/data/types";
+import { haversineMiles } from "@/lib/geo";
+import { getCurrentCoordinates } from "@/lib/location";
 import { useStore } from "@/store/store";
 import { colors, radius, space } from "@/theme/tokens";
 
 type SeasonFilter = "all" | "soon" | "upcoming" | "past";
+type ViewMode = "list" | "map";
 const TIERS: Tier[] = ["S", "A", "B"];
 
 export default function ExploreScreen() {
@@ -23,13 +28,25 @@ export default function ExploreScreen() {
     metaFor,
     isShortlisted,
     toggleShortlist,
-    isVisited,
+    trip,
   } = useStore();
 
   const [query, setQuery] = useState("");
   const [tier, setTier] = useState<Tier | null>(null);
   const [season, setSeason] = useState<SeasonFilter>("all");
   const [onlyShortlist, setOnlyShortlist] = useState(false);
+  const [mode, setMode] = useState<ViewMode>("list");
+  const [near, setNear] = useState<Coordinates | null>(null);
+  const [locating, setLocating] = useState(false);
+  const mapRef = useRef<FestivalMapHandle>(null);
+
+  const routeStops = useMemo(
+    () =>
+      trip.parkIds
+        .map((id) => festivals.find((f) => f.id === id))
+        .filter(Boolean) as Festival[],
+    [trip.parkIds, festivals]
+  );
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -50,12 +67,33 @@ export default function ExploreScreen() {
         return true;
       })
       .sort((a, b) => {
+        if (near) {
+          return (
+            haversineMiles(near, a.f.coordinates) -
+            haversineMiles(near, b.f.coordinates)
+          );
+        }
         const aStart = a.meta.dateStart || "9999";
         const bStart = b.meta.dateStart || "9999";
         return aStart.localeCompare(bStart);
       })
       .map(({ f }) => f);
-  }, [festivals, metaFor, query, tier, season, onlyShortlist, isShortlisted]);
+  }, [festivals, metaFor, query, tier, season, onlyShortlist, isShortlisted, near]);
+
+  async function onNearMe() {
+    setLocating(true);
+    try {
+      const coords = await getCurrentCoordinates();
+      if (coords) {
+        setNear(coords);
+        if (mode === "map") mapRef.current?.centerOn(coords);
+      }
+    } catch (err) {
+      Alert.alert("Location unavailable", (err as Error).message);
+    } finally {
+      setLocating(false);
+    }
+  }
 
   const renderItem = ({ item }: { item: Festival }) => (
     <FestivalCard
@@ -99,21 +137,58 @@ export default function ExploreScreen() {
             onPress={() => setOnlyShortlist((v) => !v)}
           />
         </View>
-        <Text style={styles.count}>
-          {results.length} festival{results.length === 1 ? "" : "s"}
-        </Text>
+        <View style={styles.modeRow}>
+          <View style={styles.segment}>
+            <Pressable
+              onPress={() => setMode("list")}
+              style={[styles.segBtn, mode === "list" && styles.segBtnActive]}
+            >
+              <Text style={[styles.segText, mode === "list" && styles.segTextActive]}>
+                List
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={() => setMode("map")}
+              style={[styles.segBtn, mode === "map" && styles.segBtnActive]}
+            >
+              <Text style={[styles.segText, mode === "map" && styles.segTextActive]}>
+                Map
+              </Text>
+            </Pressable>
+          </View>
+          <Pressable
+            onPress={onNearMe}
+            style={[styles.nearBtn, near && styles.nearBtnActive]}
+          >
+            <Text style={[styles.nearText, near && styles.nearTextActive]}>
+              {locating ? "Locating…" : near ? "◉ Near me" : "○ Near me"}
+            </Text>
+          </Pressable>
+          <Text style={styles.count}>
+            {results.length} result{results.length === 1 ? "" : "s"}
+          </Text>
+        </View>
       </View>
 
-      <FlatList
-        data={results}
-        keyExtractor={(f) => f.id}
-        renderItem={renderItem}
-        contentContainerStyle={styles.list}
-        keyboardShouldPersistTaps="handled"
-        ListEmptyComponent={
-          <Text style={styles.empty}>No festivals match those filters.</Text>
-        }
-      />
+      {mode === "map" ? (
+        <FestivalMap
+          ref={mapRef}
+          festivals={results}
+          routeStops={routeStops}
+          onSelect={(festivalId) => router.push(`/festival/${festivalId}`)}
+        />
+      ) : (
+        <FlatList
+          data={results}
+          keyExtractor={(f) => f.id}
+          renderItem={renderItem}
+          contentContainerStyle={styles.list}
+          keyboardShouldPersistTaps="handled"
+          ListEmptyComponent={
+            <Text style={styles.empty}>No festivals match those filters.</Text>
+          }
+        />
+      )}
     </View>
   );
 }
@@ -170,4 +245,26 @@ const styles = StyleSheet.create({
   count: { fontSize: 12, color: colors.textMuted, fontWeight: "700", letterSpacing: 0.4 },
   list: { padding: space.md },
   empty: { textAlign: "center", color: colors.textMuted, marginTop: 40 },
+  modeRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+  segment: {
+    flexDirection: "row",
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: colors.borderStrong,
+    overflow: "hidden",
+  },
+  segBtn: { paddingHorizontal: 16, paddingVertical: 7 },
+  segBtnActive: { backgroundColor: colors.navy },
+  segText: { fontSize: 13, fontWeight: "700", color: colors.textSecondary },
+  segTextActive: { color: colors.cream },
+  nearBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: colors.borderStrong,
+  },
+  nearBtnActive: { backgroundColor: colors.teal, borderColor: colors.teal },
+  nearText: { fontSize: 13, fontWeight: "700", color: colors.textSecondary },
+  nearTextActive: { color: "#FFFFFF" },
 });

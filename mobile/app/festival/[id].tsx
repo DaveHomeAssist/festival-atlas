@@ -1,6 +1,7 @@
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
+  Alert,
   Linking,
   Pressable,
   ScrollView,
@@ -11,6 +12,7 @@ import {
 import { Pill, SeasonBadge } from "@/components/Badge";
 import { MonogramMark } from "@/components/MonogramMark";
 import { getSessions } from "@/data/seed";
+import { addSessionsToCalendar } from "@/lib/calendar";
 import {
   directionsUrl,
   flightsUrl,
@@ -44,6 +46,18 @@ export default function FestivalDetail() {
   const visited = store.isVisited(festival.id);
 
   const open = (url: string) => Linking.openURL(url).catch(() => undefined);
+
+  async function onAddToCalendar() {
+    try {
+      const count = await addSessionsToCalendar(festival!, sessions);
+      Alert.alert(
+        "Added to calendar",
+        `${count} session${count === 1 ? "" : "s"} added. Verify dates before booking.`
+      );
+    } catch (err) {
+      Alert.alert("Calendar unavailable", (err as Error).message);
+    }
+  }
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
@@ -138,6 +152,9 @@ export default function FestivalDetail() {
               </Text>
             </View>
           ))}
+          <Pressable style={styles.calendarBtn} onPress={onAddToCalendar}>
+            <Text style={styles.calendarBtnText}>＋ Add sessions to calendar</Text>
+          </Pressable>
         </Card>
       ) : null}
 
@@ -276,6 +293,15 @@ const styles = StyleSheet.create({
   },
   sessionDate: { width: 64, fontSize: 12, fontWeight: "800", color: colors.teal },
   sessionLabel: { flex: 1, fontSize: 13, color: colors.textSecondary },
+  calendarBtn: {
+    marginTop: 12,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.borderStrong,
+    paddingVertical: 10,
+    alignItems: "center",
+  },
+  calendarBtnText: { fontSize: 13, fontWeight: "800", color: colors.textPrimary },
   close: {
     marginTop: 20,
     borderRadius: radius.md,

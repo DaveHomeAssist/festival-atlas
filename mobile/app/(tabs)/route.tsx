@@ -1,6 +1,7 @@
 import { useRouter } from "expo-router";
 import React, { useMemo } from "react";
 import {
+  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -11,6 +12,7 @@ import {
 import { MonogramMark } from "@/components/MonogramMark";
 import type { Festival } from "@/data/types";
 import { estimateDriveHours, haversineMiles } from "@/lib/geo";
+import { shareJsonPayload, shareTripSummary } from "@/lib/share";
 import { useStore } from "@/store/store";
 import { colors, radius, space } from "@/theme/tokens";
 
@@ -49,6 +51,29 @@ export default function RouteScreen() {
     return sum;
   }, [stops]);
 
+  async function onShareSummary() {
+    try {
+      await shareTripSummary(trip, stops, (id) => metaFor(id).dateRangeLabel);
+    } catch (err) {
+      Alert.alert("Share failed", (err as Error).message);
+    }
+  }
+
+  async function onExportTrip() {
+    try {
+      const payload = {
+        kind: "festival-atlas-trip",
+        version: 1,
+        trip,
+        stops: stops.map((f) => ({ id: f.id, name: f.name, city: f.city })),
+      };
+      const shared = await shareJsonPayload("festival-atlas-trip.json", payload);
+      if (!shared) Alert.alert("Saved", "Trip file written; sharing is unavailable on this device.");
+    } catch (err) {
+      Alert.alert("Export failed", (err as Error).message);
+    }
+  }
+
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <Text style={styles.title}>{trip.title}</Text>
@@ -56,6 +81,17 @@ export default function RouteScreen() {
         {stops.length} stop{stops.length === 1 ? "" : "s"}
         {totalMiles > 0 ? ` · ~${totalMiles.toLocaleString()} mi` : ""}
       </Text>
+
+      {stops.length > 0 ? (
+        <View style={styles.shareRow}>
+          <Pressable style={styles.shareBtn} onPress={onShareSummary}>
+            <Text style={styles.shareText}>↗ Share trip</Text>
+          </Pressable>
+          <Pressable style={styles.shareBtn} onPress={onExportTrip}>
+            <Text style={styles.shareText}>⤓ Export .json</Text>
+          </Pressable>
+        </View>
+      ) : null}
 
       {stops.length === 0 ? (
         <View style={styles.empty}>
@@ -134,7 +170,16 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.surfaceMuted },
   content: { padding: space.md, paddingBottom: 40 },
   title: { fontSize: 24, fontWeight: "900", color: colors.textPrimary },
-  subtitle: { fontSize: 13, color: colors.textSecondary, marginTop: 4, marginBottom: 16 },
+  subtitle: { fontSize: 13, color: colors.textSecondary, marginTop: 4, marginBottom: 12 },
+  shareRow: { flexDirection: "row", gap: 10, marginBottom: 16 },
+  shareBtn: {
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.borderStrong,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+  },
+  shareText: { fontSize: 13, fontWeight: "700", color: colors.textPrimary },
   empty: {
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
