@@ -17,6 +17,7 @@ export const KEYS = {
   theme: "theme",
   context: "context",
   sharedTripImports: "sharedTripImports",
+  notificationsEnabled: "notificationsEnabled",
 } as const;
 
 export type StorageKey = (typeof KEYS)[keyof typeof KEYS];

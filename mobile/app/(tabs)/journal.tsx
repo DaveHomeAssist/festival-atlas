@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from "react";
 import {
+  Alert,
+  Image,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -8,6 +10,7 @@ import {
   View,
 } from "react-native";
 import type { Festival } from "@/data/types";
+import { capturePhoto, pickPhoto } from "@/lib/media";
 import { useStore } from "@/store/store";
 import { colors, radius, space } from "@/theme/tokens";
 
@@ -30,9 +33,19 @@ export default function JournalScreen() {
   const [stage, setStage] = useState("");
   const [rating, setRating] = useState(0);
   const [note, setNote] = useState("");
+  const [photoUris, setPhotoUris] = useState<string[]>([]);
 
   const festivalName = (id: string): string =>
     festivals.find((f) => f.id === id)?.name ?? id;
+
+  async function attach(source: "camera" | "library") {
+    try {
+      const uri = source === "camera" ? await capturePhoto() : await pickPhoto();
+      if (uri) setPhotoUris((prev) => [...prev, uri]);
+    } catch (err) {
+      Alert.alert("Photo unavailable", (err as Error).message);
+    }
+  }
 
   function save() {
     if (!artist.trim() || !festivalId) return;
@@ -42,11 +55,13 @@ export default function JournalScreen() {
       stage: stage.trim() || undefined,
       rating: rating || undefined,
       note: note.trim() || undefined,
+      photoUris: photoUris.length ? photoUris : undefined,
     });
     setArtist("");
     setStage("");
     setRating(0);
     setNote("");
+    setPhotoUris([]);
   }
 
   return (
@@ -115,6 +130,30 @@ export default function JournalScreen() {
           style={[styles.input, styles.noteInput]}
         />
 
+        <Text style={styles.label}>PHOTOS</Text>
+        <View style={styles.photoActions}>
+          <Pressable style={styles.photoBtn} onPress={() => attach("camera")}>
+            <Text style={styles.photoBtnText}>📷 Camera</Text>
+          </Pressable>
+          <Pressable style={styles.photoBtn} onPress={() => attach("library")}>
+            <Text style={styles.photoBtnText}>🖼 Library</Text>
+          </Pressable>
+        </View>
+        {photoUris.length ? (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.thumbRow}>
+            {photoUris.map((uri) => (
+              <Pressable
+                key={uri}
+                onLongPress={() =>
+                  setPhotoUris((prev) => prev.filter((u) => u !== uri))
+                }
+              >
+                <Image source={{ uri }} style={styles.thumb} />
+              </Pressable>
+            ))}
+          </ScrollView>
+        ) : null}
+
         <Pressable
           style={[styles.save, (!artist.trim() || !festivalId) && styles.saveDisabled]}
           onPress={save}
@@ -143,6 +182,13 @@ export default function JournalScreen() {
               {entry.stage ? ` · ${entry.stage}` : ""}
             </Text>
             {entry.note ? <Text style={styles.entryNote}>{entry.note}</Text> : null}
+            {entry.photoUris?.length ? (
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.thumbRow}>
+                {entry.photoUris.map((uri) => (
+                  <Image key={uri} source={{ uri }} style={styles.thumb} />
+                ))}
+              </ScrollView>
+            ) : null}
             <Pressable onPress={() => removeJournalEntry(entry.id)} hitSlop={8}>
               <Text style={styles.entryDelete}>Delete</Text>
             </Pressable>
@@ -197,6 +243,23 @@ const styles = StyleSheet.create({
   stars: { flexDirection: "row", gap: 4 },
   star: { fontSize: 28, color: colors.textMuted },
   starOn: { color: colors.gold },
+  photoActions: { flexDirection: "row", gap: 10 },
+  photoBtn: {
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.borderStrong,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+  },
+  photoBtnText: { fontSize: 13, fontWeight: "700", color: colors.textPrimary },
+  thumbRow: { flexGrow: 0, marginTop: 10 },
+  thumb: {
+    width: 64,
+    height: 64,
+    borderRadius: radius.sm,
+    marginRight: 8,
+    backgroundColor: colors.surfaceMuted,
+  },
   save: {
     backgroundColor: colors.red,
     borderRadius: radius.md,

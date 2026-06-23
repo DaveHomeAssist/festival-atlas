@@ -13,30 +13,47 @@ npm run typecheck
 npm start        # Expo dev server (press i / a for iOS / Android)
 ```
 
-## What's implemented (M0–M3 of the spec)
+## What's implemented (M0–M4 of the spec)
 
 - **Seed pipeline** — `scripts/generate-seed.cjs` extracts the canonical
   43-festival dataset + 2026 schedule from the web app so the data never drifts.
 - **Local-first store** — `src/store/` persists user state to AsyncStorage under
-  the same `FA:` keys the web app uses, so a web backup imports unchanged
-  (export / restore / reset in the **More** tab).
+  the same `FA:` keys the web app uses, so a web backup imports unchanged.
 - **Season engine** — `src/lib/season.ts` is a verbatim port of the web
   `getFestivalGuideMeta` logic (happening-now/soon/upcoming/past, source
   freshness, planning status).
-- **Five tabs** — Home (snapshot + progress), Explore (search/filter directory),
-  Route (reorderable stops + leg distances + trip notes), Journal (set logging),
-  More (audit queue, backup/restore/reset, about).
+- **Five tabs** — Home (snapshot + progress), Explore (search/filter + map),
+  Route (reorderable stops + leg distances + trip notes + share/export),
+  Journal (set logging + photos), More (reminders, audit queue,
+  backup/restore/reset, about).
 - **Festival detail modal** — `app/festival/[id].tsx` with logistics deep links
   (flights/lodging/ground/directions — delivers the web `logisticsLinks` flag),
-  official-seller link, sessions, and source-freshness with the
-  verify-before-booking guardrail.
+  official-seller link, sessions with **add-to-device-calendar**, and
+  source-freshness with the verify-before-booking guardrail.
+- **Interactive map (M2)** — `src/components/FestivalMap.tsx` (`react-native-maps`):
+  colored pins, route polyline overlay, tap-to-detail, and a **near-me** control
+  (`expo-location`) that recenters the map and distance-sorts the list.
+- **Camera journal (M4)** — `expo-image-picker` attaches camera/library photos to
+  set entries; thumbnails render in the form and the log.
+- **Local reminders (M4)** — `src/lib/notifications.ts` (`expo-notifications`)
+  schedules on-device T-7 / T-1 alerts for shortlisted + routed festivals;
+  toggle and re-sync in the **More** tab.
+- **Share + calendar (M3/M4)** — trip summary via the OS share sheet, trip and
+  full-backup `.json` export (`expo-sharing`), and device-calendar events for a
+  festival's sessions (`expo-calendar`).
 
-## Not yet wired (later milestones)
+## Permissions
 
-Interactive offline vector map (M2), camera-attached journal photos and local
-push reminders (M4), OS share-sheet trip export and `.ics`/device-calendar
-integration (M3/M4). These are scaffolded conceptually in the spec; the data and
-links layers they depend on are already in place.
+Declared in `app.json`: location (map/near-me), camera + photo library (journal),
+calendar (sessions), and notifications (reminders). All are requested
+just-in-time at first use, never up front.
+
+## Still ahead
+
+Offline **vector** map tiles for true no-signal use on-site (current map needs a
+connection for tiles), shortlist/route auto-scheduling of reminders on change
+(today it's a manual sync in **More**), and import of a shared trip file via deep
+link. The data, permission, and link layers for these are already in place.
 
 ## Regenerating the seed
 
