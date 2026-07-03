@@ -381,10 +381,10 @@
 <script src="schedule.js"></script>
 <script src="shared/js/core/device.js"></script>
 <script src="device.js"></script>
-<script src="app.js"></script>
-<script src="outreach-pack.js"></script>
 <script src="deep-research-pack.js"></script>
 <script src="international-research-pack.js"></script>
+<script src="app.js"></script>
+<script src="outreach-pack.js"></script>
 <script>
 (function initAuditPage() {
   const app = window.FA.app;
@@ -620,7 +620,7 @@
     pendingPack = null;
     pendingPreview = null;
     renderPackPreview(null);
-    setStatus(`Local data reset. ${diagnostics.counts.festivals} seeded festivals loaded.`);
+    setStatus(`Local data reset. ${diagnostics.counts.festivals} canonical festivals loaded.`);
     renderRows();
   });
 

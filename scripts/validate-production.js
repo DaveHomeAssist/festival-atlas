@@ -66,6 +66,8 @@ async function validateBrowser() {
   await home.reload({ waitUntil: "load" });
   await home.waitForTimeout(120);
   assert((await home.textContent("body")).includes("Festival Atlas"), "home should render");
+  const homeFestivalCount = await home.evaluate(() => window.FA.app.getParks().length);
+  assert(homeFestivalCount === 95, `home should auto-load the 95-festival canonical baseline, got ${homeFestivalCount}`);
   await home.close();
 
   const audit = await openPage("audit.html");
@@ -78,8 +80,10 @@ async function validateBrowser() {
     const preview = window.FA.app.previewFestivalPack(window.FA.outreachPack);
     const researchPreview = window.FA.app.previewFestivalPack(window.FA.deepResearchPack);
     const internationalPreview = window.FA.app.previewFestivalPack(window.FA.internationalResearchPack);
+    const canonicalState = window.FA.app.getCanonicalPackImportState();
     return {
       rows: rows.length,
+      festivals: diagnostics.counts.festivals,
       reviewNeeded: diagnostics.counts.sourceReviewNeeded,
       verificationNeeded: diagnostics.counts.sourceVerificationQueue,
       nextConfirmed,
@@ -102,13 +106,17 @@ async function validateBrowser() {
       researchPreviewScheduleWrites: researchPreview.scheduleWrites,
       internationalPreviewCreated: internationalPreview.created,
       internationalPreviewMerged: internationalPreview.merged,
+      internationalPreviewUnchanged: internationalPreview.unchanged,
       internationalPreviewRows: internationalPreview.rows.length,
       internationalPreviewVerify: internationalPreview.verificationNeeded,
       internationalPreviewScheduleWrites: internationalPreview.scheduleWrites,
+      canonicalPackCount: Object.keys(canonicalState.applied || {}).length,
       verificationRows: verificationQueue.length
     };
   });
-  assert(auditProbe.rows > 40, "audit should include seeded catalog");
+  assert(auditProbe.rows === 95, `audit should include the canonical 95-festival baseline, got ${auditProbe.rows}`);
+  assert(auditProbe.festivals === 95, `diagnostics should count 95 canonical festivals, got ${auditProbe.festivals}`);
+  assert(auditProbe.canonicalPackCount === 2, `canonical pack migration should record 2 packs, got ${auditProbe.canonicalPackCount}`);
   assert(auditProbe.reviewNeeded === 0, `source review queue should be empty, got ${auditProbe.reviewNeeded}`);
   assert(auditProbe.verificationNeeded >= auditProbe.nextConfirmed, "verification queue should include next-confirmed rows");
   assert(auditProbe.nextConfirmed >= 1, "audit should include next-confirmed rows");
@@ -120,20 +128,21 @@ async function validateBrowser() {
   assert(auditProbe.internationalPackCount === 29, `International research pack should expose 29 festivals, got ${auditProbe.internationalPackCount}`);
   assert(auditProbe.hasResearchButton, "audit should include Deep Research pack preview control");
   assert(auditProbe.hasInternationalButton, "audit should include international research pack preview control");
-  assert(auditProbe.previewCreated >= 6, "outreach preview should include created festivals");
-  assert(auditProbe.previewMerged >= 10, "outreach preview should include merged festivals");
+  assert(auditProbe.previewCreated >= 3, "outreach preview should include remaining created festivals after canonical baseline");
+  assert(auditProbe.previewMerged >= 17, "outreach preview should merge canonical baseline festivals");
   assert(auditProbe.previewRows === 20, "outreach preview should include all pack rows");
   assert(auditProbe.previewVerify >= 1, "outreach preview should flag verification work");
-  assert(auditProbe.researchPreviewCreated >= 15, "Deep Research preview should include created festivals");
-  assert(auditProbe.researchPreviewMerged >= 10, "Deep Research preview should include merged festivals");
+  assert(auditProbe.researchPreviewCreated === 0, "Deep Research preview should be no-op after auto baseline");
+  assert(auditProbe.researchPreviewMerged === 0, "Deep Research preview should not merge after auto baseline");
   assert(auditProbe.researchPreviewRows === 36, "Deep Research preview should include all pack rows");
   assert(auditProbe.researchPreviewVerify === 0, "canonical Deep Research preview should not add source verification work");
-  assert(auditProbe.researchPreviewScheduleWrites >= 15, "Deep Research preview should add custom schedule rows for new festivals");
-  assert(auditProbe.internationalPreviewCreated === 29, `international preview should create 29 festivals, got ${auditProbe.internationalPreviewCreated}`);
-  assert(auditProbe.internationalPreviewMerged === 0, "international preview should not merge seeded festivals");
+  assert(auditProbe.researchPreviewScheduleWrites === 0, "Deep Research preview should not rewrite schedules after auto baseline");
+  assert(auditProbe.internationalPreviewCreated === 0, `international preview should create 0 festivals after auto baseline, got ${auditProbe.internationalPreviewCreated}`);
+  assert(auditProbe.internationalPreviewMerged === 0, "international preview should not merge after auto baseline");
+  assert(auditProbe.internationalPreviewUnchanged === 29, "international preview should find all canonical international rows unchanged");
   assert(auditProbe.internationalPreviewRows === 29, "international preview should include all pack rows");
   assert(auditProbe.internationalPreviewVerify === 0, "canonical international preview should not add source verification work");
-  assert(auditProbe.internationalPreviewScheduleWrites === 29, "international preview should add custom schedule rows for every international festival");
+  assert(auditProbe.internationalPreviewScheduleWrites === 0, "international preview should not rewrite schedules after auto baseline");
   const outreachProbe = await audit.evaluate(() => {
     const result = window.FA.app.importFestivalPack(window.FA.outreachPack);
     const cma = window.FA.app.getParkById("cma-fest");
@@ -159,14 +168,14 @@ async function validateBrowser() {
       hasOceansCalling: septemberEvents.some((event) => event.festivalId === "oceans-calling")
     };
   });
-  assert(outreachProbe.created >= 6, `outreach pack should create new festivals, got ${outreachProbe.created}`);
-  assert(outreachProbe.merged >= 10, `outreach pack should merge existing festivals, got ${outreachProbe.merged}`);
+  assert(outreachProbe.created >= 3, `outreach pack should create remaining non-canonical festivals, got ${outreachProbe.created}`);
+  assert(outreachProbe.merged >= 17, `outreach pack should merge existing canonical festivals, got ${outreachProbe.merged}`);
   assert(String(outreachProbe.cmaOps || "").includes("Citywide"), "CMA ops intelligence should be preserved");
   assert(String(outreachProbe.govOps || "").includes("partners@govball.com"), "Gov Ball public contact should be preserved");
   assert(outreachProbe.cmaScore >= 60, `CMA ops score should be actionable, got ${outreachProbe.cmaScore}`);
   assert(["Prime", "Strong"].includes(outreachProbe.cmaScoreTier), "CMA ops tier should be Prime or Strong");
   assert(outreachProbe.northCoastRange === "Sep 4 - 6, 2026", `North Coast date range mismatch: ${outreachProbe.northCoastRange}`);
-  assert(outreachProbe.opsCount >= 20, "diagnostics should count imported ops intelligence");
+  assert(outreachProbe.opsCount >= 65, "diagnostics should count canonical ops intelligence plus outreach rows");
   assert(outreachProbe.verificationCount >= 1, "diagnostics should count source verification queue");
   assert(outreachProbe.hasOceansCalling, "outreach pack should add September calendar events");
   const researchProbe = await audit.evaluate(() => {
@@ -211,8 +220,8 @@ async function validateBrowser() {
       countAfterReset: window.FA.app.createDiagnostics().counts.festivals
     };
   });
-  assert(researchProbe.created >= 15, `Deep Research pack should create missing festivals, got ${researchProbe.created}`);
-  assert(researchProbe.merged >= 10, `Deep Research pack should merge seeded festivals, got ${researchProbe.merged}`);
+  assert(researchProbe.created === 0, `Deep Research pack should already be baseline, got ${researchProbe.created} created`);
+  assert(researchProbe.merged === 36, `Deep Research pack should re-merge existing baseline rows, got ${researchProbe.merged}`);
   assert(researchProbe.sessions >= 70, `Deep Research pack should create custom schedule sessions, got ${researchProbe.sessions}`);
   assert(researchProbe.mountainImported, "Deep Research pack should import Mountain Music Festival");
   assert(researchProbe.arcImported, "Deep Research pack should import ARC Music Festival");
@@ -226,7 +235,8 @@ async function validateBrowser() {
   assert(researchProbe.verificationCount === auditProbe.verificationNeeded, "canonical Deep Research import should not add source verification rows");
   assert(researchProbe.hasMountainJune, "Deep Research pack should add June calendar events");
   assert(researchProbe.hasArcSeptember, "Deep Research pack should add September calendar events");
-  assert(researchProbe.countBeforeReset > researchProbe.countAfterReset, "reset should remove Deep Research imported festivals");
+  assert(researchProbe.countBeforeReset === 95, `canonical baseline before reset should be 95, got ${researchProbe.countBeforeReset}`);
+  assert(researchProbe.countAfterReset === 95, `reset should restore the 95-festival canonical baseline, got ${researchProbe.countAfterReset}`);
   const internationalProbe = await audit.evaluate(() => {
     const pack = window.FA.internationalResearchPack;
     const result = window.FA.app.importFestivalPack(pack);
@@ -263,8 +273,8 @@ async function validateBrowser() {
       countAfterReset: window.FA.app.createDiagnostics().counts.festivals
     };
   });
-  assert(internationalProbe.created === 29, `international pack should create 29 festivals, got ${internationalProbe.created}`);
-  assert(internationalProbe.merged === 0, `international pack should not merge seeded festivals, got ${internationalProbe.merged}`);
+  assert(internationalProbe.created === 0, `international pack should already be baseline, got ${internationalProbe.created} created`);
+  assert(internationalProbe.merged === 29, `international pack should re-merge existing baseline rows, got ${internationalProbe.merged}`);
   assert(internationalProbe.sessions === 105, `international pack should create 105 custom schedule sessions, got ${internationalProbe.sessions}`);
   assert(internationalProbe.downloadImported, "international pack should import Download Festival");
   assert(internationalProbe.downloadRange === "Jun 10 - 14, 2026", `Download Festival date range mismatch: ${internationalProbe.downloadRange}`);
@@ -276,7 +286,8 @@ async function validateBrowser() {
   assert(internationalProbe.verificationCount === auditProbe.verificationNeeded, "canonical international import should not add source verification rows");
   assert(internationalProbe.hasDownloadJune, "international pack should add June calendar events");
   assert(internationalProbe.hasRockInRioSeptember, "international pack should add September calendar events");
-  assert(internationalProbe.countBeforeReset > internationalProbe.countAfterReset, "reset should remove international imported festivals");
+  assert(internationalProbe.countBeforeReset === 95, `canonical baseline before reset should be 95, got ${internationalProbe.countBeforeReset}`);
+  assert(internationalProbe.countAfterReset === 95, `reset should restore the 95-festival canonical baseline, got ${internationalProbe.countAfterReset}`);
   const importProbe = await audit.evaluate(() => {
     window.FA.app.importFestivalPack({
       festivals: [{

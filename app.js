@@ -864,6 +864,8 @@
 
   /* ── Production operations ───────────── */
   var BACKUP_VERSION = 1;
+  var CANONICAL_PACK_IMPORTS_KEY = "canonicalPackImports";
+  var CANONICAL_PACK_NAMES = ["deepResearchPack", "internationalResearchPack"];
   var DATA_BACKUP_KEYS = [
     data.KEYS.parks,
     data.KEYS.activeTrip,
@@ -874,6 +876,7 @@
     "festivalJournalEntries",
     "festivalJournalHistory",
     data.KEYS.festivalCustomSchedule,
+    CANONICAL_PACK_IMPORTS_KEY,
     "sharedTripImports",
     "setkeeperDraft",
     "theme"
@@ -1365,6 +1368,89 @@
     };
   }
 
+  function canonicalPackSignature(pack) {
+    return [
+      pack.id || pack.label || "canonical-pack",
+      pack.reviewedOn || "",
+      Array.isArray(pack.festivals) ? pack.festivals.length : 0
+    ].join("@");
+  }
+
+  function getCanonicalPacks() {
+    return CANONICAL_PACK_NAMES.map(function getPack(name) {
+      return namespace[name];
+    }).filter(function keepPack(pack) {
+      return pack && typeof pack === "object" && Array.isArray(pack.festivals) && pack.festivals.length;
+    });
+  }
+
+  function getCanonicalPackImportState() {
+    var state = storage.get(CANONICAL_PACK_IMPORTS_KEY);
+    if (!state || typeof state !== "object" || Array.isArray(state)) {
+      return { applied: {} };
+    }
+    if (!state.applied || typeof state.applied !== "object" || Array.isArray(state.applied)) {
+      state.applied = {};
+    }
+    return cloneValue(state);
+  }
+
+  function canonicalPackNeedsImport(pack, state) {
+    var signature = canonicalPackSignature(pack);
+    if (!state.applied[signature]) return true;
+
+    var currentIds = getParks().reduce(function indexIds(map, park) {
+      if (park && park.id) map[park.id] = true;
+      return map;
+    }, {});
+
+    return pack.festivals.some(function missingRawFestival(rawPark) {
+      var id = normalizeFestivalId(rawPark && rawPark.id, rawPark && rawPark.name);
+      return id && !currentIds[id];
+    });
+  }
+
+  function recordCanonicalPackImport(state, pack, result) {
+    var nextState = cloneValue(state);
+    var signature = canonicalPackSignature(pack);
+    nextState.applied[signature] = {
+      packId: pack.id || "",
+      label: pack.label || pack.id || "Canonical festival pack",
+      reviewedOn: pack.reviewedOn || "",
+      festivals: Array.isArray(pack.festivals) ? pack.festivals.length : 0,
+      importedAt: nowIso(),
+      created: result.created,
+      merged: result.merged,
+      sessions: result.sessions
+    };
+    storage.set(CANONICAL_PACK_IMPORTS_KEY, nextState);
+    storage.flush(CANONICAL_PACK_IMPORTS_KEY);
+    return nextState;
+  }
+
+  function importCanonicalPacks() {
+    var packs = getCanonicalPacks();
+    var state = getCanonicalPackImportState();
+    var applied = [];
+
+    packs.forEach(function importPack(pack) {
+      if (!canonicalPackNeedsImport(pack, state)) return;
+      var result = importFestivalPack(pack);
+      state = recordCanonicalPackImport(state, pack, result);
+      applied.push(Object.assign({
+        packId: pack.id || "",
+        label: pack.label || pack.id || "Canonical festival pack"
+      }, result));
+    });
+
+    return {
+      checked: packs.length,
+      applied: applied,
+      skipped: packs.length - applied.length,
+      state: state
+    };
+  }
+
   function getBackupPayload() {
     var state = {};
     DATA_BACKUP_KEYS.forEach(function copyKey(key) {
@@ -1393,6 +1479,7 @@
     });
 
     data.initializeData();
+    importCanonicalPacks();
 
     return {
       restoredAt: nowIso(),
@@ -1407,6 +1494,7 @@
       storage.remove(key);
     });
     data.initializeData();
+    importCanonicalPacks();
     return createDiagnostics();
   }
 
@@ -1614,6 +1702,7 @@
   }
 
   data.initializeData();
+  importCanonicalPacks();
   registerServiceWorker();
 
   /* ── Shortlist badge (auto-render on all pages) ── */
@@ -1683,6 +1772,8 @@
     resetLocalData: resetLocalData,
     previewFestivalPack: previewFestivalPack,
     importFestivalPack: importFestivalPack,
+    importCanonicalPacks: importCanonicalPacks,
+    getCanonicalPackImportState: getCanonicalPackImportState,
     downloadBackup: downloadBackup,
     createDiagnostics: createDiagnostics,
     downloadDiagnostics: downloadDiagnostics,
