@@ -31,7 +31,7 @@ Festival Atlas is a static local first music festival planning guide. The curren
 | ID | Severity | Status | Title | Notes |
 |----|----------|--------|-------|-------|
 | 001 | P2 | resolved | Reorient copied MLB planner for music festivals | Replaced seeded data, dashboard pages, route board, and scorekeeper with festival specific flows |
-| 002 | P1 | in progress | Make the 2026 guide showready | Added source metadata, season status helpers, guide freshness UI, standalone shared core scripts, route reordering, attended history, full seeded source audit, source notes, CRSSD Fall 2026 correction, audit ops page, backup/restore/reset, festival pack import, diagnostics, validation script, service worker cache update, and legacy asset cleanup; remaining work is post-deploy verification |
+| 002 | P1 | resolved | Make the 2026 guide showready | Added source metadata, season status helpers, guide freshness UI, standalone shared core scripts, route reordering, attended history, full seeded source audit, source notes, CRSSD Fall 2026 correction, audit ops page, backup/restore/reset, festival pack import, diagnostics, validation script, service worker cache update, and legacy asset cleanup. Post-deploy verification completed 2026-07-03: Deep Research packs auto-load as baseline data committed+rebased over the mobile commits and pushed (f8a1f02); `scripts/validate-production.js` passed; Pages build "built" at that exact commit; live app.js serves the new pack-import code (cache-busted fetch). |
 
 ## Session Log
 
