@@ -1,0 +1,1159 @@
+{
+  "coachella": [
+    {
+      "weekday": "Fri",
+      "date": "2026-04-10",
+      "time": null,
+      "headliner": null,
+      "label": "Weekend 1 Day 1"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2026-04-11",
+      "time": null,
+      "headliner": null,
+      "label": "Weekend 1 Day 2"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2026-04-12",
+      "time": null,
+      "headliner": null,
+      "label": "Weekend 1 Day 3"
+    },
+    {
+      "weekday": "Fri",
+      "date": "2026-04-17",
+      "time": null,
+      "headliner": null,
+      "label": "Weekend 2 Day 1"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2026-04-18",
+      "time": null,
+      "headliner": null,
+      "label": "Weekend 2 Day 2"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2026-04-19",
+      "time": null,
+      "headliner": null,
+      "label": "Weekend 2 Day 3"
+    }
+  ],
+  "lollapalooza": [
+    {
+      "weekday": "Thu",
+      "date": "2026-07-30",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 1"
+    },
+    {
+      "weekday": "Fri",
+      "date": "2026-07-31",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 2"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2026-08-01",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 3"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2026-08-02",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 4"
+    }
+  ],
+  "bonnaroo": [
+    {
+      "weekday": "Thu",
+      "date": "2026-06-11",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 1"
+    },
+    {
+      "weekday": "Fri",
+      "date": "2026-06-12",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 2"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2026-06-13",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 3"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2026-06-14",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 4"
+    }
+  ],
+  "outside-lands": [
+    {
+      "weekday": "Fri",
+      "date": "2026-08-07",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 1"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2026-08-08",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 2"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2026-08-09",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 3"
+    }
+  ],
+  "governors-ball": [
+    {
+      "weekday": "Fri",
+      "date": "2026-06-05",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 1"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2026-06-06",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 2"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2026-06-07",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 3"
+    }
+  ],
+  "boston-calling": [
+    {
+      "weekday": "Fri",
+      "date": "2027-06-04",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 1"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2027-06-05",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 2"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2027-06-06",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 3"
+    }
+  ],
+  "newport-folk-festival": [
+    {
+      "weekday": "Fri",
+      "date": "2026-07-24",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 1"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2026-07-25",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 2"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2026-07-26",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 3"
+    }
+  ],
+  "newport-jazz-festival": [
+    {
+      "weekday": "Fri",
+      "date": "2026-07-31",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 1"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2026-08-01",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 2"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2026-08-02",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 3"
+    }
+  ],
+  "sea-hear-now": [
+    {
+      "weekday": "Sat",
+      "date": "2026-09-19",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 1"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2026-09-20",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 2"
+    }
+  ],
+  "elements-music-arts-festival": [
+    {
+      "weekday": "Fri",
+      "date": "2026-08-07",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 1"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2026-08-08",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 2"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2026-08-09",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 3"
+    }
+  ],
+  "ultra-music-festival": [
+    {
+      "weekday": "Fri",
+      "date": "2027-03-26",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 1"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2027-03-27",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 2"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2027-03-28",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 3"
+    }
+  ],
+  "iii-points": [
+    {
+      "weekday": "Fri",
+      "date": "2026-10-16",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 1"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2026-10-17",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 2"
+    }
+  ],
+  "shaky-knees": [
+    {
+      "weekday": "Fri",
+      "date": "2026-09-18",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 1"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2026-09-19",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 2"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2026-09-20",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 3"
+    }
+  ],
+  "new-orleans-jazz-heritage-festival": [
+    {
+      "weekday": "Thu",
+      "date": "2026-04-23",
+      "time": null,
+      "headliner": null,
+      "label": "Weekend 1 Day 1"
+    },
+    {
+      "weekday": "Fri",
+      "date": "2026-04-24",
+      "time": null,
+      "headliner": null,
+      "label": "Weekend 1 Day 2"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2026-04-25",
+      "time": null,
+      "headliner": null,
+      "label": "Weekend 1 Day 3"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2026-04-26",
+      "time": null,
+      "headliner": null,
+      "label": "Weekend 1 Day 4"
+    },
+    {
+      "weekday": "Thu",
+      "date": "2026-04-30",
+      "time": null,
+      "headliner": null,
+      "label": "Weekend 2 Day 1"
+    },
+    {
+      "weekday": "Fri",
+      "date": "2026-05-01",
+      "time": null,
+      "headliner": null,
+      "label": "Weekend 2 Day 2"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2026-05-02",
+      "time": null,
+      "headliner": null,
+      "label": "Weekend 2 Day 3"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2026-05-03",
+      "time": null,
+      "headliner": null,
+      "label": "Weekend 2 Day 4"
+    }
+  ],
+  "essence-festival-of-culture": [
+    {
+      "weekday": "Fri",
+      "date": "2026-07-03",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 1"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2026-07-04",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 2"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2026-07-05",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 3"
+    }
+  ],
+  "railbird-festival": [
+    {
+      "weekday": "Sat",
+      "date": "2026-06-06",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 1"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2026-06-07",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 2"
+    }
+  ],
+  "riot-fest": [
+    {
+      "weekday": "Fri",
+      "date": "2026-09-18",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 1"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2026-09-19",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 2"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2026-09-20",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 3"
+    }
+  ],
+  "summerfest": [
+    {
+      "weekday": "Thu",
+      "date": "2026-06-18",
+      "time": null,
+      "headliner": null,
+      "label": "Weekend 1 Day 1"
+    },
+    {
+      "weekday": "Fri",
+      "date": "2026-06-19",
+      "time": null,
+      "headliner": null,
+      "label": "Weekend 1 Day 2"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2026-06-20",
+      "time": null,
+      "headliner": null,
+      "label": "Weekend 1 Day 3"
+    },
+    {
+      "weekday": "Thu",
+      "date": "2026-06-25",
+      "time": null,
+      "headliner": null,
+      "label": "Weekend 2 Day 1"
+    },
+    {
+      "weekday": "Fri",
+      "date": "2026-06-26",
+      "time": null,
+      "headliner": null,
+      "label": "Weekend 2 Day 2"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2026-06-27",
+      "time": null,
+      "headliner": null,
+      "label": "Weekend 2 Day 3"
+    },
+    {
+      "weekday": "Thu",
+      "date": "2026-07-02",
+      "time": null,
+      "headliner": null,
+      "label": "Weekend 3 Day 1"
+    },
+    {
+      "weekday": "Fri",
+      "date": "2026-07-03",
+      "time": null,
+      "headliner": null,
+      "label": "Weekend 3 Day 2"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2026-07-04",
+      "time": null,
+      "headliner": null,
+      "label": "Weekend 3 Day 3"
+    }
+  ],
+  "movement": [
+    {
+      "weekday": "Sat",
+      "date": "2026-05-23",
+      "time": "2:00 PM",
+      "headliner": null,
+      "label": "Festival Day 1"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2026-05-24",
+      "time": "2:00 PM",
+      "headliner": null,
+      "label": "Festival Day 2"
+    },
+    {
+      "weekday": "Mon",
+      "date": "2026-05-25",
+      "time": "2:00 PM",
+      "headliner": null,
+      "label": "Festival Day 3"
+    }
+  ],
+  "electric-forest": [
+    {
+      "weekday": "Thu",
+      "date": "2026-06-25",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 1"
+    },
+    {
+      "weekday": "Fri",
+      "date": "2026-06-26",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 2"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2026-06-27",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 3"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2026-06-28",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 4"
+    }
+  ],
+  "hinterland-music-festival": [
+    {
+      "weekday": "Thu",
+      "date": "2026-07-30",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 1"
+    },
+    {
+      "weekday": "Fri",
+      "date": "2026-07-31",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 2"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2026-08-01",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 3"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2026-08-02",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 4"
+    }
+  ],
+  "summer-camp-music-festival": [
+    {
+      "weekday": "Fri",
+      "date": "2026-05-22",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 1"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2026-05-23",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 2"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2026-05-24",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 3"
+    }
+  ],
+  "edc-las-vegas": [
+    {
+      "weekday": "Fri",
+      "date": "2027-05-14",
+      "time": null,
+      "headliner": null,
+      "label": "Weekend 1 Day 1"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2027-05-15",
+      "time": null,
+      "headliner": null,
+      "label": "Weekend 1 Day 2"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2027-05-16",
+      "time": null,
+      "headliner": null,
+      "label": "Weekend 1 Day 3"
+    },
+    {
+      "weekday": "Fri",
+      "date": "2027-05-21",
+      "time": null,
+      "headliner": null,
+      "label": "Weekend 2 Day 1"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2027-05-22",
+      "time": null,
+      "headliner": null,
+      "label": "Weekend 2 Day 2"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2027-05-23",
+      "time": null,
+      "headliner": null,
+      "label": "Weekend 2 Day 3"
+    }
+  ],
+  "austin-city-limits": [
+    {
+      "weekday": "Fri",
+      "date": "2026-10-02",
+      "time": null,
+      "headliner": null,
+      "label": "Weekend 1 Day 1"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2026-10-03",
+      "time": null,
+      "headliner": null,
+      "label": "Weekend 1 Day 2"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2026-10-04",
+      "time": null,
+      "headliner": null,
+      "label": "Weekend 1 Day 3"
+    },
+    {
+      "weekday": "Fri",
+      "date": "2026-10-09",
+      "time": null,
+      "headliner": null,
+      "label": "Weekend 2 Day 1"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2026-10-10",
+      "time": null,
+      "headliner": null,
+      "label": "Weekend 2 Day 2"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2026-10-11",
+      "time": null,
+      "headliner": null,
+      "label": "Weekend 2 Day 3"
+    }
+  ],
+  "sxsw-music-festival": [
+    {
+      "weekday": "Mon",
+      "date": "2027-03-15",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 1"
+    },
+    {
+      "weekday": "Tue",
+      "date": "2027-03-16",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 2"
+    },
+    {
+      "weekday": "Wed",
+      "date": "2027-03-17",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 3"
+    },
+    {
+      "weekday": "Thu",
+      "date": "2027-03-18",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 4"
+    },
+    {
+      "weekday": "Fri",
+      "date": "2027-03-19",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 5"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2027-03-20",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 6"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2027-03-21",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 7"
+    }
+  ],
+  "seismic-dance-event": [
+    {
+      "weekday": "Fri",
+      "date": "2026-11-13",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 1"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2026-11-14",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 2"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2026-11-15",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 3"
+    }
+  ],
+  "ubbi-dubbi-festival": [
+    {
+      "weekday": "Fri",
+      "date": "2026-04-24",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 1"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2026-04-25",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 2"
+    }
+  ],
+  "m3f-music-festival": [
+    {
+      "weekday": "Fri",
+      "date": "2026-03-06",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 1"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2026-03-07",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 2"
+    }
+  ],
+  "goldrush-festival": [
+    {
+      "weekday": "Fri",
+      "date": "2026-09-11",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 1"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2026-09-12",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 2"
+    }
+  ],
+  "bottlerock-napa-valley": [
+    {
+      "weekday": "Fri",
+      "date": "2027-05-28",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 1"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2027-05-29",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 2"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2027-05-30",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 3"
+    }
+  ],
+  "crssd-festival": [
+    {
+      "weekday": "Sat",
+      "date": "2026-09-26",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 1"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2026-09-27",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 2"
+    }
+  ],
+  "bumbershoot": [
+    {
+      "weekday": "Sat",
+      "date": "2026-09-05",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 1"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2026-09-06",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 2"
+    }
+  ],
+  "capitol-hill-block-party": [
+    {
+      "weekday": "Fri",
+      "date": "2026-08-07",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 1"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2026-08-08",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 2"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2026-08-09",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 3"
+    }
+  ],
+  "lightning-in-a-bottle": [
+    {
+      "weekday": "Wed",
+      "date": "2026-05-20",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 1"
+    },
+    {
+      "weekday": "Thu",
+      "date": "2026-05-21",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 2"
+    },
+    {
+      "weekday": "Fri",
+      "date": "2026-05-22",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 3"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2026-05-23",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 4"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2026-05-24",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 5"
+    }
+  ],
+  "hard-summer": [
+    {
+      "weekday": "Sat",
+      "date": "2026-08-01",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 1"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2026-08-02",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 2"
+    }
+  ],
+  "ohana-festival": [
+    {
+      "weekday": "Fri",
+      "date": "2026-09-25",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 1"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2026-09-26",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 2"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2026-09-27",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 3"
+    }
+  ],
+  "pickathon": [
+    {
+      "weekday": "Thu",
+      "date": "2026-07-30",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 1"
+    },
+    {
+      "weekday": "Fri",
+      "date": "2026-07-31",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 2"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2026-08-01",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 3"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2026-08-02",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 4"
+    }
+  ],
+  "bass-canyon": [
+    {
+      "weekday": "Fri",
+      "date": "2026-08-14",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 1"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2026-08-15",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 2"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2026-08-16",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 3"
+    }
+  ],
+  "beyond-wonderland-at-the-gorge": [
+    {
+      "weekday": "Sat",
+      "date": "2026-06-27",
+      "time": "7:00 PM",
+      "headliner": null,
+      "label": "Festival Day 1"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2026-06-28",
+      "time": "7:00 PM",
+      "headliner": null,
+      "label": "Festival Day 2"
+    }
+  ],
+  "group-therapy-700": [
+    {
+      "weekday": "Fri",
+      "date": "2026-09-11",
+      "time": "12:00 PM",
+      "headliner": "Above & Beyond",
+      "label": "Festival Day 1"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2026-09-12",
+      "time": "12:00 PM",
+      "headliner": "Above & Beyond",
+      "label": "Festival Day 2"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2026-09-13",
+      "time": "12:00 PM",
+      "headliner": "Above & Beyond",
+      "label": "Festival Day 3"
+    }
+  ],
+  "treefort-music-fest": [
+    {
+      "weekday": "Wed",
+      "date": "2026-03-25",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 1"
+    },
+    {
+      "weekday": "Thu",
+      "date": "2026-03-26",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 2"
+    },
+    {
+      "weekday": "Fri",
+      "date": "2026-03-27",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 3"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2026-03-28",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 4"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2026-03-29",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 5"
+    }
+  ],
+  "kilby-block-party": [
+    {
+      "weekday": "Fri",
+      "date": "2027-05-14",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 1"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2027-05-15",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 2"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2027-05-16",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 3"
+    }
+  ],
+  "telluride-bluegrass-festival": [
+    {
+      "weekday": "Thu",
+      "date": "2026-06-18",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 1"
+    },
+    {
+      "weekday": "Fri",
+      "date": "2026-06-19",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 2"
+    },
+    {
+      "weekday": "Sat",
+      "date": "2026-06-20",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 3"
+    },
+    {
+      "weekday": "Sun",
+      "date": "2026-06-21",
+      "time": null,
+      "headliner": null,
+      "label": "Festival Day 4"
+    }
+  ]
+}

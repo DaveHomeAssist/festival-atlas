@@ -1,0 +1,47 @@
+# Festival Atlas
+
+A local-first static web app for browsing music festivals, planning a multi-stop festival route, and tracking which sets you actually attended — plus a React Native companion app under `mobile/`.
+
+## What's here
+
+| Path | What it is |
+|---|---|
+| `index.html` | Dashboard — progress, happening-soon picks, shortlist, route context |
+| `festivals.html` | Festival explorer — filters, source status, review scope, detail panel, route actions |
+| `calendar.html` | Month calendar — search, month jump, stats, route stops, next-confirmed dates |
+| `route.html` | Route board — reorderable stops, trip notes, source links, travel-leg planning |
+| `setkeeper.html` | Setkeeper journal — attended history, standout sets, session export |
+| `audit.html` | Ops surface — source audit, verification queue, backup/restore/reset, diagnostics, pack import |
+| `data.js` / `schedule.js` | Seeded festival dataset and 2026 session data |
+| `deep-research-pack.js`, `international-research-pack.js`, `outreach-pack.js` | Built-in canonical data packs (domestic, international, outreach) that auto-load as baseline app data |
+| `shared/js/core/` | Shared config, storage, context-store, notes, visits, device, and utils modules used by every page |
+| `shared.css` | Shared design tokens and shell styles |
+| `sw.js`, `manifest.json`, `icons/`, `fonts/` | PWA service worker, manifest, and install/icon assets |
+| `mobile/` | React Native + Expo companion app — see `mobile/README.md` |
+| `scripts/validate-production.js` | Production smoke validation, run via `npm run validate` |
+| `archives/` | Retired legacy assets (e.g. pre-fork media) kept for reference, not shipped |
+| `SOURCE_AUDIT.md`, `PRODUCTION_READINESS.md`, `VALIDATION_MATRIX.md`, `MOBILE_APP_SPEC.md`, `HANDOFF.md`, `CLAUDE.md` | Project docs: source ledger, release checklist, validation matrix, mobile spec, handoff notes, and agent working notes |
+
+## Commands
+
+The web app has no build step — open `index.html` directly in a browser, or serve the repo root with any static file server.
+
+```bash
+npm run validate   # runs scripts/validate-production.js production smoke checks
+```
+
+For the mobile app:
+
+```bash
+cd mobile
+npm install
+npm start          # Expo dev server
+```
+
+See `mobile/README.md` for the full mobile command set (seed generation, typecheck, etc.).
+
+## Conventions
+
+- **Local-first, no backend.** All user state — route, shortlist, journal entries, attended history, backups — lives in browser `localStorage` under the namespace defined in `shared/js/core/storage.js`. There is no account sync; users export/import a JSON backup instead.
+- **Seeded packs are canonical, not live data.** `deep-research-pack.js`, `international-research-pack.js`, and `outreach-pack.js` are treated as trusted baseline data and auto-load on startup — they are not fetched from a live festival API. See `PRODUCTION_READINESS.md` for the exact merge/creation counts each pack contributes.
+- **Mobile data is generated, never hand-edited.** After changing `data.js` or `schedule.js`, run `npm run seed` inside `mobile/` to regenerate `mobile/src/data/festivals.json` / `schedule.json` so the two apps never drift apart.

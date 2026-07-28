@@ -32,8 +32,8 @@ Main flows:
 7. Mark the festival attended
 8. Recheck official source links before booking
 9. Preview and apply the Summer 2026 outreach pack when production, vendor, sponsor, or labor scouting is needed
-10. Preview and apply the ChatGPT Deep Research Summer Music Festivals 2026 pack when the research output should seed missing opportunities
-11. Preview and apply the ChatGPT Deep Research International Summer Festivals 2026 pack when international opportunities should be added
+10. Treat the ChatGPT Deep Research Summer Music Festivals 2026 pack as baseline data, auto-loaded on startup
+11. Treat the ChatGPT Deep Research International Summer Festivals 2026 pack as baseline data, auto-loaded on startup
 12. Prioritize outreach with ops opportunity scores and any remaining non-canonical source flags
 
 ## Key Files
