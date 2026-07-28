@@ -1,5 +1,6 @@
 const path = require("path");
 const { spawnSync } = require("child_process");
+const { pathToFileURL } = require("url");
 
 function run(command, args, options = {}) {
   const result = spawnSync(command, args, {
@@ -23,7 +24,8 @@ function loadPlaywright() {
   const candidates = [
     "playwright",
     "../node_modules/playwright",
-    "../soil-searcher/node_modules/playwright"
+    "../soil-searcher/node_modules/playwright",
+    "../../../40-tools/shared-playwright/node_modules/playwright"
   ];
 
   for (const candidate of candidates) {
@@ -41,7 +43,7 @@ function loadPlaywright() {
 
 async function validateBrowser() {
   const { chromium } = loadPlaywright();
-  const base = "file:///" + process.cwd().replace(/\\/g, "/") + "/";
+  const base = pathToFileURL(`${process.cwd()}${path.sep}`).href;
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({ viewport: { width: 1366, height: 900 } });
   const errors = [];
@@ -52,7 +54,7 @@ async function validateBrowser() {
     page.on("console", (message) => {
       if (message.type() === "error") errors.push(`${file}: console error: ${message.text()}`);
     });
-    await page.goto(base + file, { waitUntil: "load" });
+    await page.goto(base + file, { waitUntil: "domcontentloaded" });
     await page.waitForTimeout(120);
     return page;
   }
