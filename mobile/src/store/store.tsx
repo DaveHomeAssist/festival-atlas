@@ -9,8 +9,10 @@ import React, {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
+import { Alert } from "react-native";
 import { FESTIVALS, getSessions } from "@/data/seed";
 import type {
   ActiveTrip,
@@ -24,6 +26,7 @@ import { KEYS } from "./keys";
 import {
   exportAll as storageExportAll,
   importAll as storageImportAll,
+  onStorageFailure,
   readJson,
   resetAll as storageResetAll,
   writeJson,
@@ -50,6 +53,11 @@ interface StoreValue {
   trip: ActiveTrip;
   shortlist: string[];
   journal: JournalEntry[];
+
+  /** Set while device persistence is failing; null when saves are healthy. */
+  storageWarning: string | null;
+  /** Re-write all user-owned keys; clears the warning when every write lands. */
+  retryPersist: () => Promise<boolean>;
 
   // derived
   metaFor: (festivalId: string) => FestivalGuideMeta;
@@ -85,6 +93,28 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [trip, setTrip] = useState<ActiveTrip>(emptyTrip);
   const [shortlist, setShortlist] = useState<string[]>([]);
   const [journal, setJournal] = useState<JournalEntry[]>([]);
+  const [storageWarning, setStorageWarning] = useState<string | null>(null);
+  const alertedRef = useRef(false);
+
+  // Surface persistence failures (audit M-3): a failed AsyncStorage write
+  // means in-memory state looks fine but disappears on restart, so warn once
+  // and keep a banner-friendly flag set until a retry succeeds.
+  useEffect(() => {
+    return onStorageFailure((failure) => {
+      setStorageWarning(
+        failure.op === "write"
+          ? `Saving "${failure.key}" to device storage failed (${failure.message}). Recent changes may be lost after restart.`
+          : `Stored "${failure.key}" data could not be read (${failure.message}); the raw value was preserved under corrupt:${failure.key}.`
+      );
+      if (!alertedRef.current) {
+        alertedRef.current = true;
+        Alert.alert(
+          "Device storage problem",
+          "Festival Atlas could not save your data to this device. Free up storage, then use Retry save in More > Local data — and export a backup now to be safe."
+        );
+      }
+    });
+  }, []);
 
   // Hydrate from disk once.
   useEffect(() => {
@@ -229,6 +259,21 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setJournal([]);
   }, []);
 
+  const retryPersist = useCallback(async () => {
+    const results = await Promise.all([
+      writeJson(KEYS.visits, visits),
+      writeJson(KEYS.activeTrip, trip),
+      writeJson(KEYS.shortlistFestivalIds, shortlist),
+      writeJson(KEYS.festivalJournalEntries, journal),
+    ]);
+    const ok = results.every(Boolean);
+    if (ok) {
+      setStorageWarning(null);
+      alertedRef.current = false;
+    }
+    return ok;
+  }, [visits, trip, shortlist, journal]);
+
   const value = useMemo<StoreValue>(
     () => ({
       ready,
@@ -237,6 +282,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       trip,
       shortlist,
       journal,
+      storageWarning,
+      retryPersist,
       metaFor,
       isVisited,
       isOnRoute,
@@ -260,6 +307,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       trip,
       shortlist,
       journal,
+      storageWarning,
+      retryPersist,
       metaFor,
       isVisited,
       isOnRoute,

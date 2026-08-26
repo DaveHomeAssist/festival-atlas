@@ -6,29 +6,80 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { KEYS, NAMESPACE, namespaced } from "./keys";
 
+/**
+ * Persistence failures must be visible (audit M-3): the device is the source
+ * of truth, so a swallowed AsyncStorage error silently loses route, shortlist,
+ * attended history, and journal data on restart. Every failed read parse or
+ * write is reported to subscribers so the store can surface it in the UI.
+ */
+export interface StorageFailure {
+  op: "read" | "write";
+  key: string;
+  message: string;
+}
+
+type StorageFailureListener = (failure: StorageFailure) => void;
+
+const failureListeners = new Set<StorageFailureListener>();
+
+export function onStorageFailure(listener: StorageFailureListener): () => void {
+  failureListeners.add(listener);
+  return () => {
+    failureListeners.delete(listener);
+  };
+}
+
+function reportFailure(op: "read" | "write", key: string, error: unknown): void {
+  const message = error instanceof Error ? error.message : String(error);
+  failureListeners.forEach((listener) => {
+    try {
+      listener({ op, key, message });
+    } catch {
+      /* a broken listener must not break storage */
+    }
+  });
+}
+
 export async function readJson<T>(key: string, fallback: T): Promise<T> {
+  let raw: string | null = null;
   try {
-    const raw = await AsyncStorage.getItem(namespaced(key));
-    if (raw == null) return fallback;
+    raw = await AsyncStorage.getItem(namespaced(key));
+  } catch (error) {
+    reportFailure("read", key, error);
+    return fallback;
+  }
+  if (raw == null) return fallback;
+  try {
     return JSON.parse(raw) as T;
-  } catch {
+  } catch (error) {
+    // Malformed stored data: quarantine the raw value before falling back so
+    // the next persist cycle cannot silently overwrite the only copy.
+    try {
+      await AsyncStorage.setItem(namespaced(`corrupt:${key}`), raw);
+    } catch {
+      /* best effort — the report below is still emitted */
+    }
+    reportFailure("read", key, error);
     return fallback;
   }
 }
 
-export async function writeJson<T>(key: string, value: T): Promise<void> {
+/** Returns true when the value reached device storage. */
+export async function writeJson<T>(key: string, value: T): Promise<boolean> {
   try {
     await AsyncStorage.setItem(namespaced(key), JSON.stringify(value));
-  } catch {
-    // Local-first: a failed write is non-fatal; in-memory state stays correct.
+    return true;
+  } catch (error) {
+    reportFailure("write", key, error);
+    return false;
   }
 }
 
 export async function removeKey(key: string): Promise<void> {
   try {
     await AsyncStorage.removeItem(namespaced(key));
-  } catch {
-    /* noop */
+  } catch (error) {
+    reportFailure("write", key, error);
   }
 }
 

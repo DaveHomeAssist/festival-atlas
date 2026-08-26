@@ -33,6 +33,8 @@ export default function MoreScreen() {
     journal,
     shortlist,
     trip,
+    storageWarning,
+    retryPersist,
   } = useStore();
   const [lastAction, setLastAction] = useState<string>("");
   const [remindersOn, setRemindersOn] = useState(false);
@@ -202,6 +204,23 @@ export default function MoreScreen() {
           All your data lives on this device under the FA: keys — the same shape
           the web app uses, so backups round-trip between them.
         </Text>
+        {storageWarning ? (
+          <View style={styles.storageWarning}>
+            <Text style={styles.storageWarningText}>{storageWarning}</Text>
+            <Btn
+              label="Retry save"
+              tint={colors.red}
+              onPress={async () => {
+                const ok = await retryPersist();
+                setLastAction(
+                  ok
+                    ? "All data keys saved to device storage."
+                    : "Device storage still failing — export a backup now."
+                );
+              }}
+            />
+          </View>
+        ) : null}
         <View style={styles.actions}>
           <Btn label="Export backup" onPress={onExport} />
           <Btn label="Restore (round-trip)" onPress={onImportDemo} />
@@ -299,6 +318,15 @@ const styles = StyleSheet.create({
   btn: { borderRadius: radius.md, paddingHorizontal: 16, paddingVertical: 10 },
   btnText: { color: "#FFFFFF", fontWeight: "800", fontSize: 13 },
   action: { marginTop: 12, fontSize: 13, color: colors.teal, fontWeight: "600" },
+  storageWarning: {
+    marginTop: 12,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.red,
+    padding: 12,
+    gap: 10,
+  },
+  storageWarningText: { fontSize: 13, color: colors.red, fontWeight: "600", lineHeight: 18 },
   version: { marginTop: 12, fontSize: 12, color: colors.textMuted },
   toggleRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   toggleCopy: { flex: 1 },
