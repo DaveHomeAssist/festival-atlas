@@ -35,5 +35,12 @@
   "devDependencies": {
     "@types/react": "~18.2.45",
     "typescript": "~5.3.3"
+  },
+  "overrides": {
+    "tar": "^7.5.22",
+    "postcss": "^8.5.26",
+    "@expo/plist": {
+      "@xmldom/xmldom": "^0.8.13"
+    }
   }
 }
