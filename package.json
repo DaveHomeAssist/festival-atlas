@@ -4,5 +4,8 @@
   "private": true,
   "scripts": {
     "validate": "node scripts/validate-production.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.62.1"
   }
 }
