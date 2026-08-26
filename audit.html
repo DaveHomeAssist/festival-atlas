@@ -347,6 +347,7 @@
     <aside class="ops-panel fade-up fade-up-2">
       <h2>Local Data</h2>
       <p class="ops-copy">Backups include route, attended history, journal entries, shortlist, notes, and the current seeded catalog snapshot.</p>
+      <p class="ops-copy" id="sharedOriginNote" hidden>This deployment shares its browser origin (<strong id="sharedOriginHost"></strong>) with every sibling GitHub Pages project, so scripts from any of them can read, overwrite, or erase the FA: keys — the prefix prevents accidental collisions, not access. Export backups regularly; only a dedicated custom domain gives this app an isolated origin.</p>
       <div class="ops-actions">
         <button class="btn btn-primary" id="exportBackup">Export backup</button>
         <button class="btn btn-export" id="downloadDiagnostics">Diagnostics</button>
@@ -398,6 +399,18 @@
   let activeFilter = "all";
   let pendingPack = null;
   let pendingPreview = null;
+
+  // Shared-origin disclosure (audit M-4): path-based projects under a
+  // *.github.io host share one browser origin, so localStorage is not
+  // isolated between them.
+  if (/\.github\.io$/i.test(window.location.hostname)) {
+    const originNoteEl = document.getElementById("sharedOriginNote");
+    const originHostEl = document.getElementById("sharedOriginHost");
+    if (originNoteEl && originHostEl) {
+      originHostEl.textContent = window.location.hostname;
+      originNoteEl.hidden = false;
+    }
+  }
 
   function escapeHtml(value) {
     return utils.escapeHtml(value);
