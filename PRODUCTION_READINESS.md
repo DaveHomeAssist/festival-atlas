@@ -4,7 +4,7 @@ Status date: 2026-05-30
 
 ## Release Checklist
 
-1. Run `npm run validate`.
+1. Run `node scripts/validate-production.js --strict-freshness`. For a release cut this must pass with zero stale sources; plain `npm run validate` only warns on sources outside the 45-day review window.
 2. Review `git status --short` and confirm only intended source, docs, shared core files, and legacy asset removals are present.
 3. Commit the release-ready changes.
 4. Deploy to the configured static host.

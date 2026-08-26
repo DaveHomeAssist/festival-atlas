@@ -27,8 +27,17 @@ A local-first static web app for browsing music festivals, planning a multi-stop
 The web app has no build step — open `index.html` directly in a browser, or serve the repo root with any static file server.
 
 ```bash
-npm run validate   # runs scripts/validate-production.js production smoke checks
+npm install                     # installs Playwright, the only validation dependency
+npx playwright install chromium # one-time browser download for the validation script
+npm run validate                # runs scripts/validate-production.js production smoke checks
 ```
+
+Functional checks run against a clock pinned to the last verified-green review
+epoch so they stay deterministic; real-world source freshness is reported at the
+end of the run as a warning when festival sources fall outside the 45-day
+review window. Pass `--strict-freshness` (`node scripts/validate-production.js
+--strict-freshness`) to fail the run on stale sources, e.g. before a release
+cut.
 
 For the mobile app:
 
