@@ -10,6 +10,8 @@ cd mobile
 npm install
 npm run seed     # regenerate the bundled festival seed from ../data.js + ../schedule.js
 npm run typecheck
+npm run lint     # eslint via expo lint (config in .eslintrc.js, deps are pinned)
+npm test         # plain-node smoke test: seed invariants + seed drift check
 npm start        # Expo dev server (press i / a for iOS / Android)
 ```
 
@@ -59,4 +61,24 @@ link. The data, permission, and link layers for these are already in place.
 
 The festival data is generated, not hand-edited. After changing `../data.js` or
 `../schedule.js`, run `npm run seed` and commit the updated
-`src/data/festivals.json` / `src/data/schedule.json`.
+`src/data/festivals.json` / `src/data/schedule.json`. `npm test` fails if the
+committed seed drifts from the web canon.
+
+## Release path
+
+Builds and store submission go through [EAS](https://docs.expo.dev/eas/)
+(`eas.json`: `development`, `preview`, and `production` profiles; production
+auto-increments build numbers from the local `app.json` baseline —
+`ios.buildNumber` / `android.versionCode`, runtime version follows the
+`appVersion` policy):
+
+```bash
+npx eas-cli login             # one-time
+npm run build:preview         # internal-distribution build for device testing
+npm run build:production      # store build
+npm run submit                # submit the production build to the stores
+```
+
+CI (`.github/workflows/validate.yml`) runs `typecheck`, `lint`, and the smoke
+test on every push and pull request. There is no store listing yet: the app is
+pre-release, and `preview` builds are the current distribution channel.

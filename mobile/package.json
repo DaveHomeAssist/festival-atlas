@@ -10,7 +10,11 @@
     "web": "expo start --web",
     "seed": "node scripts/generate-seed.cjs",
     "typecheck": "tsc --noEmit",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "test": "node scripts/smoke-test.cjs",
+    "build:preview": "npx eas-cli build --profile preview",
+    "build:production": "npx eas-cli build --profile production",
+    "submit": "npx eas-cli submit --profile production"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "1.23.1",
@@ -34,6 +38,8 @@
   },
   "devDependencies": {
     "@types/react": "~18.2.45",
+    "eslint": "^8.57.1",
+    "eslint-config-expo": "~7.1.2",
     "typescript": "~5.3.3"
   },
   "overrides": {
