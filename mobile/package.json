@@ -46,7 +46,10 @@
     "tar": "^7.5.22",
     "postcss": "^8.5.26",
     "@expo/plist": {
-      "@xmldom/xmldom": "^0.8.13"
-    }
+      "@xmldom/xmldom": "^0.9.12"
+    },
+    "@remix-run/node": "^2.17.4",
+    "@remix-run/router": "^1.23.3",
+    "@remix-run/server-runtime": "^2.17.4"
   }
 }
