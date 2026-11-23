@@ -2,7 +2,7 @@
  * Device-calendar integration (MOBILE_APP_SPEC §5.4 — replaces the web .ics
  * export). Adds a festival's sessions to the user's default calendar.
  */
-import * as Calendar from "expo-calendar";
+import * as Calendar from "expo-calendar/legacy";
 import { Platform } from "react-native";
 import type { Festival, Session } from "@/data/types";
 

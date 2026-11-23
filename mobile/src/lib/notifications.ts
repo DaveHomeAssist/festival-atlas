@@ -4,6 +4,7 @@
  * the user cares about (shortlist + route).
  */
 import * as Notifications from "expo-notifications";
+import { AndroidImportance, IosAuthorizationStatus } from "expo-notifications";
 import { Platform } from "react-native";
 
 export interface ReminderTarget {
@@ -15,7 +16,8 @@ export interface ReminderTarget {
 // Foreground presentation: show the banner even while the app is open.
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
     shouldPlaySound: false,
     shouldSetBadge: false,
   }),
@@ -25,7 +27,7 @@ export async function requestNotificationPermission(): Promise<boolean> {
   const settings = await Notifications.getPermissionsAsync();
   let granted =
     settings.granted ||
-    settings.ios?.status === Notifications.IosAuthorizationStatus.PROVISIONAL;
+    settings.ios?.status === IosAuthorizationStatus.PROVISIONAL;
   if (!granted) {
     const req = await Notifications.requestPermissionsAsync();
     granted = req.granted;
@@ -33,7 +35,7 @@ export async function requestNotificationPermission(): Promise<boolean> {
   if (granted && Platform.OS === "android") {
     await Notifications.setNotificationChannelAsync("reminders", {
       name: "Festival reminders",
-      importance: Notifications.AndroidImportance.DEFAULT,
+      importance: AndroidImportance.DEFAULT,
     });
   }
   return granted;
@@ -70,10 +72,11 @@ export async function syncReminders(targets: ReminderTarget[]): Promise<number> 
           body: "Check tickets and travel — verify the official source before booking.",
           data: { festivalId: target.festivalId },
         },
-        trigger:
-          Platform.OS === "android"
-            ? { channelId: "reminders", date: when }
-            : { date: when },
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.DATE,
+          date: when,
+          ...(Platform.OS === "android" ? { channelId: "reminders" } : {}),
+        },
       });
       scheduled += 1;
     }
