@@ -3,7 +3,7 @@
  * backup export hand-off. Trip text goes through the OS share sheet; structured
  * payloads are written to a temp file and shared as an attachment.
  */
-import * as FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
 import { Share } from "react-native";
 import type { ActiveTrip, Festival } from "@/data/types";
